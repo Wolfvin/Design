@@ -1,0 +1,1107 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>FectTral – Trend Radar</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;600;700;900&family=Exo+2:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html, body { height: 100%; overflow: hidden; }
+
+:root {
+  --bg-void:       #020408;
+  --bg-deep:       #050912;
+  --bg-panel:      #0a1428;
+  --bg-card:       #0d1a32;
+  --blue-core:     #00aaff;
+  --blue-bright:   #00d4ff;
+  --blue-electric: #0066ff;
+  --blue-dim:      #003a8c;
+  --glow-sm:   0 0 8px rgba(0,170,255,0.4);
+  --glow-md:   0 0 16px rgba(0,170,255,0.5), 0 0 32px rgba(0,102,255,0.2);
+  --glow-text: 0 0 10px rgba(0,212,255,0.8), 0 0 20px rgba(0,170,255,0.4);
+  --border-dim:    rgba(0,140,255,0.10);
+  --border-mid:    rgba(0,170,255,0.22);
+  --text-primary:  #e8f4ff;
+  --text-secondary:#8ab8d8;
+  --text-muted:    #3a5a78;
+  --text-dim:      #1a3050;
+  --font-display: 'Orbitron', monospace;
+  --font-body:    'Exo 2', sans-serif;
+  --font-mono:    'JetBrains Mono', monospace;
+  --sidebar-w: 220px;
+  --topbar-h:  48px;
+}
+
+body {
+  font-family: var(--font-body);
+  background: var(--bg-void);
+  color: var(--text-primary);
+  display: flex; flex-direction: column;
+  height: 100vh; cursor: none; overflow: hidden;
+}
+
+/* ═══ BACKGROUND ═══ */
+.bg-root { position: fixed; inset: 0; z-index: 0; overflow: hidden; }
+.bg-space { position:absolute;inset:0;background:radial-gradient(ellipse at 20% 80%,rgba(0,40,120,0.6) 0%,transparent 45%),radial-gradient(ellipse at 80% 10%,rgba(0,20,80,0.5) 0%,transparent 40%),radial-gradient(ellipse at 50% 50%,rgba(0,10,40,0.4) 0%,transparent 65%),#020408; }
+.bg-grid { position:absolute;inset:0;background-image:radial-gradient(circle,rgba(0,130,255,0.18) 1px,transparent 1px);background-size:36px 36px;animation:gridDrift 60s linear infinite;mask-image:radial-gradient(ellipse 80% 80% at center,black 30%,transparent 80%); }
+@keyframes gridDrift { from{background-position:0 0;}to{background-position:36px 36px;} }
+.bg-floor { position:absolute;bottom:0;left:0;right:0;height:55%;background-image:linear-gradient(rgba(0,100,255,0.07) 1px,transparent 1px),linear-gradient(90deg,rgba(0,100,255,0.07) 1px,transparent 1px);background-size:70px 35px;transform:perspective(500px) rotateX(65deg);transform-origin:bottom center;mask-image:linear-gradient(to bottom,transparent 0%,black 50%);animation:floorScroll 20s linear infinite; }
+@keyframes floorScroll { from{background-position:0 0;}to{background-position:0 35px;} }
+.bg-hex-giant { position:absolute;width:850px;height:850px;top:50%;left:50%;transform:translate(-50%,-50%);animation:slowRotate 150s linear infinite;opacity:0.035;pointer-events:none; }
+.bg-hex-giant svg { width:100%;height:100%; }
+@keyframes slowRotate { from{transform:translate(-50%,-50%) rotate(0deg);}to{transform:translate(-50%,-50%) rotate(360deg);} }
+.orb { position:absolute;border-radius:50%;filter:blur(90px);pointer-events:none; }
+.orb-1 { width:680px;height:680px;background:radial-gradient(circle,rgba(0,50,180,0.55) 0%,transparent 70%);top:-220px;left:-180px;animation:orb1 28s ease-in-out infinite; }
+.orb-2 { width:480px;height:480px;background:radial-gradient(circle,rgba(0,110,255,0.45) 0%,transparent 70%);bottom:-120px;right:-120px;animation:orb2 32s ease-in-out infinite; }
+.orb-3 { width:320px;height:320px;background:radial-gradient(circle,rgba(0,180,255,0.22) 0%,transparent 70%);top:35%;left:40%;animation:orb3 22s ease-in-out infinite; }
+@keyframes orb1 { 0%,100%{transform:translate(0,0) scale(1);}33%{transform:translate(50px,70px) scale(1.08);}66%{transform:translate(-25px,35px) scale(0.95);} }
+@keyframes orb2 { 0%,100%{transform:translate(0,0);}50%{transform:translate(-70px,-55px);} }
+@keyframes orb3 { 0%,100%{transform:translate(0,0) scale(1);}50%{transform:translate(25px,-45px) scale(1.25);} }
+.data-stream { position:absolute;width:1px;background:linear-gradient(to bottom,transparent 0%,rgba(0,170,255,0.7) 50%,transparent 100%);animation:streamFall linear infinite;pointer-events:none; }
+@keyframes streamFall { 0%{transform:translateY(-200px);opacity:0;}10%{opacity:1;}85%{opacity:0.6;}100%{transform:translateY(110vh);opacity:0;} }
+.hex-particle { position:absolute;color:rgba(0,150,255,0.35);text-shadow:0 0 10px rgba(0,170,255,0.5);animation:hexFloat linear infinite;pointer-events:none; }
+@keyframes hexFloat { 0%{transform:translateY(110vh) rotate(0deg);opacity:0;}8%{opacity:0.7;}92%{opacity:0.2;}100%{transform:translateY(-10vh) rotate(200deg);opacity:0;} }
+.scan-beam { position:absolute;left:0;right:0;height:2px;background:linear-gradient(90deg,transparent 0%,rgba(0,150,255,0.08) 20%,rgba(0,212,255,0.35) 50%,rgba(0,150,255,0.08) 80%,transparent 100%);animation:beamSweep 10s linear infinite;pointer-events:none; }
+@keyframes beamSweep { from{top:-2px;}to{top:100%;} }
+.scanlines { position:absolute;inset:0;pointer-events:none;background:repeating-linear-gradient(0deg,transparent,transparent 3px,rgba(0,0,0,0.06) 3px,rgba(0,0,0,0.06) 4px); }
+.vignette { position:absolute;inset:0;pointer-events:none;background:radial-gradient(ellipse at center,transparent 45%,rgba(0,0,0,0.75) 100%); }
+
+/* ═══ GLITCH ═══ */
+.glitch-text { position:relative;display:inline-block; }
+.glitch-text::before,.glitch-text::after { content:attr(data-text);position:absolute;top:0;left:0;width:100%;height:100%;font-family:inherit;font-size:inherit;font-weight:inherit;letter-spacing:inherit; }
+.glitch-text::before { color:#00ffee;animation:gBefore 7s infinite;clip-path:polygon(0 20%,100% 20%,100% 40%,0 40%); }
+.glitch-text::after  { color:#ff00cc;animation:gAfter 7s infinite;clip-path:polygon(0 65%,100% 65%,100% 80%,0 80%); }
+@keyframes gBefore { 0%,93%,100%{transform:translateX(0);opacity:0;}94%{transform:translateX(-4px);opacity:0.9;}95%{transform:translateX(3px);opacity:0.7;}96%{transform:translateX(-2px);opacity:0.8;}97%{transform:translateX(0);opacity:0;} }
+@keyframes gAfter  { 0%,92%,100%{transform:translateX(0);opacity:0;}93%{transform:translateX(4px);opacity:0.8;}94%{transform:translateX(-3px);opacity:0.6;}95%{transform:translateX(2px);opacity:0.7;}96%{transform:translateX(0);opacity:0;} }
+.glitch-bars { position:fixed;inset:0;z-index:999;pointer-events:none;overflow:hidden; }
+.g-bar { position:absolute;left:0;right:0;opacity:0; }
+@keyframes screenShake { 0%,100%{transform:translate(0,0) skewX(0deg);filter:none;}20%{transform:translate(-3px,1px) skewX(-0.4deg);filter:hue-rotate(80deg) brightness(1.15);}40%{transform:translate(3px,-1px) skewX(0.4deg);filter:hue-rotate(-80deg);}60%{transform:translate(-2px,0px);filter:brightness(1.3) saturate(1.5);}80%{transform:translate(2px,1px) skewX(0.2deg);filter:none;} }
+
+/* ═══ APP SHELL ═══ */
+.app { position:relative;z-index:2;display:flex;flex-direction:column;height:100vh; }
+
+/* TOPBAR */
+.topbar { height:var(--topbar-h);display:flex;align-items:center;justify-content:space-between;padding:0 20px 0 0;border-bottom:1px solid var(--border-dim);background:linear-gradient(90deg,rgba(4,8,16,0.98) 0%,rgba(7,13,25,0.96) 100%);backdrop-filter:blur(30px);flex-shrink:0;position:relative;overflow:hidden; }
+.topbar::after { content:'';position:absolute;bottom:0;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent 0%,rgba(0,150,255,0.25) 25%,rgba(0,212,255,0.7) 50%,rgba(0,150,255,0.25) 75%,transparent 100%);animation:barGlow 5s ease-in-out infinite; }
+@keyframes barGlow { 0%,100%{opacity:0.5;}50%{opacity:1;} }
+.topbar-logo { width:var(--sidebar-w);display:flex;align-items:center;gap:10px;padding:0 18px;border-right:1px solid var(--border-dim);height:100%; }
+.logo-hex { width:28px;height:28px;flex-shrink:0;animation:hexGlow 4s ease-in-out infinite; }
+.logo-hex svg { width:100%;height:100%; }
+@keyframes hexGlow { 0%,100%{filter:drop-shadow(0 0 6px rgba(0,170,255,0.7));}50%{filter:drop-shadow(0 0 18px rgba(0,212,255,1)) drop-shadow(0 0 35px rgba(0,80,255,0.5));} }
+.logo-text { font-family:var(--font-display);line-height:1; }
+.logo-name { font-size:13px;font-weight:700;letter-spacing:0.12em;color:var(--blue-bright);text-shadow:var(--glow-text); }
+.logo-sub { display:block;font-size:7px;font-weight:400;letter-spacing:0.38em;color:var(--text-muted);margin-top:3px; }
+.topbar-center { flex:1;display:flex;align-items:center;padding:0 24px;gap:12px; }
+.breadcrumb { display:flex;align-items:center;gap:6px;font-family:var(--font-mono);font-size:11px;color:var(--text-muted); }
+.breadcrumb .sep { color:var(--blue-dim); }
+.breadcrumb .current { color:var(--blue-core);text-shadow:0 0 8px rgba(0,170,255,0.5); }
+.ctx-pill { display:flex;align-items:center;gap:6px;padding:3px 10px;border:1px solid var(--border-dim);border-radius:2px;font-family:var(--font-mono);font-size:10px;color:var(--text-muted);background:rgba(0,40,100,0.2); }
+.ctx-pill .dot { width:5px;height:5px;border-radius:50%;background:var(--blue-core);box-shadow:0 0 6px var(--blue-core);animation:blink 2s ease-in-out infinite; }
+@keyframes blink { 0%,100%{opacity:1;}50%{opacity:0.15;} }
+.topbar-right { display:flex;align-items:center;gap:10px; }
+.ai-pill { display:flex;align-items:center;gap:7px;padding:5px 12px;border:1px solid rgba(0,200,100,0.2);border-radius:2px;background:rgba(0,25,12,0.5);font-family:var(--font-mono);font-size:10px;color:#00cc66;cursor:pointer;transition:all 0.2s; }
+.ai-pill:hover { border-color:rgba(0,200,100,0.4);box-shadow:0 0 10px rgba(0,200,100,0.15); }
+.ai-pill .pulse { width:6px;height:6px;border-radius:50%;background:#00cc66;box-shadow:0 0 8px #00cc66;animation:pDot 1.5s ease-in-out infinite; }
+@keyframes pDot { 0%,100%{transform:scale(1);opacity:1;}50%{transform:scale(1.5);opacity:0.5;} }
+.icon-btn { width:30px;height:30px;display:flex;align-items:center;justify-content:center;border:1px solid var(--border-dim);border-radius:2px;background:transparent;color:var(--text-muted);cursor:pointer;transition:all 0.2s;font-size:14px; }
+.icon-btn:hover { border-color:var(--border-mid);color:var(--blue-bright);box-shadow:var(--glow-sm); }
+
+/* MAIN LAYOUT */
+.main-layout { display:flex;flex:1;overflow:hidden; }
+
+/* SIDEBAR */
+.sidebar { width:var(--sidebar-w);flex-shrink:0;display:flex;flex-direction:column;border-right:1px solid var(--border-dim);background:linear-gradient(180deg,rgba(4,8,18,0.97) 0%,rgba(2,4,10,0.99) 100%);backdrop-filter:blur(40px);padding:12px 0;overflow-y:auto;overflow-x:hidden;position:relative; }
+.sidebar::after { content:'';position:absolute;top:0;right:0;bottom:0;width:1px;background:linear-gradient(180deg,transparent 0%,rgba(0,100,255,0.15) 25%,rgba(0,170,255,0.45) 50%,rgba(0,100,255,0.15) 75%,transparent 100%);animation:sideGlow 6s ease-in-out infinite; }
+@keyframes sideGlow { 0%,100%{opacity:0.5;}50%{opacity:1;} }
+.nav-section { margin-bottom:2px; }
+.nav-label { padding:8px 16px 4px;font-family:var(--font-mono);font-size:9px;letter-spacing:0.3em;color:var(--text-dim);text-transform:uppercase; }
+.nav-item { position:relative;display:flex;align-items:center;gap:10px;padding:9px 16px;margin:1px 8px;border-radius:3px;cursor:pointer;font-size:12px;font-weight:500;letter-spacing:0.04em;color:var(--text-muted);transition:all 0.25s;border:1px solid transparent;text-decoration:none;overflow:hidden; }
+.nav-item::before { content:'';position:absolute;inset:0;background:linear-gradient(90deg,transparent 0%,rgba(0,140,255,0.07) 50%,transparent 100%);transform:translateX(-100%);transition:transform 0.5s ease; }
+.nav-item:hover::before { transform:translateX(100%); }
+.nav-item:hover { color:var(--text-secondary);background:rgba(0,70,150,0.1);border-color:var(--border-dim); }
+.nav-item.active { color:var(--blue-bright);background:linear-gradient(90deg,rgba(0,90,220,0.16) 0%,rgba(0,50,130,0.06) 100%);border-color:rgba(0,160,255,0.18);text-shadow:0 0 8px rgba(0,170,255,0.5); }
+.nav-item.active::after { content:'';position:absolute;left:-8px;top:50%;transform:translateY(-50%);width:3px;height:55%;background:linear-gradient(180deg,var(--blue-bright),var(--blue-electric));border-radius:0 2px 2px 0;box-shadow:0 0 10px var(--blue-bright),0 0 22px rgba(0,160,255,0.4); }
+.nav-icon { width:16px;display:flex;align-items:center;justify-content:center;font-size:13px;flex-shrink:0; }
+.nav-badge { margin-left:auto;background:rgba(0,70,170,0.3);border:1px solid rgba(0,140,255,0.22);border-radius:2px;padding:1px 5px;font-family:var(--font-mono);font-size:9px;color:var(--blue-core);min-width:18px;text-align:center; }
+.nav-badge.red { background:rgba(170,0,40,0.25);border-color:rgba(255,50,90,0.3);color:#ff5580;animation:redBlink 2s ease-in-out infinite; }
+@keyframes redBlink { 0%,100%{box-shadow:none;}50%{box-shadow:0 0 8px rgba(255,50,100,0.5);} }
+.nav-badge.green { background:rgba(0,120,60,0.2);border-color:rgba(0,200,100,0.25);color:#00cc66; }
+.nav-divider { height:1px;margin:8px 16px;background:linear-gradient(90deg,transparent,var(--border-dim),transparent); }
+.sidebar-footer { margin-top:auto;padding:10px 8px 4px;border-top:1px solid var(--border-dim); }
+.lib-stats { display:flex;align-items:center;justify-content:space-between;padding:6px 10px 10px; }
+.stat-item { text-align:center; }
+.stat-num { font-family:var(--font-display);font-size:16px;font-weight:700;color:var(--blue-bright);text-shadow:var(--glow-text);display:block; }
+.stat-lbl { font-family:var(--font-mono);font-size:8px;letter-spacing:0.14em;color:var(--text-dim);text-transform:uppercase; }
+.stat-sep { width:1px;height:26px;background:var(--border-dim); }
+.provider-card { padding:10px 12px;border:1px solid var(--border-dim);border-radius:3px;background:var(--bg-card);cursor:pointer;transition:all 0.25s;position:relative;overflow:hidden; }
+.provider-card::before { content:'';position:absolute;top:0;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent,rgba(0,170,255,0.45),transparent);opacity:0;transition:opacity 0.3s; }
+.provider-card:hover::before { opacity:1; }
+.provider-card:hover { border-color:var(--border-mid);box-shadow:var(--glow-sm); }
+.prov-top { display:flex;align-items:center;justify-content:space-between;margin-bottom:5px; }
+.prov-label { font-family:var(--font-mono);font-size:9px;letter-spacing:0.2em;color:var(--text-dim); }
+.prov-status { display:flex;align-items:center;gap:4px;font-family:var(--font-mono);font-size:9px;color:#00cc66; }
+.prov-status .dot { width:5px;height:5px;border-radius:50%;background:#00cc66;box-shadow:0 0 6px #00cc66; }
+.prov-name { font-family:var(--font-display);font-size:10px;font-weight:600;color:var(--blue-core);letter-spacing:0.1em; }
+.prov-model { font-family:var(--font-mono);font-size:9px;color:var(--text-muted);margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis; }
+
+/* CONTENT */
+.content { flex:1;overflow:hidden;position:relative; }
+
+/* ═══════════════════════════
+   TREND RADAR PAGE
+═══════════════════════════ */
+.radar-page { display:flex;flex-direction:column;height:100%;overflow:hidden; }
+
+/* ── PAGE HEADER ── */
+.radar-header {
+  flex-shrink:0;
+  padding: 16px 28px 14px;
+  border-bottom: 1px solid var(--border-dim);
+  background: linear-gradient(180deg, rgba(0,8,24,0.7) 0%, transparent 100%);
+  display: flex; align-items: flex-end; justify-content: space-between; gap: 20px;
+}
+.rh-left {}
+.rh-eyebrow { font-family:var(--font-mono);font-size:9px;letter-spacing:0.35em;color:var(--text-dim);text-transform:uppercase;margin-bottom:5px; }
+.rh-title { font-family:var(--font-display);font-size:21px;font-weight:900;letter-spacing:0.14em;color:var(--blue-bright);text-shadow:var(--glow-text);line-height:1; }
+.rh-crawl-meta { display:flex;align-items:center;gap:16px;margin-top:7px; }
+.crawl-stamp { font-family:var(--font-mono);font-size:10px;color:var(--text-muted);display:flex;align-items:center;gap:5px; }
+.crawl-stamp .cicon { color:var(--blue-dim); }
+.next-crawl { font-family:var(--font-mono);font-size:10px;color:var(--text-muted);display:flex;align-items:center;gap:5px; }
+.next-crawl .countdown { color:var(--blue-core);font-weight:500;min-width:44px;display:inline-block; }
+.rh-right { display:flex;align-items:center;gap:10px;flex-shrink:0; }
+.crawl-btn {
+  display:flex;align-items:center;gap:8px;padding:9px 18px;
+  background: linear-gradient(90deg,rgba(0,80,200,0.35),rgba(0,50,150,0.2));
+  border:1px solid rgba(0,150,255,0.4);border-radius:3px;
+  color:var(--blue-bright);font-family:var(--font-display);font-size:10px;font-weight:700;
+  letter-spacing:0.16em;cursor:pointer;transition:all 0.25s;position:relative;overflow:hidden;
+}
+.crawl-btn::before { content:'';position:absolute;inset:0;background:linear-gradient(90deg,transparent,rgba(0,170,255,0.1),transparent);transform:translateX(-100%);transition:transform 0.5s; }
+.crawl-btn:hover::before { transform:translateX(100%); }
+.crawl-btn:hover { border-color:var(--blue-bright);box-shadow:var(--glow-md); }
+.crawl-btn.crawling { border-color:rgba(0,200,100,0.4);color:#00cc66;animation:crawlPulse 1s ease-in-out infinite; }
+@keyframes crawlPulse { 0%,100%{box-shadow:none;}50%{box-shadow:0 0 18px rgba(0,200,100,0.3);} }
+.crawl-icon { font-size:14px;transition:transform 0.3s; }
+.crawl-btn.crawling .crawl-icon { animation:spinSlow 1s linear infinite; }
+@keyframes spinSlow { to{transform:rotate(360deg);} }
+
+/* ── FILTER BAR ── */
+.filter-bar {
+  flex-shrink:0;
+  padding: 10px 28px;
+  border-bottom: 1px solid var(--border-dim);
+  background: rgba(2,5,14,0.5);
+  display: flex; align-items: center; gap: 20px; flex-wrap: wrap;
+}
+.fb-group { display:flex;align-items:center;gap:6px; }
+.fb-label { font-family:var(--font-mono);font-size:8px;letter-spacing:0.28em;color:var(--text-dim);text-transform:uppercase;margin-right:4px; }
+.filter-chip {
+  padding:4px 10px;border-radius:2px;cursor:pointer;
+  font-family:var(--font-mono);font-size:9px;letter-spacing:0.1em;
+  border:1px solid var(--border-dim);color:var(--text-muted);
+  transition:all 0.2s;user-select:none;background:rgba(0,10,30,0.4);
+}
+.filter-chip:hover:not(.active) { border-color:var(--border-mid);color:var(--text-secondary); }
+.filter-chip.active {
+  border-color:rgba(0,150,255,0.45);color:var(--blue-bright);
+  background:rgba(0,80,200,0.14);box-shadow:var(--glow-sm);
+}
+.filter-chip.source-aww.active   { border-color:rgba(255,80,160,0.5);color:#ff80cc;background:rgba(200,0,100,0.12); }
+.filter-chip.source-linear.active { border-color:rgba(120,80,255,0.5);color:#aa88ff;background:rgba(80,20,200,0.12); }
+.filter-chip.source-vercel.active { border-color:rgba(200,200,200,0.35);color:#cccccc;background:rgba(100,100,100,0.1); }
+.filter-chip.source-dribble.active { border-color:rgba(255,80,120,0.5);color:#ff8080;background:rgba(200,0,50,0.1); }
+.filter-chip.source-codepen.active { border-color:rgba(0,200,100,0.4);color:#00cc80;background:rgba(0,100,50,0.12); }
+.filter-chip.dna-high.active { border-color:rgba(0,220,100,0.5);color:#00ff88;background:rgba(0,120,60,0.15); }
+.filter-chip.dna-med.active  { border-color:rgba(255,180,0,0.45);color:#ffcc44;background:rgba(140,80,0,0.14); }
+.filter-chip.dna-low.active  { border-color:rgba(255,80,80,0.4);color:#ff7070;background:rgba(150,0,0,0.12); }
+.fb-sep { width:1px;height:20px;background:var(--border-dim); }
+
+/* ── FEED AREA ── */
+.feed-area {
+  flex:1;overflow-y:auto;overflow-x:hidden;
+  padding: 20px 28px;
+  display: flex; flex-direction: column; gap: 12px;
+}
+
+/* ── TREND CARD ── */
+.trend-card {
+  border:1px solid var(--border-dim);border-radius:4px;
+  background:rgba(6,12,24,0.72);backdrop-filter:blur(20px);
+  transition:all 0.3s;position:relative;overflow:hidden;
+}
+.trend-card::before { content:'';position:absolute;top:0;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent,rgba(0,170,255,0.35),transparent);opacity:0;transition:opacity 0.3s; }
+.trend-card:hover::before { opacity:1; }
+.trend-card:hover { border-color:var(--border-mid);box-shadow:var(--glow-sm); }
+.trend-card.dismissed-card { opacity:0;transform:translateX(40px);pointer-events:none;transition:all 0.4s ease; }
+
+/* card inner layout */
+.tc-body { display:flex;gap:0;align-items:stretch; }
+
+/* left stripe accent */
+.tc-stripe { width:3px;flex-shrink:0;border-radius:4px 0 0 4px; }
+.tc-stripe.high   { background:linear-gradient(180deg,#00ff88,#00aa55); }
+.tc-stripe.medium { background:linear-gradient(180deg,#ffcc44,#cc8800); }
+.tc-stripe.low    { background:linear-gradient(180deg,#ff7070,#cc2222); }
+
+/* main content */
+.tc-main { flex:1;padding:14px 16px; }
+.tc-top { display:flex;align-items:flex-start;justify-content:space-between;gap:12px;margin-bottom:10px; }
+.tc-top-left { display:flex;flex-direction:column;gap:5px; }
+.tc-meta { display:flex;align-items:center;gap:7px; }
+.source-badge {
+  display:flex;align-items:center;gap:4px;padding:2px 8px;border-radius:2px;
+  font-family:var(--font-mono);font-size:8px;letter-spacing:0.12em;text-transform:uppercase;
+  border:1px solid; flex-shrink:0;
+}
+.source-badge.awwwards  { color:#ff80cc;border-color:rgba(255,80,160,0.3);background:rgba(200,0,100,0.1); }
+.source-badge.linear    { color:#aa88ff;border-color:rgba(120,80,255,0.3);background:rgba(80,20,200,0.08); }
+.source-badge.vercel    { color:#cccccc;border-color:rgba(180,180,180,0.25);background:rgba(80,80,80,0.1); }
+.source-badge.dribbble  { color:#ff8080;border-color:rgba(255,80,120,0.3);background:rgba(200,0,50,0.08); }
+.source-badge.codepen   { color:#00cc80;border-color:rgba(0,200,100,0.3);background:rgba(0,100,50,0.1); }
+.crawl-date { font-family:var(--font-mono);font-size:8px;color:var(--text-dim); }
+.tc-name { font-family:var(--font-display);font-size:12px;font-weight:700;letter-spacing:0.08em;color:var(--text-primary); }
+.tc-desc { font-family:var(--font-body);font-size:11px;color:var(--text-muted);line-height:1.5;margin-top:2px; }
+.tc-top-right { display:flex;flex-direction:column;align-items:flex-end;gap:6px;flex-shrink:0; }
+
+/* DNA match score */
+.dna-score-wrap { position:relative; }
+.dna-score {
+  display:flex;align-items:center;gap:5px;padding:5px 10px;border-radius:3px;
+  border:1px solid;cursor:default;transition:all 0.2s;
+}
+.dna-score.high   { color:#00ff88;border-color:rgba(0,220,100,0.35);background:rgba(0,120,60,0.15); }
+.dna-score.medium { color:#ffcc44;border-color:rgba(255,180,0,0.35);background:rgba(140,80,0,0.14); }
+.dna-score.low    { color:#ff7070;border-color:rgba(255,80,80,0.3);background:rgba(150,0,0,0.12); }
+.dna-score-pct { font-family:var(--font-display);font-size:13px;font-weight:700; }
+.dna-score-lbl { font-family:var(--font-mono);font-size:8px;letter-spacing:0.12em; }
+/* DNA match tooltip */
+.dna-tooltip {
+  position:absolute;right:0;top:calc(100% + 6px);z-index:50;
+  background:var(--bg-card);border:1px solid var(--border-mid);border-radius:3px;
+  padding:8px 12px;min-width:220px;
+  box-shadow:var(--glow-sm);opacity:0;pointer-events:none;transition:opacity 0.2s;
+  white-space:nowrap;
+}
+.dna-tooltip::before { content:'';position:absolute;right:12px;top:-5px;width:8px;height:8px;background:var(--bg-card);border-top:1px solid var(--border-mid);border-left:1px solid var(--border-mid);transform:rotate(45deg); }
+.dna-score-wrap:hover .dna-tooltip { opacity:1;pointer-events:auto; }
+.dna-tt-title { font-family:var(--font-mono);font-size:8px;letter-spacing:0.2em;color:var(--text-dim);text-transform:uppercase;margin-bottom:5px; }
+.dna-tt-text { font-family:var(--font-mono);font-size:10px;color:var(--text-secondary);line-height:1.5; }
+.dna-tt-tags { display:flex;flex-wrap:wrap;gap:4px;margin-top:6px; }
+.dna-tt-tag { padding:2px 7px;border-radius:2px;font-family:var(--font-mono);font-size:8px;background:rgba(0,80,200,0.15);border:1px solid rgba(0,150,255,0.2);color:var(--blue-core); }
+
+/* category tags */
+.tc-cats { display:flex;gap:4px;flex-wrap:wrap; }
+.cat-tag { padding:2px 7px;border-radius:2px;font-family:var(--font-mono);font-size:8px;letter-spacing:0.1em;border:1px solid;text-transform:uppercase; }
+.cat-tag.animation { color:#cc80ff;border-color:rgba(170,0,255,0.25);background:rgba(120,0,200,0.1); }
+.cat-tag.gradient  { color:#ff9944;border-color:rgba(255,120,0,0.25);background:rgba(180,60,0,0.1); }
+.cat-tag.typography { color:var(--blue-core);border-color:rgba(0,150,255,0.25);background:rgba(0,80,200,0.1); }
+.cat-tag.layout    { color:#00cc88;border-color:rgba(0,180,100,0.25);background:rgba(0,100,60,0.1); }
+.cat-tag.interaction { color:#ffcc44;border-color:rgba(220,160,0,0.25);background:rgba(140,80,0,0.1); }
+.cat-tag.glassmorphism { color:#88ccff;border-color:rgba(0,160,255,0.25);background:rgba(0,60,150,0.12); }
+.cat-tag.color     { color:#ff80cc;border-color:rgba(255,80,160,0.25);background:rgba(200,0,100,0.1); }
+
+/* code snippet */
+.tc-code-wrap { margin-top:10px; }
+.tc-code {
+  background:rgba(0,5,15,0.8);border:1px solid var(--border-dim);border-radius:3px;
+  padding:9px 12px;overflow:auto;max-height:72px;
+}
+.tc-code code { font-family:var(--font-mono);font-size:9px;color:#8ab8d8;white-space:pre;display:block;line-height:1.6; }
+.tc-code .kw { color:var(--blue-bright); }
+.tc-code .prop { color:#cc80ff; }
+.tc-code .val { color:#ff9944; }
+.tc-code .cmt { color:#2a4a66;font-style:italic; }
+
+/* actions */
+.tc-actions { display:flex;align-items:center;gap:8px;margin-top:12px; }
+.tc-btn {
+  display:flex;align-items:center;gap:5px;padding:6px 12px;border-radius:2px;
+  font-family:var(--font-mono);font-size:9px;letter-spacing:0.12em;cursor:pointer;
+  transition:all 0.2s;border:1px solid;
+}
+.tc-btn.add { color:#00cc80;border-color:rgba(0,200,100,0.3);background:rgba(0,100,50,0.12); }
+.tc-btn.add:hover { border-color:rgba(0,220,100,0.5);box-shadow:0 0 12px rgba(0,200,100,0.2);color:#00ff88; }
+.tc-btn.preview { color:var(--blue-core);border-color:rgba(0,150,255,0.25);background:rgba(0,60,150,0.1); }
+.tc-btn.preview:hover { border-color:var(--border-mid);box-shadow:var(--glow-sm);color:var(--blue-bright); }
+.tc-btn.dismiss { color:var(--text-muted);border-color:var(--border-dim);background:transparent; }
+.tc-btn.dismiss:hover { border-color:rgba(255,80,80,0.3);color:#ff7070;background:rgba(150,0,0,0.08); }
+.tc-btn-icon { font-size:11px; }
+.tc-spacer { flex:1; }
+.tc-btn.added { color:#aaaaaa;border-color:var(--border-dim);background:rgba(20,30,50,0.4);cursor:default;pointer-events:none; }
+
+/* ── DISMISSED SECTION ── */
+.dismissed-section { flex-shrink:0;margin:0 28px 20px; }
+.dismissed-toggle {
+  display:flex;align-items:center;gap:10px;padding:10px 14px;
+  border:1px solid var(--border-dim);border-radius:3px;
+  background:rgba(4,8,18,0.6);cursor:pointer;transition:all 0.2s;user-select:none;
+}
+.dismissed-toggle:hover { border-color:var(--border-mid); }
+.dismissed-toggle.open { border-radius:3px 3px 0 0;border-bottom-color:transparent; }
+.dt-icon { font-size:11px;color:var(--text-muted);transition:transform 0.3s; }
+.dismissed-toggle.open .dt-icon { transform:rotate(90deg); }
+.dt-label { font-family:var(--font-mono);font-size:9px;letter-spacing:0.2em;color:var(--text-muted);text-transform:uppercase; }
+.dt-count { font-family:var(--font-mono);font-size:9px;color:var(--text-dim);margin-left:auto; }
+.dismissed-list {
+  border:1px solid var(--border-dim);border-top:none;border-radius:0 0 3px 3px;
+  background:rgba(4,8,18,0.4);
+  max-height:0;overflow:hidden;transition:max-height 0.4s ease;
+}
+.dismissed-list.open { max-height:220px; }
+.dl-inner { padding:8px 0; }
+.dl-item {
+  display:flex;align-items:center;gap:10px;padding:7px 14px;
+  border-bottom:1px solid rgba(0,40,80,0.2);transition:background 0.2s;
+}
+.dl-item:last-child { border-bottom:none; }
+.dl-item:hover { background:rgba(0,40,100,0.08); }
+.dl-name { font-family:var(--font-mono);font-size:10px;color:var(--text-muted);flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap; }
+.dl-source { font-family:var(--font-mono);font-size:8px;color:var(--text-dim);width:70px; }
+.dl-score { font-family:var(--font-mono);font-size:9px;width:40px; }
+.dl-score.high   { color:#00cc66; }
+.dl-score.medium { color:#ffcc44; }
+.dl-score.low    { color:#ff7070; }
+.restore-btn {
+  font-family:var(--font-mono);font-size:8px;letter-spacing:0.12em;
+  padding:3px 8px;border-radius:2px;border:1px solid rgba(0,140,255,0.2);
+  color:var(--blue-dim);background:rgba(0,40,100,0.1);cursor:pointer;transition:all 0.2s;
+}
+.restore-btn:hover { border-color:var(--border-mid);color:var(--blue-core); }
+
+/* crawl overlay */
+.crawl-overlay {
+  display:none;position:absolute;inset:0;background:rgba(2,4,12,0.82);
+  backdrop-filter:blur(8px);z-index:80;
+  align-items:center;justify-content:center;flex-direction:column;gap:14px;
+}
+.crawl-overlay.active { display:flex; }
+.co-spinner { width:44px;height:44px;border:2px solid var(--border-dim);border-top-color:var(--blue-bright);border-radius:50%;animation:spin 0.7s linear infinite; }
+@keyframes spin { to{transform:rotate(360deg);} }
+.co-label { font-family:var(--font-mono);font-size:11px;color:var(--blue-core);letter-spacing:0.1em; }
+.co-log { font-family:var(--font-mono);font-size:9px;color:var(--text-muted);text-align:center;max-width:300px; }
+.co-source-list { display:flex;gap:8px;margin-top:4px; }
+.co-src { font-family:var(--font-mono);font-size:8px;padding:2px 8px;border-radius:2px;border:1px solid var(--border-dim);color:var(--text-dim);transition:all 0.3s; }
+.co-src.crawling { color:var(--blue-bright);border-color:rgba(0,200,255,0.35);background:rgba(0,80,200,0.15);box-shadow:var(--glow-sm); }
+.co-src.done { color:#00cc66;border-color:rgba(0,180,80,0.3);background:rgba(0,80,40,0.12); }
+
+/* PREVIEW MODAL */
+.preview-modal {
+  display:none;position:fixed;inset:0;z-index:500;
+  align-items:center;justify-content:center;
+  background:rgba(2,4,10,0.88);backdrop-filter:blur(12px);
+}
+.preview-modal.active { display:flex; }
+.pm-box {
+  width:580px;max-width:92vw;
+  border:1px solid var(--border-mid);border-radius:5px;
+  background:var(--bg-card);box-shadow:var(--glow-md);
+  position:relative;overflow:hidden;
+  animation:fadeUp 0.3s cubic-bezier(0.16,1,0.3,1) both;
+}
+.pm-top-line { height:1px;background:linear-gradient(90deg,transparent,rgba(0,200,255,0.7),transparent); }
+.pm-header { padding:14px 18px;border-bottom:1px solid var(--border-dim);display:flex;align-items:center;justify-content:space-between; }
+.pm-title { font-family:var(--font-display);font-size:12px;font-weight:700;letter-spacing:0.1em;color:var(--blue-bright); }
+.pm-close { width:26px;height:26px;display:flex;align-items:center;justify-content:center;border:1px solid var(--border-dim);border-radius:2px;color:var(--text-muted);cursor:pointer;transition:all 0.2s;font-size:13px; }
+.pm-close:hover { border-color:rgba(255,80,80,0.4);color:#ff7070; }
+.pm-body { padding:18px; }
+.pm-render {
+  background:rgba(0,5,16,0.9);border:1px solid var(--border-dim);border-radius:3px;
+  padding:20px;min-height:140px;display:flex;align-items:center;justify-content:center;
+  margin-bottom:14px;
+}
+.pm-code-block { background:rgba(0,3,10,0.9);border:1px solid var(--border-dim);border-radius:3px;padding:12px 14px;overflow:auto;max-height:160px; }
+.pm-code-block code { font-family:var(--font-mono);font-size:10px;color:#8ab8d8;white-space:pre;line-height:1.65; }
+.pm-code-block .kw { color:var(--blue-bright); }
+.pm-code-block .prop { color:#cc80ff; }
+.pm-code-block .val { color:#ff9944; }
+.pm-code-block .cmt { color:#2a4a66; }
+.pm-footer { padding:12px 18px;border-top:1px solid var(--border-dim);display:flex;gap:8px;justify-content:flex-end; }
+.pm-btn { padding:8px 16px;border-radius:2px;font-family:var(--font-display);font-size:9px;font-weight:700;letter-spacing:0.14em;cursor:pointer;transition:all 0.2s; }
+.pm-btn.primary { background:rgba(0,80,200,0.3);border:1px solid rgba(0,150,255,0.4);color:var(--blue-bright); }
+.pm-btn.primary:hover { box-shadow:var(--glow-md);border-color:var(--blue-bright); }
+.pm-btn.secondary { background:transparent;border:1px solid var(--border-dim);color:var(--text-muted); }
+.pm-btn.secondary:hover { border-color:var(--border-mid);color:var(--text-secondary); }
+
+/* feed counter */
+.feed-header { display:flex;align-items:center;justify-content:space-between;margin-bottom:4px;flex-shrink:0; }
+.feed-count { font-family:var(--font-mono);font-size:9px;letter-spacing:0.2em;color:var(--text-dim);text-transform:uppercase; }
+.feed-sort { font-family:var(--font-mono);font-size:9px;color:var(--text-muted);display:flex;align-items:center;gap:5px;cursor:pointer; }
+.feed-sort:hover { color:var(--text-secondary); }
+
+/* animations */
+@keyframes slideLeft { from{transform:translateX(-20px);opacity:0;}to{transform:translateX(0);opacity:1;} }
+@keyframes fadeDown { from{transform:translateY(-12px);opacity:0;}to{transform:translateY(0);opacity:1;} }
+@keyframes fadeUp { from{transform:translateY(14px);opacity:0;}to{transform:translateY(0);opacity:1;} }
+.topbar { animation:fadeDown 0.4s cubic-bezier(0.16,1,0.3,1) both; }
+.sidebar { animation:slideLeft 0.45s cubic-bezier(0.16,1,0.3,1) both; }
+.nav-item { animation:fadeUp 0.4s cubic-bezier(0.16,1,0.3,1) both; }
+.nav-item:nth-child(1){animation-delay:0.08s;}.nav-item:nth-child(2){animation-delay:0.12s;}
+.nav-item:nth-child(3){animation-delay:0.16s;}.nav-item:nth-child(4){animation-delay:0.20s;}
+.nav-item:nth-child(5){animation-delay:0.24s;}.nav-item:nth-child(6){animation-delay:0.28s;}
+.radar-page { animation:fadeUp 0.5s 0.2s cubic-bezier(0.16,1,0.3,1) both; }
+
+/* scrollbar */
+::-webkit-scrollbar { width:4px; }
+::-webkit-scrollbar-track { background:transparent; }
+::-webkit-scrollbar-thumb { background:rgba(0,100,200,0.3);border-radius:2px; }
+::-webkit-scrollbar-thumb:hover { background:rgba(0,150,255,0.5); }
+
+/* cursor */
+#cursor { position:fixed;z-index:9999;width:6px;height:6px;background:var(--blue-bright);border-radius:50%;pointer-events:none;transform:translate(-50%,-50%);box-shadow:var(--glow-md);transition:transform 0.1s; }
+#cursor-ring { position:fixed;z-index:9998;width:26px;height:26px;border:1px solid rgba(0,170,255,0.5);border-radius:50%;pointer-events:none;transform:translate(-50%,-50%);transition:width 0.2s,height 0.2s,border-color 0.2s; }
+.has-tip { position:relative; }
+.tip { position:absolute;left:calc(100% + 10px);top:50%;transform:translateY(-50%);background:var(--bg-card);border:1px solid var(--border-mid);border-radius:2px;padding:4px 9px;font-family:var(--font-mono);font-size:10px;color:var(--text-secondary);white-space:nowrap;pointer-events:none;opacity:0;transition:opacity 0.15s;z-index:200;box-shadow:var(--glow-sm); }
+.has-tip:hover .tip { opacity:1; }
+</style>
+</head>
+<body>
+
+<!-- BACKGROUND -->
+<div class="bg-root">
+  <div class="bg-space"></div>
+  <canvas id="starCanvas" style="position:absolute;inset:0;width:100%;height:100%;"></canvas>
+  <div class="bg-grid"></div>
+  <div class="bg-floor"></div>
+  <div class="bg-hex-giant">
+    <svg viewBox="0 0 850 850" fill="none">
+      <polygon points="425,30 780,217 780,633 425,820 70,633 70,217" stroke="rgba(0,120,255,1)" stroke-width="1.2" fill="none"/>
+      <polygon points="425,100 710,255 710,595 425,750 140,595 140,255" stroke="rgba(0,150,255,0.6)" stroke-width="0.7" fill="none"/>
+      <polygon points="425,185 650,303 650,547 425,665 200,547 200,303" stroke="rgba(0,180,255,0.4)" stroke-width="0.5" fill="none"/>
+    </svg>
+  </div>
+  <div class="orb orb-1"></div>
+  <div class="orb orb-2"></div>
+  <div class="orb orb-3"></div>
+  <div id="dataStreams"></div>
+  <div id="hexParticles"></div>
+  <div class="scan-beam"></div>
+  <div class="scanlines"></div>
+  <div class="vignette"></div>
+</div>
+
+<div id="glitchBars" class="glitch-bars"></div>
+<div id="cursor"></div>
+<div id="cursor-ring"></div>
+
+<!-- PREVIEW MODAL -->
+<div class="preview-modal" id="previewModal">
+  <div class="pm-box">
+    <div class="pm-top-line"></div>
+    <div class="pm-header">
+      <div class="pm-title" id="pmTitle">TREND PREVIEW</div>
+      <div class="pm-close" id="pmClose">✕</div>
+    </div>
+    <div class="pm-body">
+      <div class="pm-render" id="pmRender"></div>
+      <div class="pm-code-block">
+        <code id="pmCode"></code>
+      </div>
+    </div>
+    <div class="pm-footer">
+      <button class="pm-btn secondary" id="pmDismiss">DISMISS</button>
+      <button class="pm-btn primary" id="pmAdd">+ ADD TO LIBRARY</button>
+    </div>
+  </div>
+</div>
+
+<div id="app" class="app">
+
+  <!-- TOPBAR -->
+  <header class="topbar">
+    <div class="topbar-logo">
+      <div class="logo-hex">
+        <svg viewBox="0 0 28 28" fill="none">
+          <polygon points="14,2 25,8 25,20 14,26 3,20 3,8" stroke="#00aaff" stroke-width="1.2" fill="none"/>
+          <polygon points="14,7 20,10.5 20,17.5 14,21 8,17.5 8,10.5" stroke="#00d4ff" stroke-width="0.7" fill="rgba(0,100,255,0.08)"/>
+          <circle cx="14" cy="14" r="3" fill="#00aaff" opacity="0.9"/>
+        </svg>
+      </div>
+      <div class="logo-text">
+        <div class="logo-name glitch-text" data-text="FECTTRAL">FECTTRAL</div>
+        <span class="logo-sub">DESIGN INTELLIGENCE</span>
+      </div>
+    </div>
+    <div class="topbar-center">
+      <div class="breadcrumb">
+        <span>studio</span>
+        <span class="sep">›</span>
+        <span>intelligence</span>
+        <span class="sep">›</span>
+        <span class="current" id="breadCrumb">trend-radar</span>
+      </div>
+      <div class="ctx-pill">
+        <span class="dot"></span>
+        <span id="feedPill">18 trends · 4 sources</span>
+      </div>
+    </div>
+    <div class="topbar-right">
+      <div class="ai-pill"><span class="pulse"></span><span>AI ONLINE</span></div>
+      <button class="icon-btn has-tip">⚙<span class="tip">Settings</span></button>
+      <button class="icon-btn has-tip">◎<span class="tip">History</span></button>
+    </div>
+  </header>
+
+  <div class="main-layout">
+
+    <!-- SIDEBAR -->
+    <aside class="sidebar">
+      <div class="nav-section">
+        <div class="nav-label">Studio</div>
+        <a class="nav-item" href="#"><span class="nav-icon">⬡</span><span>Overview</span></a>
+        <a class="nav-item" href="#"><span class="nav-icon">◈</span><span>Library</span><span class="nav-badge">84</span></a>
+      </div>
+      <div class="nav-section">
+        <div class="nav-label">Tools</div>
+        <a class="nav-item" href="#"><span class="nav-icon">⊞</span><span>Generator</span></a>
+        <a class="nav-item" href="#"><span class="nav-icon">✦</span><span>Review Queue</span><span class="nav-badge red">12</span></a>
+        <a class="nav-item" href="#"><span class="nav-icon">⇄</span><span>A/B Workshop</span></a>
+        <a class="nav-item" href="#"><span class="nav-icon">⬡</span><span>Web Fetcher</span></a>
+      </div>
+      <div class="nav-divider"></div>
+      <div class="nav-section">
+        <div class="nav-label">Intelligence</div>
+        <a class="nav-item active" href="#"><span class="nav-icon">◎</span><span>Trend Radar</span><span class="nav-badge green">18</span></a>
+        <a class="nav-item" href="#"><span class="nav-icon">◉</span><span>DNA Report</span></a>
+        <a class="nav-item" href="#"><span class="nav-icon">⊛</span><span>Analytics</span></a>
+      </div>
+      <div class="nav-section">
+        <div class="nav-label">System</div>
+        <a class="nav-item" href="#"><span class="nav-icon">⊛</span><span>Settings</span></a>
+      </div>
+      <div class="sidebar-footer">
+        <div class="lib-stats">
+          <div class="stat-item"><span class="stat-num">84</span><span class="stat-lbl">Elements</span></div>
+          <div class="stat-sep"></div>
+          <div class="stat-item"><span class="stat-num">18</span><span class="stat-lbl">Trends</span></div>
+          <div class="stat-sep"></div>
+          <div class="stat-item"><span class="stat-num">14</span><span class="stat-lbl">Dismissed</span></div>
+        </div>
+        <div class="provider-card">
+          <div class="prov-top">
+            <span class="prov-label">AI Provider</span>
+            <div class="prov-status"><span class="dot"></span><span>Online</span></div>
+          </div>
+          <div class="prov-name">OLLAMA LOCAL</div>
+          <div class="prov-model">qwen2.5-coder:14b · 10GB</div>
+        </div>
+      </div>
+    </aside>
+
+    <!-- CONTENT -->
+    <main class="content">
+      <div class="radar-page">
+
+        <!-- CRAWL OVERLAY -->
+        <div class="crawl-overlay" id="crawlOverlay">
+          <div class="co-spinner"></div>
+          <div class="co-label" id="coLabel">CRAWLING SOURCES...</div>
+          <div class="co-log" id="coLog">Connecting to trend sources...</div>
+          <div class="co-source-list" id="coSrcList">
+            <div class="co-src" id="cs-aww">Awwwards</div>
+            <div class="co-src" id="cs-linear">Linear</div>
+            <div class="co-src" id="cs-vercel">Vercel</div>
+            <div class="co-src" id="cs-dribble">Dribbble</div>
+            <div class="co-src" id="cs-codepen">CodePen</div>
+          </div>
+        </div>
+
+        <!-- PAGE HEADER -->
+        <div class="radar-header">
+          <div class="rh-left">
+            <div class="rh-eyebrow">// intelligence · 07</div>
+            <div class="rh-title glitch-text" data-text="TREND RADAR">TREND RADAR</div>
+            <div class="rh-crawl-meta">
+              <div class="crawl-stamp">
+                <span class="cicon">◎</span>
+                Last crawled: <span id="lastCrawled">Today, 09:42 AM</span>
+              </div>
+              <div class="next-crawl">
+                Next auto-crawl in <span class="countdown" id="countdown">02:47:18</span>
+              </div>
+            </div>
+          </div>
+          <div class="rh-right">
+            <button class="crawl-btn" id="crawlBtn">
+              <span class="crawl-icon">⟳</span>
+              <span id="crawlBtnLabel">CRAWL NOW</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- FILTER BAR -->
+        <div class="filter-bar">
+          <div class="fb-group">
+            <span class="fb-label">Source</span>
+            <div class="filter-chip active" data-filter="source" data-val="all">ALL</div>
+            <div class="filter-chip source-aww" data-filter="source" data-val="awwwards">Awwwards</div>
+            <div class="filter-chip source-linear" data-filter="source" data-val="linear">Linear</div>
+            <div class="filter-chip source-vercel" data-filter="source" data-val="vercel">Vercel</div>
+            <div class="filter-chip source-dribble" data-filter="source" data-val="dribbble">Dribbble</div>
+            <div class="filter-chip source-codepen" data-filter="source" data-val="codepen">CodePen</div>
+          </div>
+          <div class="fb-sep"></div>
+          <div class="fb-group">
+            <span class="fb-label">DNA Match</span>
+            <div class="filter-chip active" data-filter="dna" data-val="all">ALL</div>
+            <div class="filter-chip dna-high" data-filter="dna" data-val="high">High Match</div>
+            <div class="filter-chip dna-med"  data-filter="dna" data-val="medium">Medium</div>
+            <div class="filter-chip dna-low"  data-filter="dna" data-val="low">Low</div>
+          </div>
+        </div>
+
+        <!-- FEED AREA -->
+        <div class="feed-area" id="feedArea">
+          <div class="feed-header">
+            <div class="feed-count" id="feedCount">18 TRENDS · SORTED BY MATCH</div>
+            <div class="feed-sort" id="sortBtn">⇅ SORT BY DATE</div>
+          </div>
+          <!-- Cards injected by JS -->
+          <div id="trendFeed"></div>
+
+          <!-- DISMISSED SECTION -->
+          <div class="dismissed-section" id="dismissedSection">
+            <div class="dismissed-toggle" id="dismissedToggle">
+              <span class="dt-icon">›</span>
+              <span class="dt-label">Dismissed trends</span>
+              <span class="dt-count" id="dismissCount">14 dismissed</span>
+            </div>
+            <div class="dismissed-list" id="dismissedList">
+              <div class="dl-inner" id="dismissedInner">
+                <!-- Filled by JS -->
+              </div>
+            </div>
+          </div>
+        </div>
+
+      </div><!-- /radar-page -->
+    </main>
+
+  </div>
+</div>
+
+<script>
+/* ══ STAR CANVAS ══ */
+const canvas = document.getElementById('starCanvas');
+const ctx = canvas.getContext('2d');
+function resize() { canvas.width = window.innerWidth; canvas.height = window.innerHeight; }
+resize(); window.addEventListener('resize', resize);
+const stars = Array.from({length:220}, ()=>({x:Math.random()*window.innerWidth,y:Math.random()*window.innerHeight,r:Math.random()*1.3,o:Math.random(),tw:Math.random()*Math.PI*2,sp:Math.random()*0.4+0.05}));
+function drawStars(){ctx.clearRect(0,0,canvas.width,canvas.height);stars.forEach(s=>{s.tw+=s.sp*0.018;const op=s.o*(0.35+0.65*Math.abs(Math.sin(s.tw)));ctx.beginPath();ctx.arc(s.x,s.y,s.r,0,Math.PI*2);ctx.fillStyle=`rgba(160,215,255,${op})`;ctx.fill();if(s.r>1.0){ctx.beginPath();ctx.arc(s.x,s.y,s.r*3.5,0,Math.PI*2);ctx.fillStyle=`rgba(0,160,255,${op*0.12})`;ctx.fill();}});requestAnimationFrame(drawStars);}
+drawStars();
+
+/* ══ STREAMS + PARTICLES ══ */
+const streamsEl=document.getElementById('dataStreams');
+for(let i=0;i<20;i++){const el=document.createElement('div');el.className='data-stream';el.style.cssText=`left:${Math.random()*100}%;height:${Math.random()*130+50}px;animation-duration:${Math.random()*5+3}s;animation-delay:${Math.random()*10}s;`;streamsEl.appendChild(el);}
+const hexEl=document.getElementById('hexParticles');const syms=['⬡','⬢','◈','◉','◎','⊞','✦'];
+for(let i=0;i<16;i++){const el=document.createElement('div');el.className='hex-particle';el.textContent=syms[Math.floor(Math.random()*syms.length)];el.style.cssText=`left:${Math.random()*100}%;bottom:-60px;font-size:${Math.random()*22+9}px;animation-duration:${Math.random()*22+14}s;animation-delay:${Math.random()*18}s;`;hexEl.appendChild(el);}
+
+/* ══ GLITCH ══ */
+const glitchBars=document.getElementById('glitchBars');const appEl=document.getElementById('app');
+function triggerGlitch(intensity='low'){const count=intensity==='boot'?8:Math.floor(Math.random()*4)+2;for(let i=0;i<count;i++){const bar=document.createElement('div');bar.className='g-bar';const top=Math.random()*100,h=Math.random()*(intensity==='boot'?8:4)+1,tx=(Math.random()-0.5)*(intensity==='boot'?30:14),dur=Math.random()*80+40,isRGB=Math.random()>0.5;bar.style.cssText=`top:${top}%;height:${h}px;background:rgba(${isRGB?'0,210,255':'255,0,200'},${intensity==='boot'?0.12:0.07});transform:translateX(${tx}px) skewX(${(Math.random()-0.5)*2}deg);mix-blend-mode:screen;`;glitchBars.appendChild(bar);let op=0;const step=1/(dur/16);let dir=1;(function anim(){op+=step*dir;if(op>=1)dir=-1;if(op<=0&&dir===-1){bar.remove();return;}bar.style.opacity=op;requestAnimationFrame(anim);})();setTimeout(()=>bar.remove(),dur+80);}if(Math.random()>0.5||intensity==='boot'){appEl.style.animation=`screenShake ${60+Math.random()*80}ms ease both`;setTimeout(()=>{appEl.style.animation='';},200);}}
+window.addEventListener('load',()=>{let n=0;const boot=()=>{if(n++>5)return;triggerGlitch('boot');setTimeout(boot,110);};setTimeout(boot,500);});
+function scheduleGlitch(){const d=Math.random()*9000+5000;setTimeout(()=>{triggerGlitch('low');scheduleGlitch();},d);}scheduleGlitch();
+
+/* ══ CURSOR ══ */
+const cursor=document.getElementById('cursor'),ring=document.getElementById('cursor-ring');let mx=0,my=0,rx=0,ry=0;
+document.addEventListener('mousemove',e=>{mx=e.clientX;my=e.clientY;cursor.style.left=mx+'px';cursor.style.top=my+'px';});
+(function animRing(){rx+=(mx-rx)*0.1;ry+=(my-ry)*0.1;ring.style.left=rx+'px';ring.style.top=ry+'px';requestAnimationFrame(animRing);})();
+function bindCursor(){document.querySelectorAll('a,button,.filter-chip,.trend-card,.dismissed-toggle,.restore-btn,.dl-item,.nav-item,.provider-card').forEach(el=>{el.addEventListener('mouseenter',()=>{ring.style.width='36px';ring.style.height='36px';ring.style.borderColor='rgba(0,212,255,0.7)';cursor.style.transform='translate(-50%,-50%) scale(1.6)';});el.addEventListener('mouseleave',()=>{ring.style.width='26px';ring.style.height='26px';ring.style.borderColor='rgba(0,170,255,0.5)';cursor.style.transform='translate(-50%,-50%) scale(1)';});});}
+bindCursor();
+
+/* ══ NAV ══ */
+document.querySelectorAll('.nav-item').forEach(item=>{item.addEventListener('click',e=>{e.preventDefault();document.querySelectorAll('.nav-item').forEach(i=>i.classList.remove('active'));item.classList.add('active');document.getElementById('breadCrumb').textContent=item.querySelector('span:nth-child(2)').textContent.toLowerCase().replace(/\s+/g,'-');triggerGlitch('low');});});
+
+/* ══ TREND DATA ══ */
+const TRENDS = [
+  {
+    id:1, source:'awwwards', date:'2h ago',
+    name:'Liquid Glass Morphism',
+    desc:'Fluid, translucent surfaces with chromatic aberration and refraction — pushing glassmorphism into full liquid territory.',
+    dna:92, dnaLevel:'high',
+    dnaMatchText:'Matches your preference for elegant + dark color palettes',
+    dnaTags:['elegant','dark luxury','glass'],
+    cats:['glassmorphism','animation'],
+    code:`.liquid-glass {\n  background: rgba(255,255,255,0.04);\n  backdrop-filter: blur(24px) saturate(180%);\n  border: 1px solid rgba(255,255,255,0.12);\n  filter: drop-shadow(0 0 30px rgba(100,180,255,0.3));\n  border-radius: 20px;\n}`,
+    renderHtml:`<div style="width:140px;height:70px;background:linear-gradient(135deg,rgba(100,200,255,0.12),rgba(180,100,255,0.08));backdrop-filter:blur(20px);border:1px solid rgba(255,255,255,0.15);border-radius:16px;display:flex;align-items:center;justify-content:center;font-family:Exo 2,sans-serif;font-size:11px;color:rgba(200,230,255,0.8);">Liquid Glass</div>`
+  },
+  {
+    id:2, source:'linear', date:'5h ago',
+    name:'Kinetic Gradient Text',
+    desc:'Animated gradient fills flowing through display type — driven by CSS @property and Houdini paint worklets.',
+    dna:87, dnaLevel:'high',
+    dnaMatchText:'Strong match for your editorial typography preference',
+    dnaTags:['elegant','editorial','typography'],
+    cats:['animation','typography'],
+    code:`@property --g-angle { syntax: '<angle>'; inherits: false; initial-value: 0deg; }\n.kinetic-text {\n  background: conic-gradient(from var(--g-angle), #00d4ff, #cc80ff, #ff9944, #00d4ff);\n  -webkit-background-clip: text;\n  -webkit-text-fill-color: transparent;\n  animation: spin 4s linear infinite;\n}`,
+    renderHtml:`<div style="font-family:Orbitron,monospace;font-size:20px;font-weight:900;background:linear-gradient(90deg,#00d4ff,#cc80ff,#ff9944);-webkit-background-clip:text;-webkit-text-fill-color:transparent;letter-spacing:0.1em;">KINETIC</div>`
+  },
+  {
+    id:3, source:'vercel', date:'8h ago',
+    name:'Spatial Depth Cards',
+    desc:'CSS 3D transforms creating real parallax depth on hover — layers respond independently to cursor proximity.',
+    dna:74, dnaLevel:'medium',
+    dnaMatchText:'Partial match — you prefer flat surfaces over 3D depth',
+    dnaTags:['bold','interaction'],
+    cats:['interaction','layout'],
+    code:`.depth-card {\n  transform-style: preserve-3d;\n  transition: transform 0.4s ease;\n}\n.depth-card:hover {\n  transform: perspective(800px) rotateY(8deg) rotateX(-4deg);\n}\n.depth-layer { transform: translateZ(20px); }`,
+    renderHtml:`<div style="width:130px;height:75px;background:linear-gradient(135deg,#0a1428,#0d1a32);border:1px solid rgba(0,170,255,0.2);border-radius:8px;display:flex;align-items:center;justify-content:center;font-family:JetBrains Mono,monospace;font-size:10px;color:#8ab8d8;transform:perspective(300px) rotateY(12deg) rotateX(-5deg);box-shadow:8px 12px 24px rgba(0,0,0,0.5);">3D Depth</div>`
+  },
+  {
+    id:4, source:'dribbble', date:'12h ago',
+    name:'Ink Spread Animation',
+    desc:'SVG filter-based ink diffusion effect — feTurbulence + feDisplacementMap creating organic spread on reveal.',
+    dna:88, dnaLevel:'high',
+    dnaMatchText:'Matches dark + organic aesthetic in your DNA profile',
+    dnaTags:['dark luxury','animation','elegant'],
+    cats:['animation','color'],
+    code:`/* SVG ink filter */\n.ink-reveal {\n  filter: url(#ink-spread);\n  clip-path: inset(0);\n  animation: inkIn 0.8s ease forwards;\n}\n@keyframes inkIn {\n  from { opacity: 0; filter: url(#ink-spread) blur(8px); }\n  to   { opacity: 1; filter: url(#ink-spread); }\n}`,
+    renderHtml:`<div style="font-family:Orbitron,monospace;font-size:16px;font-weight:700;color:#e8f4ff;letter-spacing:0.12em;text-shadow:0 0 30px rgba(180,100,255,0.6),0 0 60px rgba(100,0,200,0.3);">INK · SPREAD</div>`
+  },
+  {
+    id:5, source:'codepen', date:'1d ago',
+    name:'Bento Grid Masonry',
+    desc:'Variable-span grid cells creating asymmetric, editorial layouts — trending across product landing pages.',
+    dna:61, dnaLevel:'medium',
+    dnaMatchText:'Moderate match — layout patterns align, color palette differs',
+    dnaTags:['minimal','layout'],
+    cats:['layout','typography'],
+    code:`.bento-grid {\n  display: grid;\n  grid-template-columns: repeat(4, 1fr);\n  grid-auto-rows: 120px;\n  gap: 12px;\n}\n.bento-wide  { grid-column: span 2; }\n.bento-tall  { grid-row: span 2; }\n.bento-large { grid-column: span 2; grid-row: span 2; }`,
+    renderHtml:`<div style="display:grid;grid-template-columns:repeat(4,1fr);grid-auto-rows:18px;gap:3px;width:160px;"><div style="grid-column:span 2;grid-row:span 2;background:rgba(0,100,255,0.2);border:1px solid rgba(0,150,255,0.2);border-radius:3px;"></div><div style="background:rgba(0,60,150,0.15);border:1px solid rgba(0,120,255,0.15);border-radius:3px;"></div><div style="background:rgba(0,60,150,0.15);border:1px solid rgba(0,120,255,0.15);border-radius:3px;"></div><div style="grid-column:span 2;background:rgba(0,80,180,0.12);border:1px solid rgba(0,130,255,0.12);border-radius:3px;"></div><div style="background:rgba(0,60,150,0.15);border:1px solid rgba(0,120,255,0.15);border-radius:3px;"></div><div style="background:rgba(0,60,150,0.15);border:1px solid rgba(0,120,255,0.15);border-radius:3px;"></div></div>`
+  },
+  {
+    id:6, source:'awwwards', date:'1d ago',
+    name:'Holographic Foil Effect',
+    desc:'CSS hue-rotate + iridescent gradient mapping shifting by cursor position — premium material simulation.',
+    dna:95, dnaLevel:'high',
+    dnaMatchText:'Extremely high match — aligns with futuristic + elegant DNA',
+    dnaTags:['elegant','futuristic','dark luxury'],
+    cats:['gradient','color'],
+    code:`.holo-foil {\n  background: linear-gradient(135deg,\n    #ff0080 0%, #ff8c00 14%, #ffff00 28%,\n    #00ff00 42%, #00ffff 56%,\n    #0080ff 70%, #8000ff 84%, #ff0080 100%);\n  background-size: 400% 400%;\n  animation: holoShift 4s ease infinite;\n}`,
+    renderHtml:`<div style="width:150px;height:60px;background:linear-gradient(135deg,#ff0080,#ff8c00,#ffff00,#00ffff,#8000ff);background-size:300% 300%;border-radius:8px;display:flex;align-items:center;justify-content:center;font-family:Orbitron,monospace;font-size:10px;font-weight:700;color:rgba(0,0,0,0.8);letter-spacing:0.1em;">HOLOGRAPHIC</div>`
+  },
+  {
+    id:7, source:'linear', date:'2d ago',
+    name:'Noise Texture Overlay',
+    desc:'SVG feTurbulence grain layer over backgrounds — adds tactile, analog warmth to digital surfaces.',
+    dna:42, dnaLevel:'low',
+    dnaMatchText:'Low match — your DNA favors clean digital over textured surfaces',
+    dnaTags:['organic'],
+    cats:['gradient','color'],
+    code:`/* Noise via pseudo-element */\n.noisy::after {\n  content: '';\n  position: absolute; inset: 0;\n  background-image: url("data:image/svg+xml,...");\n  opacity: 0.06;\n  mix-blend-mode: overlay;\n  pointer-events: none;\n}`,
+    renderHtml:`<div style="width:150px;height:60px;background:repeating-linear-gradient(45deg,rgba(255,255,255,0.02) 0px,rgba(255,255,255,0.02) 1px,transparent 1px,transparent 4px),linear-gradient(135deg,#0a0a0a,#1a1a2a);border-radius:6px;display:flex;align-items:center;justify-content:center;font-family:JetBrains Mono,monospace;font-size:9px;color:#666;">noise texture</div>`
+  },
+  {
+    id:8, source:'codepen', date:'2d ago',
+    name:'Magnetic Button Pull',
+    desc:'JavaScript cursor proximity detection causing button elements to magnetically attract toward cursor on hover.',
+    dna:79, dnaLevel:'medium',
+    dnaMatchText:'Matches bold + interactive category in your profile',
+    dnaTags:['bold','interaction'],
+    cats:['interaction','animation'],
+    code:`el.addEventListener('mousemove', e => {\n  const rect = el.getBoundingClientRect();\n  const cx = rect.left + rect.width / 2;\n  const cy = rect.top  + rect.height / 2;\n  const dx = (e.clientX - cx) * 0.35;\n  const dy = (e.clientY - cy) * 0.35;\n  el.style.transform = \`translate(\${dx}px, \${dy}px)\`;\n});`,
+    renderHtml:`<button style="padding:10px 20px;background:linear-gradient(90deg,rgba(0,80,200,0.4),rgba(0,50,150,0.2));border:1px solid rgba(0,150,255,0.5);border-radius:4px;color:#00d4ff;font-family:Orbitron,monospace;font-size:10px;font-weight:700;letter-spacing:0.12em;cursor:none;box-shadow:0 0 20px rgba(0,150,255,0.25);">MAGNETIC</button>`
+  },
+];
+
+const DISMISSED_STATIC = [
+  {name:'Skeuomorphic Shadows', source:'dribbble', score:28, level:'low'},
+  {name:'Neumorphism Revival', source:'awwwards', score:31, level:'low'},
+  {name:'Comic Sans Aesthetic', source:'codepen', score:12, level:'low'},
+  {name:'Pastel Color Wash', source:'dribbble', score:38, level:'low'},
+  {name:'Flat Icon Packs', source:'codepen', score:22, level:'low'},
+  {name:'Material Design 2 Buttons', source:'vercel', score:45, level:'low'},
+  {name:'Gradient Mesh Blobs', source:'awwwards', score:51, level:'medium'},
+  {name:'Outlined Typography Only', source:'linear', score:44, level:'low'},
+  {name:'Heavy Drop Shadows', source:'dribbble', score:36, level:'low'},
+  {name:'Retro 80s Grid Lines', source:'codepen', score:48, level:'medium'},
+  {name:'Confetti Animations', source:'dribbble', score:19, level:'low'},
+  {name:'Paper Texture BG', source:'awwwards', score:27, level:'low'},
+  {name:'Thick Stroke Illustrations', source:'codepen', score:33, level:'low'},
+  {name:'Emoji-Heavy UI', source:'vercel', score:15, level:'low'},
+];
+
+let activeSourceFilter = 'all';
+let activeDnaFilter    = 'all';
+let dismissedIds = new Set();
+let addedIds     = new Set();
+let currentPreviewId = null;
+
+/* ── BUILD FEED ── */
+function buildFeed() {
+  const feed = document.getElementById('trendFeed');
+  feed.innerHTML = '';
+
+  const visible = TRENDS.filter(t => {
+    if (dismissedIds.has(t.id)) return false;
+    if (activeSourceFilter !== 'all' && t.source !== activeSourceFilter) return false;
+    if (activeDnaFilter !== 'all' && t.dnaLevel !== activeDnaFilter) return false;
+    return true;
+  });
+
+  document.getElementById('feedCount').textContent = `${visible.length} TRENDS · SORTED BY MATCH`;
+  document.getElementById('feedPill').textContent = `${visible.length} trends · ${new Set(visible.map(t=>t.source)).size} sources`;
+
+  visible.forEach((t,i) => {
+    const el = document.createElement('div');
+    el.className = 'trend-card';
+    el.dataset.id = t.id;
+    el.style.animationDelay = (i*0.06)+'s';
+    el.style.animation = 'fadeUp 0.4s cubic-bezier(0.16,1,0.3,1) both';
+
+    const catHtml = t.cats.map(c=>`<span class="cat-tag ${c}">${c}</span>`).join('');
+    const tagsHtml = t.dnaTags.map(tag=>`<span class="dna-tt-tag">${tag}</span>`).join('');
+    const addedClass = addedIds.has(t.id) ? 'added' : '';
+    const addedLabel = addedIds.has(t.id) ? '✓ IN LIBRARY' : '+ Add to Library';
+
+    // Truncate code for card preview
+    const codeLines = t.code.split('\n').slice(0,4).join('\n');
+    const codeSyntax = codeLines
+      .replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')
+      .replace(/(\.[\w-]+|@[\w-]+|:[\w-]+\s*\{)/g,'<span class="kw">$1</span>')
+      .replace(/(background|border|filter|animation|transform|display|position|opacity|content|width|height|grid-template-columns|gap)(?=\s*:)/g,'<span class="prop">$1</span>')
+      .replace(/:\s*([^;\n{]+)/g,(m,v)=>`: <span class="val">${v}</span>`);
+
+    el.innerHTML = `
+      <div class="tc-body">
+        <div class="tc-stripe ${t.dnaLevel}"></div>
+        <div class="tc-main">
+          <div class="tc-top">
+            <div class="tc-top-left">
+              <div class="tc-meta">
+                <div class="source-badge ${t.source}">${t.source}</div>
+                <div class="crawl-date">${t.date}</div>
+              </div>
+              <div class="tc-name">${t.name}</div>
+              <div class="tc-desc">${t.desc}</div>
+            </div>
+            <div class="tc-top-right">
+              <div class="dna-score-wrap">
+                <div class="dna-score ${t.dnaLevel}">
+                  <span class="dna-score-pct">${t.dna}%</span>
+                  <span class="dna-score-lbl">match</span>
+                </div>
+                <div class="dna-tooltip">
+                  <div class="dna-tt-title">// DNA Match Reason</div>
+                  <div class="dna-tt-text">${t.dnaMatchText}</div>
+                  <div class="dna-tt-tags">${tagsHtml}</div>
+                </div>
+              </div>
+              <div class="tc-cats">${catHtml}</div>
+            </div>
+          </div>
+          <div class="tc-code-wrap">
+            <div class="tc-code"><code>${codeSyntax}</code></div>
+          </div>
+          <div class="tc-actions">
+            <button class="tc-btn add ${addedClass}" data-action="add" data-id="${t.id}">${addedLabel}</button>
+            <button class="tc-btn preview" data-action="preview" data-id="${t.id}">⬡ Preview</button>
+            <div class="tc-spacer"></div>
+            <button class="tc-btn dismiss" data-action="dismiss" data-id="${t.id}">✕ Dismiss</button>
+          </div>
+        </div>
+      </div>`;
+    feed.appendChild(el);
+  });
+
+  bindCursor();
+  bindCardActions();
+}
+
+/* ── CARD ACTIONS ── */
+function bindCardActions() {
+  document.querySelectorAll('[data-action]').forEach(btn => {
+    btn.addEventListener('click', e => {
+      const action = btn.dataset.action;
+      const id = +btn.dataset.id;
+      const trend = TRENDS.find(t=>t.id===id);
+      if (!trend) return;
+
+      if (action === 'add') {
+        addedIds.add(id);
+        btn.classList.add('added');
+        btn.textContent = '✓ IN LIBRARY';
+        triggerGlitch('low');
+      }
+      else if (action === 'preview') {
+        openPreview(trend);
+      }
+      else if (action === 'dismiss') {
+        const card = btn.closest('.trend-card');
+        card.classList.add('dismissed-card');
+        setTimeout(()=>{ dismissedIds.add(id); buildFeed(); buildDismissed(); }, 400);
+        triggerGlitch('low');
+      }
+    });
+  });
+}
+
+/* ── PREVIEW MODAL ── */
+function openPreview(trend) {
+  currentPreviewId = trend.id;
+  document.getElementById('pmTitle').textContent = trend.name.toUpperCase();
+  document.getElementById('pmRender').innerHTML = trend.renderHtml;
+
+  const codeSyntax = trend.code
+    .replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')
+    .replace(/(\.[\w-]+|@[\w-]+|:[\w-]+\s*\{)/g,'<span class="kw">$1</span>')
+    .replace(/(background|border|filter|animation|transform|display|position|opacity|content|width|height|grid-template-columns|gap)(?=\s*:)/g,'<span class="prop">$1</span>')
+    .replace(/:\s*([^;\n{]+)/g,(m,v)=>`: <span class="val">${v}</span>`);
+  document.getElementById('pmCode').innerHTML = codeSyntax;
+
+  const addBtn = document.getElementById('pmAdd');
+  if (addedIds.has(trend.id)) { addBtn.textContent='✓ ALREADY IN LIBRARY'; addBtn.disabled=true; }
+  else { addBtn.textContent='+ ADD TO LIBRARY'; addBtn.disabled=false; }
+
+  document.getElementById('previewModal').classList.add('active');
+  triggerGlitch('low');
+}
+
+document.getElementById('pmClose').addEventListener('click',()=>{ document.getElementById('previewModal').classList.remove('active'); });
+document.getElementById('pmAdd').addEventListener('click',()=>{
+  if (!currentPreviewId) return;
+  addedIds.add(currentPreviewId);
+  document.getElementById('pmAdd').textContent='✓ ALREADY IN LIBRARY';
+  document.getElementById('pmAdd').disabled=true;
+  buildFeed();
+  triggerGlitch('low');
+});
+document.getElementById('pmDismiss').addEventListener('click',()=>{
+  if (!currentPreviewId) return;
+  dismissedIds.add(currentPreviewId);
+  document.getElementById('previewModal').classList.remove('active');
+  buildFeed(); buildDismissed();
+  triggerGlitch('low');
+});
+document.getElementById('previewModal').addEventListener('click', e=>{
+  if (e.target === document.getElementById('previewModal')) document.getElementById('previewModal').classList.remove('active');
+});
+
+/* ── BUILD DISMISSED ── */
+let dismissedData = [...DISMISSED_STATIC];
+
+function buildDismissed() {
+  const inner = document.getElementById('dismissedInner');
+  inner.innerHTML = '';
+  const allDismissed = [
+    ...dismissedData,
+    ...Array.from(dismissedIds).map(id=>{
+      const t=TRENDS.find(x=>x.id===id);
+      return t ? {name:t.name,source:t.source,score:t.dna,level:t.dnaLevel} : null;
+    }).filter(Boolean)
+  ];
+  document.getElementById('dismissCount').textContent = `${allDismissed.length} dismissed`;
+  allDismissed.forEach((item,i)=>{
+    const el = document.createElement('div');
+    el.className = 'dl-item';
+    el.innerHTML = `
+      <div class="dl-name">${item.name}</div>
+      <div class="dl-source">${item.source}</div>
+      <div class="dl-score ${item.level}">${item.score}%</div>
+      <button class="restore-btn" data-restore="${i}" data-name="${item.name}">RESTORE</button>`;
+    inner.appendChild(el);
+  });
+  inner.querySelectorAll('.restore-btn').forEach(btn=>{
+    btn.addEventListener('click',()=>{
+      const idx = +btn.dataset.restore;
+      const name = btn.dataset.name;
+      // Check if it's from live dismissed IDs
+      const liveIdx = Array.from(dismissedIds).findIndex(id=>TRENDS.find(t=>t.id===id&&t.name===name));
+      if (liveIdx > -1) {
+        const id = Array.from(dismissedIds)[liveIdx];
+        dismissedIds.delete(id);
+        buildFeed();
+      } else {
+        dismissedData.splice(idx - Array.from(dismissedIds).length, 1);
+      }
+      buildDismissed();
+      triggerGlitch('low');
+    });
+  });
+  bindCursor();
+}
+
+/* ── DISMISSED TOGGLE ── */
+document.getElementById('dismissedToggle').addEventListener('click',()=>{
+  const tog = document.getElementById('dismissedToggle');
+  const list = document.getElementById('dismissedList');
+  tog.classList.toggle('open'); list.classList.toggle('open');
+});
+
+/* ── FILTER CHIPS ── */
+document.querySelectorAll('.filter-chip').forEach(chip=>{
+  chip.addEventListener('click',()=>{
+    const filterType = chip.dataset.filter;
+    const val = chip.dataset.val;
+    document.querySelectorAll(`.filter-chip[data-filter="${filterType}"]`).forEach(c=>c.classList.remove('active'));
+    chip.classList.add('active');
+    if (filterType==='source') activeSourceFilter=val;
+    else activeDnaFilter=val;
+    buildFeed();
+    triggerGlitch('low');
+  });
+});
+
+/* ── CRAWL NOW ── */
+const crawlBtn = document.getElementById('crawlBtn');
+const crawlOverlay = document.getElementById('crawlOverlay');
+
+crawlBtn.addEventListener('click',()=>{
+  if (crawlBtn.classList.contains('crawling')) return;
+  crawlBtn.classList.add('crawling');
+  document.getElementById('crawlBtnLabel').textContent = 'CRAWLING...';
+  crawlOverlay.classList.add('active');
+
+  const sources = ['cs-aww','cs-linear','cs-vercel','cs-dribble','cs-codepen'];
+  const logs = [
+    'Initializing crawler agents...',
+    'Fetching Awwwards highlights...',
+    'Parsing Linear changelog...',
+    'Scanning Vercel templates...',
+    'Extracting Dribbble trends...',
+    'Crawling CodePen picks...',
+    'Running DNA match scoring...',
+    'Deduplicating results...',
+    'Crawl complete · 18 trends found ✓'
+  ];
+  let li=0; let si=0;
+  const logEl=document.getElementById('coLog');
+  const interval=setInterval(()=>{
+    if(li<logs.length){logEl.textContent=logs[li++];}
+    if(si<sources.length){
+      document.getElementById(sources[si]).classList.add('crawling');
+      if(si>0)document.getElementById(sources[si-1]).classList.replace('crawling','done');
+      si++;
+    }
+    if(li>=logs.length){
+      clearInterval(interval);
+      sources.forEach(s=>document.getElementById(s).classList.replace('crawling','done'));
+      setTimeout(()=>{
+        crawlOverlay.classList.remove('active');
+        crawlBtn.classList.remove('crawling');
+        document.getElementById('crawlBtnLabel').textContent='CRAWL NOW';
+        document.getElementById('lastCrawled').textContent='Just now';
+        // reset source dots
+        sources.forEach(s=>{
+          const el=document.getElementById(s);
+          el.classList.remove('done','crawling');
+        });
+        triggerGlitch('low');
+      },600);
+    }
+  },350);
+});
+
+/* ── COUNTDOWN ── */
+let countdownSecs = 2 * 3600 + 47 * 60 + 18;
+function fmtTime(s){ const h=Math.floor(s/3600),m=Math.floor((s%3600)/60),ss=s%60; return `${String(h).padStart(2,'0')}:${String(m).padStart(2,'0')}:${String(ss).padStart(2,'0')}`; }
+setInterval(()=>{ countdownSecs=Math.max(0,countdownSecs-1); document.getElementById('countdown').textContent=fmtTime(countdownSecs); },1000);
+
+/* ── INIT ── */
+buildFeed();
+buildDismissed();
+</script>
+</body>
+</html>

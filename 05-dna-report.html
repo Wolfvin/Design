@@ -1,0 +1,947 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>FectTral – DNA Report</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;600;700;900&family=Exo+2:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html, body { height: 100%; overflow: hidden; }
+
+:root {
+  --bg-void:       #020408;
+  --bg-deep:       #050912;
+  --bg-panel:      #0a1428;
+  --bg-card:       #0d1a32;
+  --blue-core:     #00aaff;
+  --blue-bright:   #00d4ff;
+  --blue-electric: #0066ff;
+  --blue-dim:      #003a8c;
+  --glow-sm:   0 0 8px rgba(0,170,255,0.4);
+  --glow-md:   0 0 16px rgba(0,170,255,0.5), 0 0 32px rgba(0,102,255,0.2);
+  --glow-text: 0 0 10px rgba(0,212,255,0.8), 0 0 20px rgba(0,170,255,0.4);
+  --border-dim:    rgba(0,140,255,0.10);
+  --border-mid:    rgba(0,170,255,0.22);
+  --text-primary:  #e8f4ff;
+  --text-secondary:#8ab8d8;
+  --text-muted:    #3a5a78;
+  --text-dim:      #1a3050;
+  --font-display: 'Orbitron', monospace;
+  --font-body:    'Exo 2', sans-serif;
+  --font-mono:    'JetBrains Mono', monospace;
+  --sidebar-w: 220px;
+  --topbar-h:  48px;
+}
+
+body { font-family: var(--font-body); background: var(--bg-void); color: var(--text-primary); display: flex; flex-direction: column; height: 100vh; cursor: none; overflow: hidden; }
+
+/* ════ BG ════ */
+.bg-root { position: fixed; inset: 0; z-index: 0; overflow: hidden; }
+.bg-space { position: absolute; inset: 0; background: radial-gradient(ellipse at 20% 80%, rgba(0,40,120,0.6) 0%, transparent 45%), radial-gradient(ellipse at 80% 10%, rgba(0,20,80,0.5) 0%, transparent 40%), radial-gradient(ellipse at 50% 50%, rgba(0,10,40,0.4) 0%, transparent 65%), #020408; }
+.bg-grid { position: absolute; inset: 0; background-image: radial-gradient(circle, rgba(0,130,255,0.18) 1px, transparent 1px); background-size: 36px 36px; animation: gridDrift 60s linear infinite; mask-image: radial-gradient(ellipse 80% 80% at center, black 30%, transparent 80%); }
+@keyframes gridDrift { from{background-position:0 0;} to{background-position:36px 36px;} }
+.bg-floor { position: absolute; bottom: 0; left: 0; right: 0; height: 55%; background-image: linear-gradient(rgba(0,100,255,0.07) 1px, transparent 1px), linear-gradient(90deg, rgba(0,100,255,0.07) 1px, transparent 1px); background-size: 70px 35px; transform: perspective(500px) rotateX(65deg); transform-origin: bottom center; mask-image: linear-gradient(to bottom, transparent 0%, black 50%); animation: floorScroll 20s linear infinite; }
+@keyframes floorScroll { from{background-position:0 0;} to{background-position:0 35px;} }
+.bg-hex-giant { position: absolute; width: 850px; height: 850px; top: 50%; left: 50%; transform: translate(-50%,-50%); animation: slowRotate 150s linear infinite; opacity: 0.035; pointer-events: none; }
+.bg-hex-giant svg { width: 100%; height: 100%; }
+@keyframes slowRotate { from{transform:translate(-50%,-50%) rotate(0deg);} to{transform:translate(-50%,-50%) rotate(360deg);} }
+.orb { position: absolute; border-radius: 50%; filter: blur(90px); pointer-events: none; }
+.orb-1 { width: 680px; height: 680px; background: radial-gradient(circle, rgba(0,50,180,0.55) 0%, transparent 70%); top: -220px; left: -180px; animation: orb1 28s ease-in-out infinite; }
+.orb-2 { width: 480px; height: 480px; background: radial-gradient(circle, rgba(0,110,255,0.45) 0%, transparent 70%); bottom: -120px; right: -120px; animation: orb2 32s ease-in-out infinite; }
+.orb-3 { width: 320px; height: 320px; background: radial-gradient(circle, rgba(0,180,255,0.22) 0%, transparent 70%); top: 35%; left: 40%; animation: orb3 22s ease-in-out infinite; }
+@keyframes orb1 { 0%,100%{transform:translate(0,0) scale(1);} 33%{transform:translate(50px,70px) scale(1.08);} 66%{transform:translate(-25px,35px) scale(0.95);} }
+@keyframes orb2 { 0%,100%{transform:translate(0,0);} 50%{transform:translate(-70px,-55px);} }
+@keyframes orb3 { 0%,100%{transform:translate(0,0) scale(1);} 50%{transform:translate(25px,-45px) scale(1.25);} }
+.data-stream { position: absolute; width: 1px; background: linear-gradient(to bottom, transparent 0%, rgba(0,170,255,0.7) 50%, transparent 100%); animation: streamFall linear infinite; pointer-events: none; }
+@keyframes streamFall { 0%{transform:translateY(-200px);opacity:0;} 10%{opacity:1;} 85%{opacity:0.6;} 100%{transform:translateY(110vh);opacity:0;} }
+.hex-particle { position: absolute; color: rgba(0,150,255,0.35); text-shadow: 0 0 10px rgba(0,170,255,0.5); animation: hexFloat linear infinite; pointer-events: none; }
+@keyframes hexFloat { 0%{transform:translateY(110vh) rotate(0deg);opacity:0;} 8%{opacity:0.7;} 92%{opacity:0.2;} 100%{transform:translateY(-10vh) rotate(200deg);opacity:0;} }
+.scan-beam { position: absolute; left: 0; right: 0; height: 2px; background: linear-gradient(90deg,transparent,rgba(0,150,255,0.08) 20%,rgba(0,212,255,0.35) 50%,rgba(0,150,255,0.08) 80%,transparent); animation: beamSweep 10s linear infinite; pointer-events: none; }
+@keyframes beamSweep { from{top:-2px;} to{top:100%;} }
+.scanlines { position: absolute; inset: 0; pointer-events: none; background: repeating-linear-gradient(0deg,transparent,transparent 3px,rgba(0,0,0,0.06) 3px,rgba(0,0,0,0.06) 4px); }
+.vignette { position: absolute; inset: 0; pointer-events: none; background: radial-gradient(ellipse at center, transparent 45%, rgba(0,0,0,0.75) 100%); }
+
+/* ════ GLITCH ════ */
+.glitch-text { position: relative; display: inline-block; }
+.glitch-text::before, .glitch-text::after { content: attr(data-text); position: absolute; top:0; left:0; width:100%; height:100%; font-family:inherit; font-size:inherit; font-weight:inherit; letter-spacing:inherit; }
+.glitch-text::before { color:#00ffee; animation:gBefore 7s infinite; clip-path:polygon(0 20%,100% 20%,100% 40%,0 40%); }
+.glitch-text::after  { color:#ff00cc; animation:gAfter 7s infinite;  clip-path:polygon(0 65%,100% 65%,100% 80%,0 80%); }
+@keyframes gBefore { 0%,93%,100%{transform:translateX(0);opacity:0;} 94%{transform:translateX(-4px);opacity:0.9;} 95%{transform:translateX(3px);opacity:0.7;} 96%{transform:translateX(0);opacity:0;} }
+@keyframes gAfter  { 0%,92%,100%{transform:translateX(0);opacity:0;} 93%{transform:translateX(4px);opacity:0.8;} 94%{transform:translateX(-3px);opacity:0.6;} 95%{transform:translateX(0);opacity:0;} }
+.glitch-bars { position: fixed; inset: 0; z-index: 999; pointer-events: none; overflow: hidden; }
+.g-bar { position: absolute; left: 0; right: 0; opacity: 0; }
+@keyframes screenShake { 0%,100%{transform:translate(0,0) skewX(0);filter:none;} 20%{transform:translate(-3px,1px) skewX(-0.4deg);filter:hue-rotate(80deg) brightness(1.15);} 40%{transform:translate(3px,-1px) skewX(0.4deg);filter:hue-rotate(-80deg);} 60%{transform:translate(-2px,0);filter:brightness(1.3) saturate(1.5);} 80%{transform:translate(2px,1px) skewX(0.2deg);filter:none;} }
+
+/* ════ APP SHELL ════ */
+.app { position: relative; z-index: 2; display: flex; flex-direction: column; height: 100vh; }
+.topbar { height: var(--topbar-h); display: flex; align-items: center; justify-content: space-between; padding: 0 20px 0 0; border-bottom: 1px solid var(--border-dim); background: linear-gradient(90deg,rgba(4,8,16,0.98),rgba(7,13,25,0.96)); backdrop-filter: blur(30px); flex-shrink: 0; position: relative; overflow: hidden; animation: fadeDown 0.4s cubic-bezier(0.16,1,0.3,1) both; }
+.topbar::after { content:''; position:absolute; bottom:0; left:0; right:0; height:1px; background:linear-gradient(90deg,transparent,rgba(0,150,255,0.25) 25%,rgba(0,212,255,0.7) 50%,rgba(0,150,255,0.25) 75%,transparent); animation:barGlow 5s ease-in-out infinite; }
+@keyframes barGlow { 0%,100%{opacity:0.5;} 50%{opacity:1;} }
+.topbar-logo { width:var(--sidebar-w); display:flex; align-items:center; gap:10px; padding:0 18px; border-right:1px solid var(--border-dim); height:100%; }
+.logo-hex { width:28px; height:28px; flex-shrink:0; animation:hexGlow 4s ease-in-out infinite; }
+.logo-hex svg { width:100%; height:100%; }
+@keyframes hexGlow { 0%,100%{filter:drop-shadow(0 0 6px rgba(0,170,255,0.7));} 50%{filter:drop-shadow(0 0 18px rgba(0,212,255,1)) drop-shadow(0 0 35px rgba(0,80,255,0.5));} }
+.logo-text { font-family:var(--font-display); line-height:1; }
+.logo-name { font-size:13px; font-weight:700; letter-spacing:0.12em; color:var(--blue-bright); text-shadow:var(--glow-text); }
+.logo-sub { display:block; font-size:7px; letter-spacing:0.38em; color:var(--text-muted); margin-top:3px; }
+.topbar-center { flex:1; display:flex; align-items:center; padding:0 24px; gap:12px; }
+.breadcrumb { display:flex; align-items:center; gap:6px; font-family:var(--font-mono); font-size:11px; color:var(--text-muted); }
+.breadcrumb .sep { color:var(--blue-dim); }
+.breadcrumb .current { color:var(--blue-core); text-shadow:0 0 8px rgba(0,170,255,0.5); }
+.ctx-pill { display:flex; align-items:center; gap:6px; padding:3px 10px; border:1px solid var(--border-dim); border-radius:2px; font-family:var(--font-mono); font-size:10px; color:var(--text-muted); background:rgba(0,40,100,0.2); }
+.ctx-pill .dot { width:5px; height:5px; border-radius:50%; background:var(--blue-core); box-shadow:0 0 6px var(--blue-core); animation:blinkDot 2s ease-in-out infinite; }
+@keyframes blinkDot { 0%,100%{opacity:1;} 50%{opacity:0.15;} }
+.topbar-right { display:flex; align-items:center; gap:10px; }
+.ai-pill { display:flex; align-items:center; gap:7px; padding:5px 12px; border:1px solid rgba(0,200,100,0.2); border-radius:2px; background:rgba(0,25,12,0.5); font-family:var(--font-mono); font-size:10px; color:#00cc66; cursor:pointer; transition:all 0.2s; }
+.ai-pill .pulse { width:6px; height:6px; border-radius:50%; background:#00cc66; box-shadow:0 0 8px #00cc66; animation:pDot 1.5s ease-in-out infinite; }
+@keyframes pDot { 0%,100%{transform:scale(1);opacity:1;} 50%{transform:scale(1.5);opacity:0.5;} }
+.icon-btn { width:30px; height:30px; display:flex; align-items:center; justify-content:center; border:1px solid var(--border-dim); border-radius:2px; background:transparent; color:var(--text-muted); cursor:pointer; transition:all 0.2s; font-size:14px; }
+.icon-btn:hover { border-color:var(--border-mid); color:var(--blue-bright); box-shadow:var(--glow-sm); }
+.main-layout { display:flex; flex:1; overflow:hidden; }
+.sidebar { width:var(--sidebar-w); flex-shrink:0; display:flex; flex-direction:column; border-right:1px solid var(--border-dim); background:linear-gradient(180deg,rgba(4,8,18,0.97),rgba(2,4,10,0.99)); backdrop-filter:blur(40px); padding:12px 0; overflow-y:auto; overflow-x:hidden; position:relative; animation:slideLeft 0.45s cubic-bezier(0.16,1,0.3,1) both; }
+.sidebar::after { content:''; position:absolute; top:0; right:0; bottom:0; width:1px; background:linear-gradient(180deg,transparent,rgba(0,100,255,0.15) 25%,rgba(0,170,255,0.45) 50%,rgba(0,100,255,0.15) 75%,transparent); animation:sideGlow 6s ease-in-out infinite; }
+@keyframes sideGlow { 0%,100%{opacity:0.5;} 50%{opacity:1;} }
+.nav-section { margin-bottom:2px; }
+.nav-label { padding:8px 16px 4px; font-family:var(--font-mono); font-size:9px; letter-spacing:0.3em; color:var(--text-dim); text-transform:uppercase; }
+.nav-item { position:relative; display:flex; align-items:center; gap:10px; padding:9px 16px; margin:1px 8px; border-radius:3px; cursor:pointer; font-size:12px; font-weight:500; letter-spacing:0.04em; color:var(--text-muted); transition:all 0.25s; border:1px solid transparent; text-decoration:none; overflow:hidden; animation:fadeUp 0.4s cubic-bezier(0.16,1,0.3,1) both; }
+.nav-item::before { content:''; position:absolute; inset:0; background:linear-gradient(90deg,transparent,rgba(0,140,255,0.07) 50%,transparent); transform:translateX(-100%); transition:transform 0.5s ease; }
+.nav-item:hover::before { transform:translateX(100%); }
+.nav-item:hover { color:var(--text-secondary); background:rgba(0,70,150,0.1); border-color:var(--border-dim); }
+.nav-item.active { color:var(--blue-bright); background:linear-gradient(90deg,rgba(0,90,220,0.16),rgba(0,50,130,0.06)); border-color:rgba(0,160,255,0.18); text-shadow:0 0 8px rgba(0,170,255,0.5); }
+.nav-item.active::after { content:''; position:absolute; left:-8px; top:50%; transform:translateY(-50%); width:3px; height:60%; background:var(--blue-bright); border-radius:0 2px 2px 0; box-shadow:0 0 8px var(--blue-bright); }
+.nav-item:nth-child(1){animation-delay:0.08s;} .nav-item:nth-child(2){animation-delay:0.12s;} .nav-item:nth-child(3){animation-delay:0.16s;} .nav-item:nth-child(4){animation-delay:0.20s;} .nav-item:nth-child(5){animation-delay:0.24s;}
+.nav-icon { font-size:13px; opacity:0.8; flex-shrink:0; width:16px; text-align:center; }
+.nav-badge { margin-left:auto; padding:1px 6px; border-radius:2px; font-size:9px; font-family:var(--font-mono); background:rgba(0,100,200,0.25); border:1px solid rgba(0,150,255,0.2); color:var(--blue-core); }
+.nav-badge.red { background:rgba(200,30,30,0.25); border-color:rgba(255,60,60,0.25); color:#ff6060; }
+.nav-divider { height:1px; background:var(--border-dim); margin:8px 16px; }
+.has-tip { position:relative; }
+.tip { position:absolute; left:calc(100% + 10px); top:50%; transform:translateY(-50%); background:var(--bg-card); border:1px solid var(--border-mid); border-radius:2px; padding:4px 9px; font-family:var(--font-mono); font-size:10px; color:var(--text-secondary); white-space:nowrap; pointer-events:none; opacity:0; transition:opacity 0.15s; z-index:200; box-shadow:var(--glow-sm); }
+.has-tip:hover .tip { opacity:1; }
+.sidebar-footer { margin-top:auto; padding:12px 10px 8px; border-top:1px solid var(--border-dim); }
+.lib-stats { display:flex; align-items:center; justify-content:space-around; margin-bottom:10px; }
+.stat-item { text-align:center; }
+.stat-num { font-family:var(--font-display); font-size:14px; font-weight:700; color:var(--blue-bright); text-shadow:var(--glow-text); display:block; }
+.stat-lbl { font-family:var(--font-mono); font-size:8px; letter-spacing:0.18em; color:var(--text-dim); text-transform:uppercase; }
+.stat-sep { width:1px; height:28px; background:var(--border-dim); }
+.provider-card { border:1px solid var(--border-dim); border-radius:3px; padding:8px 10px; background:rgba(0,20,50,0.4); cursor:pointer; transition:all 0.2s; }
+.provider-card:hover { border-color:var(--border-mid); box-shadow:var(--glow-sm); }
+.prov-top { display:flex; align-items:center; justify-content:space-between; margin-bottom:4px; }
+.prov-label { font-family:var(--font-mono); font-size:8px; letter-spacing:0.2em; color:var(--text-dim); text-transform:uppercase; }
+.prov-status { display:flex; align-items:center; gap:5px; font-family:var(--font-mono); font-size:9px; color:#00cc66; }
+.prov-status .dot { width:5px; height:5px; border-radius:50%; background:#00cc66; box-shadow:0 0 6px #00cc66; animation:pDot 2s ease-in-out infinite; }
+.prov-name { font-family:var(--font-display); font-size:10px; font-weight:700; color:var(--blue-core); letter-spacing:0.1em; }
+.prov-model { font-family:var(--font-mono); font-size:9px; color:var(--text-dim); margin-top:2px; }
+::-webkit-scrollbar { width:4px; }
+::-webkit-scrollbar-track { background:transparent; }
+::-webkit-scrollbar-thumb { background:rgba(0,100,200,0.3); border-radius:2px; }
+::-webkit-scrollbar-thumb:hover { background:rgba(0,150,255,0.5); }
+@keyframes fadeDown  { from{transform:translateY(-12px);opacity:0;} to{transform:translateY(0);opacity:1;} }
+@keyframes fadeUp    { from{transform:translateY(14px);opacity:0;}  to{transform:translateY(0);opacity:1;} }
+@keyframes slideLeft { from{transform:translateX(-20px);opacity:0;} to{transform:translateX(0);opacity:1;} }
+#cursor { position:fixed; z-index:9999; width:6px; height:6px; background:var(--blue-bright); border-radius:50%; pointer-events:none; transform:translate(-50%,-50%); box-shadow:var(--glow-md); transition:transform 0.1s; }
+#cursor-ring { position:fixed; z-index:9998; width:26px; height:26px; border:1px solid rgba(0,170,255,0.5); border-radius:50%; pointer-events:none; transform:translate(-50%,-50%); transition:width 0.2s,height 0.2s,border-color 0.2s; }
+
+/* ════════════════════════════════
+   CONTENT
+════════════════════════════════ */
+.content { flex:1; overflow-y:auto; overflow-x:hidden; display:flex; flex-direction:column; }
+
+/* ════ DNA PAGE ════ */
+.dna-page { flex:1; animation:fadeUp 0.5s 0.2s cubic-bezier(0.16,1,0.3,1) both; }
+
+/* ── PAGE HEADER ── */
+.dna-page-header {
+  display:flex; align-items:center; justify-content:space-between;
+  padding:16px 28px 14px; border-bottom:1px solid var(--border-dim);
+  background:rgba(2,4,10,0.7); backdrop-filter:blur(12px); flex-shrink:0; position:sticky; top:0; z-index:20;
+}
+.dna-title-group { display:flex; flex-direction:column; gap:4px; }
+.dna-eyebrow { font-family:var(--font-mono); font-size:9px; color:var(--text-dim); letter-spacing:0.2em; }
+.dna-title { font-family:var(--font-display); font-size:15px; font-weight:900; color:var(--blue-bright); text-shadow:var(--glow-text); letter-spacing:0.14em; }
+.dna-timestamp { font-family:var(--font-mono); font-size:9px; color:var(--text-dim); margin-top:2px; }
+.dna-timestamp strong { color:var(--text-muted); }
+.dna-header-right { display:flex; align-items:center; gap:10px; }
+
+/* Re-analyze button */
+.reanalyze-btn {
+  display:flex; align-items:center; gap:8px; padding:9px 18px;
+  border:1px solid var(--blue-core); border-radius:3px;
+  background:linear-gradient(135deg,rgba(0,80,200,0.25),rgba(0,40,120,0.15));
+  font-family:var(--font-display); font-size:10px; font-weight:700;
+  letter-spacing:0.15em; color:var(--blue-bright); cursor:pointer;
+  transition:all 0.3s; position:relative; overflow:hidden;
+  text-shadow:0 0 8px rgba(0,200,255,0.4);
+}
+.reanalyze-btn:hover { box-shadow:var(--glow-md); transform:translateY(-1px); }
+.reanalyze-btn.running { pointer-events:none; opacity:0.7; }
+.reanalyze-btn .btn-shimmer { position:absolute; inset:0; background:linear-gradient(90deg,transparent,rgba(255,255,255,0.05) 50%,transparent); transform:translateX(-100%); animation:shimmer 2.5s ease-in-out infinite; }
+@keyframes shimmer { 0%{transform:translateX(-100%);} 100%{transform:translateX(200%);} }
+.spin-xs { width:11px; height:11px; border-radius:50%; border:2px solid rgba(0,150,255,0.2); border-top-color:var(--blue-bright); animation:spin 0.7s linear infinite; display:none; }
+.reanalyze-btn.running .spin-xs { display:block; }
+@keyframes spin { to{transform:rotate(360deg);} }
+
+/* DNA STRENGTH badge */
+.dna-strength-badge { display:flex; align-items:center; gap:8px; padding:7px 14px; border:1px solid var(--border-dim); border-radius:3px; background:rgba(0,10,30,0.5); }
+.strength-label { font-family:var(--font-mono); font-size:9px; color:var(--text-dim); letter-spacing:0.15em; }
+.strength-bar-mini { width:60px; height:4px; background:rgba(0,40,100,0.4); border-radius:2px; overflow:hidden; }
+.strength-fill-mini { height:100%; background:linear-gradient(90deg,var(--blue-electric),var(--blue-bright)); border-radius:2px; width:78%; box-shadow:0 0 6px rgba(0,170,255,0.4); animation:strengthPulse 3s ease-in-out infinite; }
+@keyframes strengthPulse { 0%,100%{opacity:0.8;} 50%{opacity:1;} }
+.strength-val { font-family:var(--font-display); font-size:10px; font-weight:700; color:var(--blue-bright); }
+
+/* ── MAIN CONTENT GRID ── */
+.dna-grid {
+  display:grid; grid-template-columns:1fr 1fr;
+  grid-template-areas:
+    "identity  mood"
+    "stats     stats"
+    "elements  timeline"
+    "reco      reco";
+  gap:20px; padding:24px 28px;
+}
+
+/* Shared card base */
+.dna-card {
+  border:1px solid var(--border-dim); border-radius:6px;
+  background:rgba(5,10,25,0.7); backdrop-filter:blur(8px);
+  position:relative; overflow:hidden; transition:border-color 0.2s;
+}
+.dna-card:hover { border-color:rgba(0,120,255,0.2); }
+.dna-card::before { content:''; position:absolute; top:0; left:0; right:0; height:1px; background:linear-gradient(90deg,transparent,rgba(0,150,255,0.3),transparent); }
+/* corner accents */
+.dna-card::after { content:''; position:absolute; top:6px; right:6px; width:12px; height:12px; border-top:1px solid var(--blue-dim); border-right:1px solid var(--blue-dim); opacity:0.5; }
+.card-corner-bl { position:absolute; bottom:6px; left:6px; width:12px; height:12px; border-bottom:1px solid var(--blue-dim); border-left:1px solid var(--blue-dim); opacity:0.5; }
+
+.card-header { padding:16px 18px 12px; border-bottom:1px solid var(--border-dim); display:flex; align-items:center; justify-content:space-between; }
+.card-title { font-family:var(--font-display); font-size:9px; font-weight:700; letter-spacing:0.3em; color:var(--text-dim); text-transform:uppercase; display:flex; align-items:center; gap:8px; }
+.card-title-icon { font-size:12px; color:var(--blue-core); }
+.card-body { padding:18px; }
+
+/* ═══ SECTION 1 — DNA IDENTITY ═══ */
+.card-identity { grid-area:identity; }
+
+.identity-main { display:flex; flex-direction:column; gap:16px; }
+.identity-hex-row { display:flex; align-items:center; gap:16px; }
+.identity-hex-vis {
+  width:64px; height:64px; flex-shrink:0; position:relative;
+}
+.identity-hex-vis svg { width:100%; height:100%; }
+.hex-ring-outer { animation:hexSpin 20s linear infinite; transform-origin:32px 32px; }
+.hex-ring-inner { animation:hexSpin 12s linear infinite reverse; transform-origin:32px 32px; }
+@keyframes hexSpin { to{transform:rotate(360deg);} }
+
+.identity-text {}
+.identity-primary {
+  font-family:var(--font-display); font-size:13px; font-weight:900;
+  color:var(--text-primary); letter-spacing:0.06em; line-height:1.3;
+}
+.identity-primary span { color:var(--blue-bright); text-shadow:var(--glow-text); }
+.identity-secondary { font-family:var(--font-mono); font-size:10px; color:var(--text-muted); margin-top:4px; letter-spacing:0.05em; }
+.identity-tags { display:flex; gap:5px; flex-wrap:wrap; margin-top:8px; }
+.identity-tag { padding:2px 8px; border-radius:2px; font-family:var(--font-mono); font-size:8px; border:1px solid var(--border-dim); color:var(--text-dim); }
+.identity-tag.primary { border-color:rgba(0,150,255,0.3); color:var(--blue-core); background:rgba(0,50,120,0.2); }
+.identity-tag.secondary { border-color:rgba(140,60,255,0.25); color:#c080ff; background:rgba(40,0,80,0.2); }
+
+/* DNA Strength meter */
+.dna-strength-section { margin-top:16px; padding-top:14px; border-top:1px solid var(--border-dim); }
+.strength-label-row { display:flex; justify-content:space-between; align-items:center; margin-bottom:8px; }
+.strength-lbl { font-family:var(--font-mono); font-size:9px; color:var(--text-dim); letter-spacing:0.2em; text-transform:uppercase; }
+.strength-pct { font-family:var(--font-display); font-size:11px; font-weight:700; color:var(--blue-bright); text-shadow:var(--glow-text); }
+.strength-track { height:8px; background:rgba(0,30,80,0.5); border-radius:4px; overflow:hidden; border:1px solid var(--border-dim); position:relative; }
+.strength-fill {
+  height:100%; border-radius:4px;
+  background:linear-gradient(90deg,var(--blue-electric) 0%,var(--blue-core) 50%,var(--blue-bright) 100%);
+  box-shadow:0 0 12px rgba(0,170,255,0.5),0 0 24px rgba(0,100,255,0.2);
+  width:0%; transition:width 1.4s cubic-bezier(0.16,1,0.3,1) 0.3s;
+  position:relative;
+}
+.strength-fill::after { content:''; position:absolute; top:0; bottom:0; right:0; width:3px; background:white; border-radius:2px; filter:blur(2px); opacity:0.8; }
+.strength-sublabel { font-family:var(--font-mono); font-size:8px; color:var(--text-dim); margin-top:5px; display:flex; justify-content:space-between; }
+.strength-milestone { display:flex; align-items:center; gap:4px; }
+.strength-milestone::before { content:''; width:4px; height:4px; border-radius:50%; background:var(--blue-dim); display:block; }
+
+/* ═══ SECTION 2 — MOOD DISTRIBUTION ═══ */
+.card-mood { grid-area:mood; }
+
+.mood-chart { display:flex; flex-direction:column; gap:12px; }
+.mood-row { display:flex; flex-direction:column; gap:5px; }
+.mood-row-header { display:flex; align-items:center; justify-content:space-between; }
+.mood-name { font-family:var(--font-mono); font-size:10px; color:var(--text-secondary); letter-spacing:0.08em; display:flex; align-items:center; gap:8px; }
+.mood-dot { width:6px; height:6px; border-radius:50%; flex-shrink:0; }
+.mood-pct { font-family:var(--font-display); font-size:10px; font-weight:700; color:var(--blue-bright); }
+.mood-track { height:6px; background:rgba(0,20,60,0.5); border-radius:3px; overflow:hidden; border:1px solid var(--border-dim); }
+.mood-fill { height:100%; border-radius:3px; width:0%; transition:width 1.2s cubic-bezier(0.16,1,0.3,1); }
+.mood-blocks { display:flex; gap:1px; font-family:var(--font-mono); font-size:7px; margin-top:2px; letter-spacing:0.05em; }
+.mood-block-filled { color:var(--blue-core); }
+.mood-block-empty  { color:var(--text-dim); }
+
+/* ═══ SECTION 3 — STATS GRID ═══ */
+.card-stats { grid-area:stats; }
+.stats-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:12px; }
+.stat-cell {
+  padding:14px 16px; border:1px solid var(--border-dim); border-radius:4px;
+  background:rgba(0,10,30,0.5); position:relative; overflow:hidden; transition:all 0.2s;
+}
+.stat-cell:hover { border-color:rgba(0,120,255,0.2); background:rgba(0,18,50,0.6); }
+.stat-cell::before { content:''; position:absolute; top:0; left:0; right:0; height:1px; background:linear-gradient(90deg,transparent,rgba(0,150,255,0.15),transparent); }
+.stat-cell-label { font-family:var(--font-mono); font-size:8px; color:var(--text-dim); letter-spacing:0.2em; text-transform:uppercase; margin-bottom:8px; }
+.stat-cell-value { font-family:var(--font-display); font-size:11px; font-weight:700; color:var(--text-primary); letter-spacing:0.05em; line-height:1.4; }
+.stat-cell-value .primary { color:var(--blue-bright); text-shadow:0 0 8px rgba(0,200,255,0.4); }
+.stat-cell-value .secondary { color:var(--text-muted); font-size:9px; }
+.stat-cell-big { font-family:var(--font-display); font-size:28px; font-weight:900; color:var(--blue-bright); text-shadow:var(--glow-text); display:block; line-height:1; }
+.stat-cell-sub { font-family:var(--font-mono); font-size:8px; color:var(--text-dim); margin-top:4px; }
+/* mini bar inside stat */
+.stat-mini-bars { display:flex; align-items:flex-end; gap:2px; height:20px; margin-top:8px; }
+.stat-mini-bar { flex:1; background:var(--blue-electric); border-radius:1px; min-height:2px; opacity:0.6; transition:opacity 0.2s; }
+.stat-mini-bar:hover { opacity:1; }
+.stat-mini-bar.top { background:var(--blue-bright); opacity:1; }
+
+/* ═══ SECTION 4 — TOP ELEMENTS ═══ */
+.card-elements { grid-area:elements; }
+
+.elements-list { display:flex; flex-direction:column; gap:8px; }
+.elem-row {
+  display:flex; align-items:flex-start; gap:12px; padding:10px 12px;
+  border:1px solid var(--border-dim); border-radius:4px;
+  background:rgba(0,8,24,0.5); cursor:pointer; transition:all 0.2s;
+  position:relative; overflow:hidden;
+}
+.elem-row::before { content:''; position:absolute; top:0; left:0; right:0; height:1px; background:linear-gradient(90deg,transparent,rgba(0,130,255,0.15),transparent); opacity:0; transition:opacity 0.2s; }
+.elem-row:hover { border-color:rgba(0,120,255,0.2); background:rgba(0,15,40,0.6); }
+.elem-row:hover::before { opacity:1; }
+.elem-rank { font-family:var(--font-display); font-size:16px; font-weight:900; color:var(--blue-dim); width:24px; flex-shrink:0; line-height:1; padding-top:2px; }
+.elem-row:first-child .elem-rank { color:var(--blue-bright); text-shadow:var(--glow-text); }
+.elem-row:nth-child(2) .elem-rank { color:var(--blue-core); }
+.elem-info { flex:1; min-width:0; }
+.elem-row-name { font-family:var(--font-mono); font-size:10px; color:var(--text-primary); font-weight:500; }
+.elem-row-meta { display:flex; gap:8px; margin-top:3px; flex-wrap:wrap; }
+.elem-row-tag { font-family:var(--font-mono); font-size:8px; color:var(--text-dim); }
+.elem-code-preview { font-family:var(--font-mono); font-size:8px; color:rgba(100,160,220,0.6); margin-top:6px; padding:5px 7px; background:rgba(0,5,15,0.7); border-radius:2px; border-left:2px solid var(--blue-dim); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+.elem-rating { display:flex; align-items:center; gap:2px; flex-shrink:0; }
+.elem-star { font-size:10px; color:var(--blue-dim); }
+.elem-star.lit { color:#ffcc40; text-shadow:0 0 6px rgba(255,200,0,0.5); }
+.elem-uses { font-family:var(--font-mono); font-size:8px; color:var(--text-dim); margin-top:4px; text-align:right; }
+
+/* ═══ SECTION 5 — DNA TIMELINE ═══ */
+.card-timeline { grid-area:timeline; }
+
+.timeline-wrap { position:relative; }
+.timeline-label { font-family:var(--font-mono); font-size:9px; color:var(--text-dim); letter-spacing:0.15em; margin-bottom:12px; }
+.timeline-canvas-wrap { position:relative; }
+#timelineCanvas { display:block; width:100%; }
+.timeline-insight {
+  margin-top:12px; padding:10px 14px;
+  border:1px solid rgba(0,150,255,0.15); border-radius:3px;
+  background:rgba(0,20,60,0.3);
+  font-family:var(--font-mono); font-size:9px; color:var(--text-secondary);
+  display:flex; align-items:center; gap:8px;
+}
+.insight-icon { font-size:14px; flex-shrink:0; }
+.timeline-xaxis { display:flex; justify-content:space-between; margin-top:4px; }
+.timeline-x-label { font-family:var(--font-mono); font-size:8px; color:var(--text-dim); }
+
+/* ═══ SECTION 6 — RECOMMENDATIONS ═══ */
+.card-reco { grid-area:reco; }
+
+.reco-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:12px; }
+.reco-item {
+  padding:14px 16px; border:1px solid var(--border-dim); border-radius:4px;
+  background:rgba(0,8,24,0.5); position:relative; overflow:hidden; transition:all 0.2s;
+}
+.reco-item:hover { border-color:rgba(0,120,255,0.2); background:rgba(0,15,40,0.6); }
+.reco-item::before { content:''; position:absolute; top:0; left:0; right:0; height:1px; }
+.reco-item.missing::before  { background:linear-gradient(90deg,transparent,rgba(255,160,0,0.4),transparent); }
+.reco-item.explore::before  { background:linear-gradient(90deg,transparent,rgba(0,150,255,0.3),transparent); }
+.reco-item.strength::before { background:linear-gradient(90deg,transparent,rgba(0,200,80,0.3),transparent); }
+.reco-type { font-family:var(--font-mono); font-size:8px; letter-spacing:0.2em; text-transform:uppercase; margin-bottom:8px; display:flex; align-items:center; gap:5px; }
+.reco-type.missing  { color:#ffaa40; }
+.reco-type.explore  { color:var(--blue-core); }
+.reco-type.strength { color:#00cc66; }
+.reco-type-dot { width:5px; height:5px; border-radius:50%; background:currentColor; }
+.reco-text { font-family:var(--font-body); font-size:12px; color:var(--text-secondary); line-height:1.5; margin-bottom:12px; }
+.reco-text strong { color:var(--text-primary); }
+.reco-btns { display:flex; gap:6px; flex-wrap:wrap; }
+.reco-btn {
+  padding:5px 11px; border-radius:2px; font-family:var(--font-mono); font-size:9px;
+  letter-spacing:0.08em; cursor:pointer; transition:all 0.2s;
+}
+.reco-btn.primary { border:1px solid var(--blue-core); color:var(--blue-bright); background:rgba(0,60,160,0.2); }
+.reco-btn.primary:hover { box-shadow:var(--glow-sm); }
+.reco-btn.ghost  { border:1px solid var(--border-dim); color:var(--text-muted); background:transparent; }
+.reco-btn.ghost:hover { border-color:var(--border-mid); color:var(--text-secondary); }
+
+/* re-analyze overlay */
+.reanalyze-overlay {
+  position:absolute; inset:0; z-index:50; display:none;
+  background:rgba(2,4,10,0.85); backdrop-filter:blur(4px);
+  flex-direction:column; align-items:center; justify-content:center; gap:14px;
+}
+.reanalyze-overlay.visible { display:flex; }
+.ra-title { font-family:var(--font-display); font-size:12px; color:var(--blue-bright); letter-spacing:0.2em; }
+.ra-log { font-family:var(--font-mono); font-size:10px; color:var(--text-muted); text-align:center; line-height:2; }
+.ra-spinner { width:40px; height:40px; border-radius:50%; border:2px solid rgba(0,150,255,0.1); border-top-color:var(--blue-bright); animation:spin 1s linear infinite; }
+</style>
+</head>
+<body>
+
+<div class="bg-root">
+  <div class="bg-space"></div>
+  <canvas id="starCanvas" style="position:absolute;inset:0;width:100%;height:100%;"></canvas>
+  <div class="bg-grid"></div>
+  <div class="bg-floor"></div>
+  <div class="bg-hex-giant">
+    <svg viewBox="0 0 850 850" fill="none">
+      <polygon points="425,30 780,217 780,633 425,820 70,633 70,217" stroke="rgba(0,120,255,1)" stroke-width="1.2" fill="none"/>
+      <polygon points="425,100 710,255 710,595 425,750 140,595 140,255" stroke="rgba(0,150,255,0.6)" stroke-width="0.7" fill="none"/>
+      <polygon points="425,185 650,303 650,547 425,665 200,547 200,303" stroke="rgba(0,180,255,0.35)" stroke-width="0.5" fill="none"/>
+      <line x1="425" y1="30" x2="425" y2="820" stroke="rgba(0,100,255,0.18)" stroke-width="0.5"/>
+      <line x1="70" y1="217" x2="780" y2="633" stroke="rgba(0,100,255,0.18)" stroke-width="0.5"/>
+      <line x1="780" y1="217" x2="70" y2="633" stroke="rgba(0,100,255,0.18)" stroke-width="0.5"/>
+      <circle cx="425" cy="425" r="160" stroke="rgba(0,150,255,0.25)" stroke-width="0.5" fill="none" stroke-dasharray="10 5"/>
+      <circle cx="425" cy="425" r="90"  stroke="rgba(0,170,255,0.18)" stroke-width="0.5" fill="none"/>
+      <circle cx="425" cy="425" r="12"  stroke="rgba(0,200,255,0.5)"  stroke-width="0.5" fill="rgba(0,100,255,0.1)"/>
+    </svg>
+  </div>
+  <div class="orb orb-1"></div><div class="orb orb-2"></div><div class="orb orb-3"></div>
+  <div id="dataStreams"></div><div id="hexParticles"></div>
+  <div class="scan-beam"></div><div class="scanlines"></div><div class="vignette"></div>
+</div>
+<div class="glitch-bars" id="glitchBars"></div>
+<div id="cursor"></div><div id="cursor-ring"></div>
+
+<div class="app" id="app">
+  <header class="topbar">
+    <div class="topbar-logo">
+      <div class="logo-hex">
+        <svg viewBox="0 0 28 28" fill="none">
+          <polygon points="14,2 25,8 25,20 14,26 3,20 3,8" fill="none" stroke="#00aaff" stroke-width="1.5" stroke-linejoin="round"/>
+          <polygon points="14,7 20,10.5 20,17.5 14,21 8,17.5 8,10.5" fill="rgba(0,80,200,0.2)" stroke="#0055cc" stroke-width="0.8" stroke-linejoin="round"/>
+          <circle cx="14" cy="14" r="2.5" fill="#00d4ff"/>
+          <circle cx="14" cy="14" r="2.5" fill="#00d4ff" opacity="0.35">
+            <animate attributeName="r" values="2.5;5.5;2.5" dur="2.5s" repeatCount="indefinite"/>
+            <animate attributeName="opacity" values="0.35;0;0.35" dur="2.5s" repeatCount="indefinite"/>
+          </circle>
+        </svg>
+      </div>
+      <div class="logo-text">
+        <div class="logo-name glitch-text" data-text="FectTral">FectTral</div>
+        <span class="logo-sub">DESIGNERS</span>
+      </div>
+    </div>
+    <div class="topbar-center">
+      <div class="breadcrumb"><span>fecttral</span><span class="sep">/</span><span class="current" id="breadCrumb">dna</span></div>
+      <div class="ctx-pill"><span class="dot"></span><span>AI · ANALYSIS</span></div>
+    </div>
+    <div class="topbar-right">
+      <div class="ai-pill"><span class="pulse"></span><span>OLLAMA · qwen2.5-coder:14b</span></div>
+      <button class="icon-btn">⌕</button><button class="icon-btn">◎</button><button class="icon-btn">?</button>
+    </div>
+  </header>
+
+  <div class="main-layout">
+    <aside class="sidebar">
+      <div class="nav-section">
+        <div class="nav-label">Core</div>
+        <a class="nav-item has-tip" href="#"><span class="nav-icon">⬡</span><span>Library</span><span class="nav-badge">84</span><div class="tip">Browse all elements</div></a>
+        <a class="nav-item has-tip" href="#"><span class="nav-icon">🌐</span><span>Web Fetcher</span><div class="tip">Extract from URL</div></a>
+        <a class="nav-item has-tip" href="#"><span class="nav-icon">✦</span><span>AI Generator</span><div class="tip">Generate with AI</div></a>
+        <a class="nav-item has-tip" href="#"><span class="nav-icon">◈</span><span>Review Queue</span><span class="nav-badge red">12</span><div class="tip">12 pending</div></a>
+      </div>
+      <div class="nav-divider"></div>
+      <div class="nav-section">
+        <div class="nav-label">Intelligence</div>
+        <a class="nav-item active has-tip" href="#"><span class="nav-icon">◉</span><span>DNA Report</span><div class="tip">Your design DNA</div></a>
+        <a class="nav-item has-tip" href="#"><span class="nav-icon">⊞</span><span>A/B Workshop</span><div class="tip">Compare variants</div></a>
+        <a class="nav-item has-tip" href="#"><span class="nav-icon">◎</span><span>Trend Radar</span><span class="nav-badge">5</span><div class="tip">5 new trends</div></a>
+      </div>
+      <div class="nav-divider"></div>
+      <div class="nav-section">
+        <div class="nav-label">System</div>
+        <a class="nav-item has-tip" href="#"><span class="nav-icon">⬜</span><span>Projects</span><div class="tip">Manage layers</div></a>
+        <a class="nav-item has-tip" href="#"><span class="nav-icon">⚙</span><span>Settings</span><div class="tip">AI &amp; preferences</div></a>
+      </div>
+      <div class="sidebar-footer">
+        <div class="lib-stats">
+          <div class="stat-item"><span class="stat-num">84</span><span class="stat-lbl">Elements</span></div>
+          <div class="stat-sep"></div>
+          <div class="stat-item"><span class="stat-num">47</span><span class="stat-lbl">Generated</span></div>
+          <div class="stat-sep"></div>
+          <div class="stat-item"><span class="stat-num">78%</span><span class="stat-lbl">DNA</span></div>
+        </div>
+        <div class="provider-card">
+          <div class="prov-top"><span class="prov-label">AI Provider</span><div class="prov-status"><span class="dot"></span><span>Online</span></div></div>
+          <div class="prov-name">OLLAMA LOCAL</div>
+          <div class="prov-model">qwen2.5-coder:14b · 10GB</div>
+        </div>
+      </div>
+    </aside>
+
+    <main class="content">
+      <div class="dna-page">
+
+        <!-- PAGE HEADER -->
+        <div class="dna-page-header">
+          <div class="dna-title-group">
+            <div class="dna-eyebrow">// intelligence · design-pattern-analysis v2.4</div>
+            <div class="dna-title glitch-text" data-text="YOUR DESIGN DNA">YOUR DESIGN DNA</div>
+            <div class="dna-timestamp">Last analyzed: <strong>Today, 14:32:07</strong> · 84 elements · 47 generations sampled</div>
+          </div>
+          <div class="dna-header-right">
+            <div class="dna-strength-badge">
+              <span class="strength-label">DNA STRENGTH</span>
+              <div class="strength-bar-mini"><div class="strength-fill-mini"></div></div>
+              <span class="strength-val">78%</span>
+            </div>
+            <button class="reanalyze-btn" id="reanalyzeBtn">
+              <div class="btn-shimmer"></div>
+              <div class="spin-xs" id="raSpinner"></div>
+              <span id="raBtnText">◉ RE-ANALYZE</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- RE-ANALYZE OVERLAY -->
+        <div class="reanalyze-overlay" id="raOverlay">
+          <div class="ra-spinner"></div>
+          <div class="ra-title">ANALYZING DESIGN DNA</div>
+          <div class="ra-log" id="raLog">Initializing pattern recognition...</div>
+        </div>
+
+        <!-- MAIN GRID -->
+        <div class="dna-grid">
+
+          <!-- ═══ 1. DNA IDENTITY CARD ═══ -->
+          <div class="dna-card card-identity">
+            <div class="card-corner-bl"></div>
+            <div class="card-header">
+              <div class="card-title"><span class="card-title-icon">⬡</span>DNA IDENTITY</div>
+              <div style="font-family:var(--font-mono);font-size:9px;color:var(--text-dim);">PROFILE · v2.4</div>
+            </div>
+            <div class="card-body">
+              <div class="identity-main">
+                <div class="identity-hex-row">
+                  <div class="identity-hex-vis">
+                    <svg viewBox="0 0 64 64" fill="none">
+                      <g class="hex-ring-outer">
+                        <polygon points="32,4 56,18 56,46 32,60 8,46 8,18" stroke="rgba(0,120,255,0.5)" stroke-width="0.8" fill="none" stroke-dasharray="6 3"/>
+                      </g>
+                      <g class="hex-ring-inner">
+                        <polygon points="32,14 48,23 48,41 32,50 16,41 16,23" stroke="rgba(0,170,255,0.6)" stroke-width="1" fill="rgba(0,60,180,0.08)"/>
+                      </g>
+                      <polygon points="32,22 42,27.5 42,38.5 32,44 22,38.5 22,27.5" stroke="rgba(0,212,255,0.8)" stroke-width="1.2" fill="rgba(0,80,200,0.15)"/>
+                      <circle cx="32" cy="32" r="4" fill="#00d4ff" opacity="0.9"/>
+                      <circle cx="32" cy="32" r="7" stroke="rgba(0,212,255,0.3)" stroke-width="0.5" fill="none"/>
+                      <circle cx="32" cy="32" r="4" fill="#00d4ff" opacity="0.3">
+                        <animate attributeName="r" values="4;9;4" dur="3s" repeatCount="indefinite"/>
+                        <animate attributeName="opacity" values="0.3;0;0.3" dur="3s" repeatCount="indefinite"/>
+                      </circle>
+                    </svg>
+                  </div>
+                  <div class="identity-text">
+                    <div class="identity-primary">Modern <span>Luxury</span><br>Editorial</div>
+                    <div class="identity-secondary">Minimal + Futuristic touches</div>
+                    <div class="identity-tags">
+                      <span class="identity-tag primary">dark-mode</span>
+                      <span class="identity-tag primary">animation-heavy</span>
+                      <span class="identity-tag secondary">editorial</span>
+                      <span class="identity-tag secondary">luxury</span>
+                      <span class="identity-tag">CSS-first</span>
+                    </div>
+                  </div>
+                </div>
+
+                <div class="dna-strength-section">
+                  <div class="strength-label-row">
+                    <span class="strength-lbl">DNA Strength</span>
+                    <span class="strength-pct" id="strengthPct">78%</span>
+                  </div>
+                  <div class="strength-track">
+                    <div class="strength-fill" id="strengthFill" style="width:0%"></div>
+                  </div>
+                  <div class="strength-sublabel">
+                    <span>Weak · 0%</span>
+                    <span class="strength-milestone">Strong · 100%</span>
+                  </div>
+                  <div style="font-family:var(--font-mono);font-size:8px;color:var(--text-dim);margin-top:8px;">
+                    Needs <strong style="color:var(--text-muted);">+22 more approvals</strong> to reach max confidence
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- ═══ 2. MOOD DISTRIBUTION ═══ -->
+          <div class="dna-card card-mood">
+            <div class="card-corner-bl"></div>
+            <div class="card-header">
+              <div class="card-title"><span class="card-title-icon">◎</span>MOOD DISTRIBUTION</div>
+              <div style="font-family:var(--font-mono);font-size:9px;color:var(--text-dim);">84 elements</div>
+            </div>
+            <div class="card-body">
+              <div class="mood-chart" id="moodChart"></div>
+            </div>
+          </div>
+
+          <!-- ═══ 3. STATS GRID ═══ -->
+          <div class="dna-card card-stats">
+            <div class="card-corner-bl"></div>
+            <div class="card-header">
+              <div class="card-title"><span class="card-title-icon">⊞</span>DESIGN PROFILE STATS</div>
+              <div style="font-family:var(--font-mono);font-size:9px;color:var(--text-dim);">Computed from 131 interactions</div>
+            </div>
+            <div class="card-body">
+              <div class="stats-grid" id="statsGrid"></div>
+            </div>
+          </div>
+
+          <!-- ═══ 4. TOP ELEMENTS ═══ -->
+          <div class="dna-card card-elements">
+            <div class="card-corner-bl"></div>
+            <div class="card-header">
+              <div class="card-title"><span class="card-title-icon">✦</span>TOP ELEMENTS</div>
+              <div style="font-family:var(--font-mono);font-size:9px;color:var(--text-dim);">Most used · rated</div>
+            </div>
+            <div class="card-body">
+              <div class="elements-list" id="elementsList"></div>
+            </div>
+          </div>
+
+          <!-- ═══ 5. DNA TIMELINE ═══ -->
+          <div class="dna-card card-timeline">
+            <div class="card-corner-bl"></div>
+            <div class="card-header">
+              <div class="card-title"><span class="card-title-icon">◈</span>DNA STRENGTH OVER TIME</div>
+              <div style="font-family:var(--font-mono);font-size:9px;color:var(--text-dim);">Last 12 weeks</div>
+            </div>
+            <div class="card-body">
+              <div class="timeline-wrap">
+                <div class="timeline-label">STRENGTH % · weekly snapshots</div>
+                <div class="timeline-canvas-wrap">
+                  <canvas id="timelineCanvas" height="120"></canvas>
+                </div>
+                <div class="timeline-xaxis" id="timelineXaxis"></div>
+                <div class="timeline-insight">
+                  <span class="insight-icon">◎</span>
+                  <span>Your taste is getting <strong style="color:var(--blue-bright);">clearer</strong> — DNA strength increased <strong style="color:#00cc66;">+34%</strong> over 12 weeks. Consistency score: <strong style="color:var(--blue-core);">high</strong>.</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- ═══ 6. RECOMMENDATIONS ═══ -->
+          <div class="dna-card card-reco">
+            <div class="card-corner-bl"></div>
+            <div class="card-header">
+              <div class="card-title"><span class="card-title-icon">◉</span>DNA RECOMMENDATIONS</div>
+              <div style="font-family:var(--font-mono);font-size:9px;color:var(--text-dim);">Based on your profile</div>
+            </div>
+            <div class="card-body">
+              <div class="reco-grid" id="recoGrid"></div>
+            </div>
+          </div>
+
+        </div><!-- /dna-grid -->
+      </div><!-- /dna-page -->
+    </main>
+  </div>
+</div>
+
+<script>
+/* ════ BG SYSTEM ════ */
+const canvas=document.getElementById('starCanvas'),ctx=canvas.getContext('2d');
+function resize(){canvas.width=window.innerWidth;canvas.height=window.innerHeight;}
+resize();window.addEventListener('resize',resize);
+const stars=Array.from({length:220},()=>({x:Math.random()*window.innerWidth,y:Math.random()*window.innerHeight,r:Math.random()*1.3,o:Math.random(),tw:Math.random()*Math.PI*2,sp:Math.random()*0.4+0.05}));
+function drawStars(){ctx.clearRect(0,0,canvas.width,canvas.height);stars.forEach(s=>{s.tw+=s.sp*0.018;const op=s.o*(0.35+0.65*Math.abs(Math.sin(s.tw)));ctx.beginPath();ctx.arc(s.x,s.y,s.r,0,Math.PI*2);ctx.fillStyle=`rgba(160,215,255,${op})`;ctx.fill();if(s.r>1.0){ctx.beginPath();ctx.arc(s.x,s.y,s.r*3.5,0,Math.PI*2);ctx.fillStyle=`rgba(0,160,255,${op*0.12})`;ctx.fill();}});requestAnimationFrame(drawStars);}
+drawStars();
+const sEl=document.getElementById('dataStreams');
+for(let i=0;i<20;i++){const e=document.createElement('div');e.className='data-stream';e.style.cssText=`left:${Math.random()*100}%;height:${Math.random()*130+50}px;animation-duration:${Math.random()*5+3}s;animation-delay:${Math.random()*10}s;`;sEl.appendChild(e);}
+const hEl=document.getElementById('hexParticles'),syms=['⬡','⬢','◈','◉','◎','⊞','✦'];
+for(let i=0;i<16;i++){const e=document.createElement('div');e.className='hex-particle';e.textContent=syms[Math.floor(Math.random()*syms.length)];e.style.cssText=`left:${Math.random()*100}%;bottom:-60px;font-size:${Math.random()*22+9}px;animation-duration:${Math.random()*22+14}s;animation-delay:${Math.random()*18}s;`;hEl.appendChild(e);}
+
+/* GLITCH */
+const glitchBars=document.getElementById('glitchBars'),appEl=document.getElementById('app');
+function triggerGlitch(i='low'){const c=i==='boot'?8:Math.floor(Math.random()*4)+2;for(let x=0;x<c;x++){const b=document.createElement('div');b.className='g-bar';const t=Math.random()*100,h=Math.random()*(i==='boot'?8:4)+1,tx=(Math.random()-0.5)*(i==='boot'?30:14),d=Math.random()*80+40,r=Math.random()>0.5;b.style.cssText=`top:${t}%;height:${h}px;background:rgba(${r?'0,210,255':'255,0,200'},${i==='boot'?0.12:0.07});transform:translateX(${tx}px) skewX(${(Math.random()-0.5)*2}deg);mix-blend-mode:screen;`;glitchBars.appendChild(b);let op=0,step=1/(d/16),dir=1,frame;(function a(){op+=step*dir;if(op>=1)dir=-1;if(op<=0&&dir===-1){b.remove();return;}b.style.opacity=op;frame=requestAnimationFrame(a);})();setTimeout(()=>{cancelAnimationFrame(frame);b.remove();},d+60);}if(Math.random()>0.5||i==='boot'){appEl.style.animation=`screenShake ${60+Math.random()*80}ms ease both`;setTimeout(()=>{appEl.style.animation='';},200);}}
+window.addEventListener('load',()=>{let n=0;const b=()=>{if(n++>5)return;triggerGlitch('boot');setTimeout(b,110);};setTimeout(b,500);});
+(function s(){setTimeout(()=>{triggerGlitch('low');s();},Math.random()*9000+5000);})();
+
+/* CURSOR */
+const cur=document.getElementById('cursor'),ring=document.getElementById('cursor-ring');
+let mx=0,my=0,rx=0,ry=0;
+document.addEventListener('mousemove',e=>{mx=e.clientX;my=e.clientY;cur.style.left=mx+'px';cur.style.top=my+'px';});
+(function a(){rx+=(mx-rx)*0.1;ry+=(my-ry)*0.1;ring.style.left=rx+'px';ring.style.top=ry+'px';requestAnimationFrame(a);})();
+document.querySelectorAll('a,button,.elem-row,.reco-btn,.provider-card,.nav-item').forEach(el=>{
+  el.addEventListener('mouseenter',()=>{ring.style.width='36px';ring.style.height='36px';ring.style.borderColor='rgba(0,212,255,0.7)';cur.style.transform='translate(-50%,-50%) scale(1.6)';});
+  el.addEventListener('mouseleave',()=>{ring.style.width='26px';ring.style.height='26px';ring.style.borderColor='rgba(0,170,255,0.5)';cur.style.transform='translate(-50%,-50%) scale(1)';});
+});
+document.querySelectorAll('.nav-item').forEach(item=>{
+  item.addEventListener('click',e=>{e.preventDefault();document.querySelectorAll('.nav-item').forEach(i=>i.classList.remove('active'));item.classList.add('active');document.getElementById('breadCrumb').textContent=item.querySelector('span:nth-child(2)').textContent.toLowerCase().replace(/\s+/g,'-');triggerGlitch('low');});
+});
+
+/* ════ DATA ════ */
+const MOODS = [
+  { name:'elegant',    pct:62, color:'#00d4ff' },
+  { name:'minimal',   pct:22, color:'#8ab8d8' },
+  { name:'futuristic',pct:11, color:'#c080ff' },
+  { name:'editorial', pct: 5, color:'#ffcc40' },
+  { name:'luxury',    pct: 0, color:'#ff9040' },
+];
+
+const STATS = [
+  { label:'Favorite Framework', value:'Tailwind', sub:'> CSS > Framer', type:'text', bars:[5,3,2] },
+  { label:'Favorite Context',   value:'hero',     sub:'> card > button', type:'text', bars:[5,3,1] },
+  { label:'Avg Animation Speed',value:'medium-slow', sub:'0.6–1.2s range', type:'text', bars:[1,4,5,3,1] },
+  { label:'Color Tendency',     value:'dark bg',  sub:'+ warm accent', type:'text', bars:null },
+  { label:'Total Approved',     value:'84',       sub:'elements in library', type:'big' },
+  { label:'Total Generations',  value:'47',       sub:'AI-generated', type:'big' },
+];
+
+const TOP_ELEMENTS = [
+  { name:'smooth-fade-rise',    cat:'animation', mood:'elegant',    stars:5, uses:14, preview:'@keyframes smoothFadeRise { 0% { opacity:0; transform:translateY(24px); }' },
+  { name:'neon-glow-pulse',     cat:'hover',     mood:'futuristic', stars:5, uses:11, preview:'.btn-neon:hover::after { box-shadow: 0 0 20px rgba(0,212,255,0.4); }' },
+  { name:'editorial-clip-reveal',cat:'animation',mood:'editorial',  stars:4, uses: 9, preview:'@keyframes clipReveal { from { clip-path: polygon(0 0,0 0,0 100%,0 100%); }' },
+  { name:'minimal-underline-hover',cat:'hover',  mood:'minimal',    stars:4, uses: 8, preview:'.link::after { width:0; transition: width 0.3s cubic-bezier(0.16,1,0.3,1); }' },
+  { name:'luxury-gold-shimmer', cat:'animation', mood:'luxury',     stars:4, uses: 7, preview:'background: linear-gradient(90deg, #b8860b, #ffd700, #fffacd, #ffd700);' },
+];
+
+const RECO = [
+  {
+    type:'missing', typeLabel:'⚠ MISSING IN YOUR DNA',
+    text:'You\'ve never generated a <strong>gradient</strong> in <strong>futuristic mood</strong>. Your profile suggests this would be a strong match.',
+    ctas:[{label:'✦ Generate Now',cls:'primary'},{label:'🌐 Fetch from Web',cls:'ghost'}]
+  },
+  {
+    type:'explore', typeLabel:'◎ EXPLORE THIS DIRECTION',
+    text:'Only <strong>5%</strong> of your elements are <strong>editorial</strong>. Based on your approval patterns, you likely enjoy bold type treatments.',
+    ctas:[{label:'✦ Generate Editorial',cls:'primary'},{label:'→ Browse Library',cls:'ghost'}]
+  },
+  {
+    type:'strength', typeLabel:'✓ YOUR CORE STRENGTH',
+    text:'<strong>Elegant animations</strong> are your signature. 62% of approvals confirm a clear editorial + luxury direction emerging.',
+    ctas:[{label:'◉ View DNA Details',cls:'ghost'},{label:'⬡ Explore Similar',cls:'ghost'}]
+  },
+];
+
+const TIMELINE_DATA = [22,28,31,38,42,47,51,58,63,68,73,78];
+const TIMELINE_LABELS = ['W1','W2','W3','W4','W5','W6','W7','W8','W9','W10','W11','W12'];
+
+/* ════ RENDER: MOOD CHART ════ */
+function buildMoodChart(){
+  const el = document.getElementById('moodChart');
+  el.innerHTML='';
+  MOODS.forEach(m=>{
+    const totalBlocks=20;
+    const filled=Math.round(m.pct/100*totalBlocks);
+    const blocks = '█'.repeat(filled) + '░'.repeat(totalBlocks-filled);
+
+    const row=document.createElement('div'); row.className='mood-row';
+    row.innerHTML=`
+      <div class="mood-row-header">
+        <span class="mood-name">
+          <span class="mood-dot" style="background:${m.color};box-shadow:0 0 6px ${m.color}40;"></span>
+          ${m.name}
+        </span>
+        <span class="mood-pct" style="color:${m.color};">${m.pct}%</span>
+      </div>
+      <div class="mood-track">
+        <div class="mood-fill" data-pct="${m.pct}" style="background:linear-gradient(90deg,${m.color}60,${m.color});box-shadow:0 0 8px ${m.color}40;"></div>
+      </div>
+      <div class="mood-blocks">
+        <span class="mood-block-filled" style="color:${m.color};">${'█'.repeat(filled)}</span><span class="mood-block-empty">${'░'.repeat(totalBlocks-filled)}</span>
+        &nbsp;${m.pct}%
+      </div>
+    `;
+    el.appendChild(row);
+  });
+
+  // Animate bars after render
+  setTimeout(()=>{
+    document.querySelectorAll('.mood-fill[data-pct]').forEach(b=>{
+      b.style.width = b.dataset.pct + '%';
+    });
+  },300);
+}
+
+/* ════ RENDER: STATS GRID ════ */
+function buildStatsGrid(){
+  const el=document.getElementById('statsGrid');
+  el.innerHTML='';
+  STATS.forEach(s=>{
+    const cell=document.createElement('div'); cell.className='stat-cell';
+    let inner='';
+    if(s.type==='big'){
+      inner=`<div class="stat-cell-label">${s.label}</div>
+        <span class="stat-cell-big">${s.value}</span>
+        <div class="stat-cell-sub">${s.sub}</div>`;
+    } else {
+      const barsHTML = s.bars ? `<div class="stat-mini-bars">${s.bars.map((v,i)=>`<div class="stat-mini-bar${i===s.bars.indexOf(Math.max(...s.bars))?' top':''}" style="height:${(v/5*100)}%"></div>`).join('')}</div>` : '';
+      inner=`<div class="stat-cell-label">${s.label}</div>
+        <div class="stat-cell-value"><span class="primary">${s.value}</span><br><span class="secondary">${s.sub}</span></div>
+        ${barsHTML}`;
+    }
+    cell.innerHTML=inner;
+    el.appendChild(cell);
+  });
+}
+
+/* ════ RENDER: TOP ELEMENTS ════ */
+function buildElementsList(){
+  const el=document.getElementById('elementsList');
+  el.innerHTML='';
+  TOP_ELEMENTS.forEach((e,i)=>{
+    const stars = '★'.repeat(e.stars)+'☆'.repeat(5-e.stars);
+    const row=document.createElement('div'); row.className='elem-row';
+    row.innerHTML=`
+      <div class="elem-rank">${(i+1).toString().padStart(2,'0')}</div>
+      <div class="elem-info">
+        <div class="elem-row-name">${e.name}</div>
+        <div class="elem-row-meta">
+          <span class="elem-row-tag">${e.cat}</span>
+          <span class="elem-row-tag" style="color:var(--blue-dim);">·</span>
+          <span class="elem-row-tag">${e.mood}</span>
+        </div>
+        <div class="elem-code-preview">${e.preview}</div>
+      </div>
+      <div style="display:flex;flex-direction:column;align-items:flex-end;gap:4px;flex-shrink:0;">
+        <div class="elem-rating">${stars.split('').map((s,j)=>`<span class="elem-star${j<e.stars?' lit':''}">${s}</span>`).join('')}</div>
+        <div class="elem-uses">${e.uses}× used</div>
+      </div>
+    `;
+    el.appendChild(row);
+  });
+}
+
+/* ════ RENDER: TIMELINE CANVAS ════ */
+function buildTimeline(){
+  const cvs=document.getElementById('timelineCanvas');
+  const cw=cvs.parentElement.offsetWidth; cvs.width=cw; cvs.height=120;
+  const c=cvs.getContext('2d');
+  const pad={t:12,r:12,b:12,l:36};
+  const w=cw-pad.l-pad.r, h=120-pad.t-pad.b;
+  const pts=TIMELINE_DATA;
+  const minY=0,maxY=100;
+
+  // grid lines
+  [25,50,75,100].forEach(v=>{
+    const y=pad.t+h-(v/maxY)*h;
+    c.beginPath(); c.moveTo(pad.l,y); c.lineTo(pad.l+w,y);
+    c.strokeStyle=`rgba(0,80,160,${v===50?0.15:0.07})`; c.lineWidth=1; c.stroke();
+    c.font='8px JetBrains Mono,monospace'; c.fillStyle='rgba(0,80,160,0.5)';
+    c.fillText(v+'%',2,y+3);
+  });
+
+  // build coords
+  const coords=pts.map((v,i)=>({
+    x: pad.l + (i/(pts.length-1))*w,
+    y: pad.t + h - ((v-minY)/(maxY-minY))*h
+  }));
+
+  // gradient fill
+  const grad=c.createLinearGradient(0,pad.t,0,pad.t+h);
+  grad.addColorStop(0,'rgba(0,170,255,0.25)');
+  grad.addColorStop(1,'rgba(0,100,255,0)');
+  c.beginPath();
+  c.moveTo(coords[0].x, pad.t+h);
+  coords.forEach(p=>c.lineTo(p.x,p.y));
+  c.lineTo(coords[coords.length-1].x, pad.t+h);
+  c.closePath();
+  c.fillStyle=grad; c.fill();
+
+  // line
+  c.beginPath();
+  coords.forEach((p,i)=>{ if(i===0)c.moveTo(p.x,p.y); else c.lineTo(p.x,p.y); });
+  c.strokeStyle='#00aaff'; c.lineWidth=2;
+  c.shadowColor='rgba(0,170,255,0.6)'; c.shadowBlur=8;
+  c.stroke(); c.shadowBlur=0;
+
+  // dots
+  coords.forEach((p,i)=>{
+    const isLast=i===coords.length-1;
+    c.beginPath(); c.arc(p.x,p.y,isLast?5:3,0,Math.PI*2);
+    c.fillStyle=isLast?'#00d4ff':'rgba(0,170,255,0.7)';
+    if(isLast){c.shadowColor='rgba(0,212,255,0.8)';c.shadowBlur=10;}
+    c.fill(); c.shadowBlur=0;
+    // value label on last
+    if(isLast){
+      c.font='bold 10px Orbitron,monospace'; c.fillStyle='#00d4ff';
+      c.fillText(pts[i]+'%', p.x+7, p.y+4);
+    }
+  });
+
+  // x-axis
+  const xAxis=document.getElementById('timelineXaxis'); xAxis.innerHTML='';
+  TIMELINE_LABELS.forEach(l=>{
+    const s=document.createElement('span'); s.className='timeline-x-label'; s.textContent=l;
+    xAxis.appendChild(s);
+  });
+}
+
+/* ════ RENDER: RECO ════ */
+function buildReco(){
+  const el=document.getElementById('recoGrid'); el.innerHTML='';
+  RECO.forEach(r=>{
+    const item=document.createElement('div'); item.className=`reco-item ${r.type}`;
+    item.innerHTML=`
+      <div class="reco-type ${r.type}"><span class="reco-type-dot"></span>${r.typeLabel}</div>
+      <div class="reco-text">${r.text}</div>
+      <div class="reco-btns">${r.ctas.map(c=>`<button class="reco-btn ${c.cls}">${c.label}</button>`).join('')}</div>
+    `;
+    el.appendChild(item);
+  });
+}
+
+/* ════ RE-ANALYZE ════ */
+const raLogs=[
+  'Loading 84 elements + 47 generations...',
+  'Parsing mood distributions...',
+  'Identifying pattern clusters...',
+  'Running aesthetic fingerprint model...',
+  'Computing DNA strength vector...',
+  'Cross-referencing with trend database...',
+  'Generating recommendations...',
+  'Analysis complete ✓',
+];
+document.getElementById('reanalyzeBtn').addEventListener('click',function(){
+  const overlay=document.getElementById('raOverlay');
+  overlay.classList.add('visible');
+  this.classList.add('running');
+  document.getElementById('raBtnText').textContent='ANALYZING...';
+  const logEl=document.getElementById('raLog');
+  let step=0;
+  const run=()=>{
+    if(step>=raLogs.length){
+      setTimeout(()=>{
+        overlay.classList.remove('visible');
+        this.classList.remove('running');
+        document.getElementById('raBtnText').textContent='◉ RE-ANALYZE';
+        // Animate strength bar again
+        document.getElementById('strengthFill').style.width='0%';
+        setTimeout(()=>{ document.getElementById('strengthFill').style.width='78%'; },100);
+        triggerGlitch('low');
+      },400);
+      return;
+    }
+    logEl.textContent=raLogs[step++];
+    setTimeout(run, step===raLogs.length?600:500);
+  };
+  run();
+});
+
+/* ════ INIT ════ */
+buildMoodChart();
+buildStatsGrid();
+buildElementsList();
+buildReco();
+
+// Animate strength bar on load
+window.addEventListener('load',()=>{
+  setTimeout(()=>{
+    document.getElementById('strengthFill').style.width='78%';
+  },600);
+  setTimeout(buildTimeline,400);
+});
+window.addEventListener('resize',()=>{ setTimeout(buildTimeline,100); });
+</script>
+</body>
+</html>

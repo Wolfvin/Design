@@ -1,0 +1,1157 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>FectTral – Project Manager</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;600;700;900&family=Exo+2:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html, body { height: 100%; overflow: hidden; }
+
+:root {
+  --bg-void:       #020408;
+  --bg-deep:       #050912;
+  --bg-panel:      #0a1428;
+  --bg-card:       #0d1a32;
+  --blue-core:     #00aaff;
+  --blue-bright:   #00d4ff;
+  --blue-electric: #0066ff;
+  --blue-dim:      #003a8c;
+  --glow-sm:   0 0 8px rgba(0,170,255,0.4);
+  --glow-md:   0 0 16px rgba(0,170,255,0.5), 0 0 32px rgba(0,102,255,0.2);
+  --glow-text: 0 0 10px rgba(0,212,255,0.8), 0 0 20px rgba(0,170,255,0.4);
+  --border-dim:    rgba(0,140,255,0.10);
+  --border-mid:    rgba(0,170,255,0.22);
+  --text-primary:  #e8f4ff;
+  --text-secondary:#8ab8d8;
+  --text-muted:    #3a5a78;
+  --text-dim:      #1a3050;
+  --font-display: 'Orbitron', monospace;
+  --font-body:    'Exo 2', sans-serif;
+  --font-mono:    'JetBrains Mono', monospace;
+  --sidebar-w: 220px;
+  --topbar-h:  48px;
+}
+
+body { font-family:var(--font-body);background:var(--bg-void);color:var(--text-primary);display:flex;flex-direction:column;height:100vh;cursor:none;overflow:hidden; }
+
+/* ═══ BG ═══ */
+.bg-root { position:fixed;inset:0;z-index:0;overflow:hidden; }
+.bg-space { position:absolute;inset:0;background:radial-gradient(ellipse at 20% 80%,rgba(0,40,120,0.6) 0%,transparent 45%),radial-gradient(ellipse at 80% 10%,rgba(0,20,80,0.5) 0%,transparent 40%),radial-gradient(ellipse at 50% 50%,rgba(0,10,40,0.4) 0%,transparent 65%),#020408; }
+.bg-grid { position:absolute;inset:0;background-image:radial-gradient(circle,rgba(0,130,255,0.18) 1px,transparent 1px);background-size:36px 36px;animation:gridDrift 60s linear infinite;mask-image:radial-gradient(ellipse 80% 80% at center,black 30%,transparent 80%); }
+@keyframes gridDrift{from{background-position:0 0}to{background-position:36px 36px}}
+.bg-floor { position:absolute;bottom:0;left:0;right:0;height:55%;background-image:linear-gradient(rgba(0,100,255,0.07) 1px,transparent 1px),linear-gradient(90deg,rgba(0,100,255,0.07) 1px,transparent 1px);background-size:70px 35px;transform:perspective(500px) rotateX(65deg);transform-origin:bottom center;mask-image:linear-gradient(to bottom,transparent 0%,black 50%);animation:floorScroll 20s linear infinite; }
+@keyframes floorScroll{from{background-position:0 0}to{background-position:0 35px}}
+.bg-hex-giant { position:absolute;width:850px;height:850px;top:50%;left:50%;transform:translate(-50%,-50%);animation:slowRotate 150s linear infinite;opacity:0.035;pointer-events:none; }
+.bg-hex-giant svg{width:100%;height:100%}
+@keyframes slowRotate{from{transform:translate(-50%,-50%) rotate(0deg)}to{transform:translate(-50%,-50%) rotate(360deg)}}
+.orb{position:absolute;border-radius:50%;filter:blur(90px);pointer-events:none}
+.orb-1{width:680px;height:680px;background:radial-gradient(circle,rgba(0,50,180,0.55) 0%,transparent 70%);top:-220px;left:-180px;animation:orb1 28s ease-in-out infinite}
+.orb-2{width:480px;height:480px;background:radial-gradient(circle,rgba(0,110,255,0.45) 0%,transparent 70%);bottom:-120px;right:-120px;animation:orb2 32s ease-in-out infinite}
+.orb-3{width:320px;height:320px;background:radial-gradient(circle,rgba(0,180,255,0.22) 0%,transparent 70%);top:35%;left:40%;animation:orb3 22s ease-in-out infinite}
+@keyframes orb1{0%,100%{transform:translate(0,0) scale(1)}33%{transform:translate(50px,70px) scale(1.08)}66%{transform:translate(-25px,35px) scale(0.95)}}
+@keyframes orb2{0%,100%{transform:translate(0,0)}50%{transform:translate(-70px,-55px)}}
+@keyframes orb3{0%,100%{transform:translate(0,0) scale(1)}50%{transform:translate(25px,-45px) scale(1.25)}}
+.data-stream{position:absolute;width:1px;background:linear-gradient(to bottom,transparent 0%,rgba(0,170,255,0.7) 50%,transparent 100%);animation:streamFall linear infinite;pointer-events:none}
+@keyframes streamFall{0%{transform:translateY(-200px);opacity:0}10%{opacity:1}85%{opacity:0.6}100%{transform:translateY(110vh);opacity:0}}
+.hex-particle{position:absolute;color:rgba(0,150,255,0.35);text-shadow:0 0 10px rgba(0,170,255,0.5);animation:hexFloat linear infinite;pointer-events:none}
+@keyframes hexFloat{0%{transform:translateY(110vh) rotate(0deg);opacity:0}8%{opacity:0.7}92%{opacity:0.2}100%{transform:translateY(-10vh) rotate(200deg);opacity:0}}
+.scan-beam{position:absolute;left:0;right:0;height:2px;background:linear-gradient(90deg,transparent 0%,rgba(0,150,255,0.08) 20%,rgba(0,212,255,0.35) 50%,rgba(0,150,255,0.08) 80%,transparent 100%);animation:beamSweep 10s linear infinite;pointer-events:none}
+@keyframes beamSweep{from{top:-2px}to{top:100%}}
+.scanlines{position:absolute;inset:0;pointer-events:none;background:repeating-linear-gradient(0deg,transparent,transparent 3px,rgba(0,0,0,0.06) 3px,rgba(0,0,0,0.06) 4px)}
+.vignette{position:absolute;inset:0;pointer-events:none;background:radial-gradient(ellipse at center,transparent 45%,rgba(0,0,0,0.75) 100%)}
+
+/* ═══ GLITCH ═══ */
+.glitch-text{position:relative;display:inline-block}
+.glitch-text::before,.glitch-text::after{content:attr(data-text);position:absolute;top:0;left:0;width:100%;height:100%;font-family:inherit;font-size:inherit;font-weight:inherit;letter-spacing:inherit}
+.glitch-text::before{color:#00ffee;animation:gBefore 7s infinite;clip-path:polygon(0 20%,100% 20%,100% 40%,0 40%)}
+.glitch-text::after{color:#ff00cc;animation:gAfter 7s infinite;clip-path:polygon(0 65%,100% 65%,100% 80%,0 80%)}
+@keyframes gBefore{0%,93%,100%{transform:translateX(0);opacity:0}94%{transform:translateX(-4px);opacity:0.9}95%{transform:translateX(3px);opacity:0.7}96%{transform:translateX(-2px);opacity:0.8}97%{transform:translateX(0);opacity:0}}
+@keyframes gAfter{0%,92%,100%{transform:translateX(0);opacity:0}93%{transform:translateX(4px);opacity:0.8}94%{transform:translateX(-3px);opacity:0.6}95%{transform:translateX(2px);opacity:0.7}96%{transform:translateX(0);opacity:0}}
+.glitch-bars{position:fixed;inset:0;z-index:999;pointer-events:none;overflow:hidden}
+.g-bar{position:absolute;left:0;right:0;opacity:0}
+@keyframes screenShake{0%,100%{transform:translate(0,0) skewX(0deg);filter:none}20%{transform:translate(-3px,1px) skewX(-0.4deg);filter:hue-rotate(80deg) brightness(1.15)}40%{transform:translate(3px,-1px) skewX(0.4deg);filter:hue-rotate(-80deg)}60%{transform:translate(-2px,0px);filter:brightness(1.3) saturate(1.5)}80%{transform:translate(2px,1px) skewX(0.2deg);filter:none}}
+
+/* ═══ APP SHELL ═══ */
+.app{position:relative;z-index:2;display:flex;flex-direction:column;height:100vh}
+
+/* TOPBAR */
+.topbar{height:var(--topbar-h);display:flex;align-items:center;justify-content:space-between;padding:0 20px 0 0;border-bottom:1px solid var(--border-dim);background:linear-gradient(90deg,rgba(4,8,16,0.98) 0%,rgba(7,13,25,0.96) 100%);backdrop-filter:blur(30px);flex-shrink:0;position:relative;overflow:hidden}
+.topbar::after{content:'';position:absolute;bottom:0;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent 0%,rgba(0,150,255,0.25) 25%,rgba(0,212,255,0.7) 50%,rgba(0,150,255,0.25) 75%,transparent 100%);animation:barGlow 5s ease-in-out infinite}
+@keyframes barGlow{0%,100%{opacity:0.5}50%{opacity:1}}
+.topbar-logo{width:var(--sidebar-w);display:flex;align-items:center;gap:10px;padding:0 18px;border-right:1px solid var(--border-dim);height:100%}
+.logo-hex{width:28px;height:28px;flex-shrink:0;animation:hexGlow 4s ease-in-out infinite}
+.logo-hex svg{width:100%;height:100%}
+@keyframes hexGlow{0%,100%{filter:drop-shadow(0 0 6px rgba(0,170,255,0.7))}50%{filter:drop-shadow(0 0 18px rgba(0,212,255,1)) drop-shadow(0 0 35px rgba(0,80,255,0.5))}}
+.logo-text{font-family:var(--font-display);line-height:1}
+.logo-name{font-size:13px;font-weight:700;letter-spacing:0.12em;color:var(--blue-bright);text-shadow:var(--glow-text)}
+.logo-sub{display:block;font-size:7px;font-weight:400;letter-spacing:0.38em;color:var(--text-muted);margin-top:3px}
+.topbar-center{flex:1;display:flex;align-items:center;padding:0 24px;gap:12px}
+.breadcrumb{display:flex;align-items:center;gap:6px;font-family:var(--font-mono);font-size:11px;color:var(--text-muted)}
+.breadcrumb .sep{color:var(--blue-dim)}
+.breadcrumb .current{color:var(--blue-core);text-shadow:0 0 8px rgba(0,170,255,0.5)}
+.ctx-pill{display:flex;align-items:center;gap:6px;padding:3px 10px;border:1px solid var(--border-dim);border-radius:2px;font-family:var(--font-mono);font-size:10px;color:var(--text-muted);background:rgba(0,40,100,0.2)}
+.ctx-pill .dot{width:5px;height:5px;border-radius:50%;background:var(--blue-core);box-shadow:0 0 6px var(--blue-core);animation:blink 2s ease-in-out infinite}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:0.15}}
+.topbar-right{display:flex;align-items:center;gap:10px}
+.ai-pill{display:flex;align-items:center;gap:7px;padding:5px 12px;border:1px solid rgba(0,200,100,0.2);border-radius:2px;background:rgba(0,25,12,0.5);font-family:var(--font-mono);font-size:10px;color:#00cc66;cursor:pointer;transition:all 0.2s}
+.ai-pill:hover{border-color:rgba(0,200,100,0.4);box-shadow:0 0 10px rgba(0,200,100,0.15)}
+.ai-pill .pulse{width:6px;height:6px;border-radius:50%;background:#00cc66;box-shadow:0 0 8px #00cc66;animation:pDot 1.5s ease-in-out infinite}
+@keyframes pDot{0%,100%{transform:scale(1);opacity:1}50%{transform:scale(1.5);opacity:0.5}}
+.icon-btn{width:30px;height:30px;display:flex;align-items:center;justify-content:center;border:1px solid var(--border-dim);border-radius:2px;background:transparent;color:var(--text-muted);cursor:pointer;transition:all 0.2s;font-size:14px}
+.icon-btn:hover{border-color:var(--border-mid);color:var(--blue-bright);box-shadow:var(--glow-sm)}
+
+/* LAYOUT */
+.main-layout{display:flex;flex:1;overflow:hidden}
+
+/* SIDEBAR */
+.sidebar{width:var(--sidebar-w);flex-shrink:0;display:flex;flex-direction:column;border-right:1px solid var(--border-dim);background:linear-gradient(180deg,rgba(4,8,18,0.97) 0%,rgba(2,4,10,0.99) 100%);backdrop-filter:blur(40px);padding:12px 0;overflow-y:auto;overflow-x:hidden;position:relative}
+.sidebar::after{content:'';position:absolute;top:0;right:0;bottom:0;width:1px;background:linear-gradient(180deg,transparent 0%,rgba(0,100,255,0.15) 25%,rgba(0,170,255,0.45) 50%,rgba(0,100,255,0.15) 75%,transparent 100%);animation:sideGlow 6s ease-in-out infinite}
+@keyframes sideGlow{0%,100%{opacity:0.5}50%{opacity:1}}
+.nav-section{margin-bottom:2px}
+.nav-label{padding:8px 16px 4px;font-family:var(--font-mono);font-size:9px;letter-spacing:0.3em;color:var(--text-dim);text-transform:uppercase}
+.nav-item{position:relative;display:flex;align-items:center;gap:10px;padding:9px 16px;margin:1px 8px;border-radius:3px;cursor:pointer;font-size:12px;font-weight:500;letter-spacing:0.04em;color:var(--text-muted);transition:all 0.25s;border:1px solid transparent;text-decoration:none;overflow:hidden}
+.nav-item::before{content:'';position:absolute;inset:0;background:linear-gradient(90deg,transparent 0%,rgba(0,140,255,0.07) 50%,transparent 100%);transform:translateX(-100%);transition:transform 0.5s ease}
+.nav-item:hover::before{transform:translateX(100%)}
+.nav-item:hover{color:var(--text-secondary);background:rgba(0,70,150,0.1);border-color:var(--border-dim)}
+.nav-item.active{color:var(--blue-bright);background:linear-gradient(90deg,rgba(0,90,220,0.16) 0%,rgba(0,50,130,0.06) 100%);border-color:rgba(0,160,255,0.18);text-shadow:0 0 8px rgba(0,170,255,0.5)}
+.nav-item.active::after{content:'';position:absolute;left:-8px;top:50%;transform:translateY(-50%);width:3px;height:55%;background:linear-gradient(180deg,var(--blue-bright),var(--blue-electric));border-radius:0 2px 2px 0;box-shadow:0 0 10px var(--blue-bright),0 0 22px rgba(0,160,255,0.4)}
+.nav-icon{width:16px;display:flex;align-items:center;justify-content:center;font-size:13px;flex-shrink:0}
+.nav-badge{margin-left:auto;background:rgba(0,70,170,0.3);border:1px solid rgba(0,140,255,0.22);border-radius:2px;padding:1px 5px;font-family:var(--font-mono);font-size:9px;color:var(--blue-core);min-width:18px;text-align:center}
+.nav-badge.red{background:rgba(170,0,40,0.25);border-color:rgba(255,50,90,0.3);color:#ff5580;animation:redBlink 2s ease-in-out infinite}
+@keyframes redBlink{0%,100%{box-shadow:none}50%{box-shadow:0 0 8px rgba(255,50,100,0.5)}}
+.nav-divider{height:1px;margin:8px 16px;background:linear-gradient(90deg,transparent,var(--border-dim),transparent)}
+.sidebar-footer{margin-top:auto;padding:10px 8px 4px;border-top:1px solid var(--border-dim)}
+.lib-stats{display:flex;align-items:center;justify-content:space-between;padding:6px 10px 10px}
+.stat-item{text-align:center}
+.stat-num{font-family:var(--font-display);font-size:16px;font-weight:700;color:var(--blue-bright);text-shadow:var(--glow-text);display:block}
+.stat-lbl{font-family:var(--font-mono);font-size:8px;letter-spacing:0.14em;color:var(--text-dim);text-transform:uppercase}
+.stat-sep{width:1px;height:26px;background:var(--border-dim)}
+.provider-card{padding:10px 12px;border:1px solid var(--border-dim);border-radius:3px;background:var(--bg-card);cursor:pointer;transition:all 0.25s;position:relative;overflow:hidden}
+.provider-card::before{content:'';position:absolute;top:0;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent,rgba(0,170,255,0.45),transparent);opacity:0;transition:opacity 0.3s}
+.provider-card:hover::before{opacity:1}
+.provider-card:hover{border-color:var(--border-mid);box-shadow:var(--glow-sm)}
+.prov-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:5px}
+.prov-label{font-family:var(--font-mono);font-size:9px;letter-spacing:0.2em;color:var(--text-dim)}
+.prov-status{display:flex;align-items:center;gap:4px;font-family:var(--font-mono);font-size:9px;color:#00cc66}
+.prov-status .dot{width:5px;height:5px;border-radius:50%;background:#00cc66;box-shadow:0 0 6px #00cc66}
+.prov-name{font-family:var(--font-display);font-size:10px;font-weight:600;color:var(--blue-core);letter-spacing:0.1em}
+.prov-model{font-family:var(--font-mono);font-size:9px;color:var(--text-muted);margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+
+/* CONTENT */
+.content{flex:1;overflow-y:auto;overflow-x:hidden;position:relative}
+
+/* ═══════════════════════════════
+   PROJECT MANAGER PAGE
+═══════════════════════════════ */
+.pm-page { min-height:100%; }
+
+/* ── PAGE HEADER ── */
+.pm-header {
+  padding: 18px 28px 14px;
+  border-bottom: 1px solid var(--border-dim);
+  background: linear-gradient(180deg,rgba(0,8,24,0.7) 0%,transparent 100%);
+  display: flex; align-items: flex-end; justify-content: space-between;
+  position: sticky; top: 0; z-index: 40;
+  backdrop-filter: blur(20px);
+}
+.pmh-left {}
+.pmh-eyebrow { font-family:var(--font-mono);font-size:9px;letter-spacing:0.35em;color:var(--text-dim);text-transform:uppercase;margin-bottom:5px }
+.pmh-title { font-family:var(--font-display);font-size:20px;font-weight:900;letter-spacing:0.14em;color:var(--blue-bright);text-shadow:var(--glow-text);line-height:1 }
+.pmh-ctx { margin-top:6px;display:flex;align-items:center;gap:6px;font-family:var(--font-mono);font-size:10px;color:var(--text-muted) }
+.pmh-ctx-badge { padding:3px 9px;border:1px solid rgba(0,200,100,0.3);border-radius:2px;background:rgba(0,60,30,0.2);color:#00cc88;font-family:var(--font-mono);font-size:9px;letter-spacing:0.1em }
+.pmh-right { display:flex;align-items:center;gap:8px }
+.pmh-total-badge {
+  padding: 7px 16px; border-radius: 3px;
+  border: 1px solid rgba(0,170,255,0.3);
+  background: rgba(0,40,120,0.18);
+  font-family:var(--font-display);font-size:11px;font-weight:700;
+  color:var(--blue-bright);letter-spacing:0.1em;
+  display:flex;align-items:center;gap:8px;
+}
+.pmh-total-num { font-size:20px;text-shadow:var(--glow-text) }
+
+/* ── PAGE BODY ── */
+.pm-body { display:flex; gap:0; height:calc(100vh - 48px - 74px); overflow:hidden; }
+
+/* LEFT COLUMN */
+.pm-left { width:320px;flex-shrink:0;border-right:1px solid var(--border-dim);overflow-y:auto;display:flex;flex-direction:column;gap:0 }
+
+/* RIGHT COLUMN */
+.pm-right { flex:1;overflow-y:auto;display:flex;flex-direction:column }
+
+/* ── SECTION SHELL ── */
+.pm-section { border-bottom:1px solid var(--border-dim); }
+.pms-header {
+  padding:14px 18px 10px;
+  display:flex;align-items:center;justify-content:space-between;cursor:pointer;
+  user-select:none;
+}
+.pms-header-left { display:flex;align-items:center;gap:8px }
+.pms-icon { font-size:12px;color:var(--text-dim) }
+.pms-title { font-family:var(--font-mono);font-size:9px;letter-spacing:0.28em;color:var(--text-muted);text-transform:uppercase }
+.pms-count { font-family:var(--font-mono);font-size:9px;color:var(--text-dim) }
+.pms-chevron { font-size:10px;color:var(--text-dim);transition:transform 0.3s }
+.pm-section.open .pms-chevron { transform:rotate(90deg) }
+.pms-body { overflow:hidden;max-height:0;transition:max-height 0.4s ease }
+.pm-section.open .pms-body { max-height:2000px }
+
+/* ═══ SECTION 1 — ACTIVE CONTEXT ═══ */
+.ctx-section { padding:0 18px 16px }
+
+/* Active context indicator row */
+.active-ctx-row {
+  display:flex;align-items:center;gap:8px;padding:10px 12px;
+  border:1px solid rgba(0,200,100,0.25);border-radius:3px;
+  background:rgba(0,40,20,0.3);margin-bottom:14px;
+}
+.acr-dot { width:7px;height:7px;border-radius:50%;background:#00ff88;box-shadow:0 0 10px #00ff88;animation:ctxPulse 2s ease-in-out infinite;flex-shrink:0 }
+@keyframes ctxPulse{0%,100%{box-shadow:0 0 6px #00cc66}50%{box-shadow:0 0 18px #00ff88,0 0 30px rgba(0,200,100,0.3)}}
+.acr-text { font-family:var(--font-mono);font-size:10px;color:#00cc88;flex:1 }
+.acr-edit { font-family:var(--font-mono);font-size:8px;color:var(--text-dim);cursor:pointer;transition:color 0.2s;padding:2px 6px;border:1px solid transparent;border-radius:2px }
+.acr-edit:hover { color:var(--blue-core);border-color:var(--border-dim) }
+
+/* Layer stack diagram */
+.layer-stack { display:flex;flex-direction:column;gap:0;position:relative }
+.layer-connector { width:2px;height:8px;background:var(--border-dim);margin-left:17px }
+.layer-row {
+  display:flex;align-items:center;gap:10px;padding:9px 12px;
+  border:1px solid var(--border-dim);border-radius:3px;
+  background:rgba(5,10,22,0.7);transition:all 0.25s;
+  position:relative;overflow:hidden;
+}
+.layer-row::before { content:'';position:absolute;top:0;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent,var(--layer-color,rgba(0,170,255,0.3)),transparent);opacity:0;transition:opacity 0.3s }
+.layer-row:hover::before { opacity:1 }
+.layer-row.active { border-color:var(--layer-border,rgba(0,170,255,0.3));background:var(--layer-bg,rgba(0,40,100,0.15)) }
+.layer-row.inactive { opacity:0.45 }
+.layer-num {
+  width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;
+  font-family:var(--font-display);font-size:10px;font-weight:700;flex-shrink:0;
+  border:1px solid;
+}
+.layer-row.l1 .layer-num { color:#00cc88;border-color:rgba(0,180,100,0.4);background:rgba(0,80,40,0.3) }
+.layer-row.l2 .layer-num { color:var(--blue-bright);border-color:rgba(0,150,255,0.3);background:rgba(0,50,150,0.2) }
+.layer-row.l3 .layer-num { color:#cc80ff;border-color:rgba(170,0,255,0.3);background:rgba(80,0,200,0.15) }
+.layer-info { flex:1 }
+.layer-name { font-family:var(--font-mono);font-size:10px;color:var(--text-secondary);letter-spacing:0.06em }
+.layer-sub { font-family:var(--font-mono);font-size:8px;color:var(--text-dim);margin-top:2px }
+.layer-status { display:flex;align-items:center;gap:5px }
+.layer-active-tag { font-family:var(--font-mono);font-size:8px;padding:2px 6px;border-radius:2px;letter-spacing:0.1em }
+.layer-active-tag.on  { color:#00cc88;background:rgba(0,80,40,0.25);border:1px solid rgba(0,180,80,0.25) }
+.layer-active-tag.off { color:var(--text-dim);background:rgba(10,20,40,0.4);border:1px solid var(--border-dim) }
+.layer-count { font-family:var(--font-mono);font-size:9px;color:var(--text-muted);min-width:44px;text-align:right }
+.layer-switch-btn {
+  font-family:var(--font-mono);font-size:8px;padding:3px 8px;border-radius:2px;cursor:pointer;
+  border:1px solid var(--border-dim);color:var(--text-dim);background:transparent;transition:all 0.2s;
+  white-space:nowrap;
+}
+.layer-switch-btn:hover { border-color:var(--border-mid);color:var(--blue-core) }
+.layer-switch-btn.active { border-color:rgba(0,200,100,0.35);color:#00cc88;background:rgba(0,60,30,0.2) }
+
+/* Quick switch row */
+.quick-switch { margin-top:12px;display:flex;gap:6px }
+.qs-btn {
+  flex:1;padding:7px 4px;text-align:center;font-family:var(--font-mono);font-size:8px;
+  letter-spacing:0.12em;border:1px solid var(--border-dim);border-radius:2px;
+  color:var(--text-dim);cursor:pointer;transition:all 0.2s;background:transparent;text-transform:uppercase;
+}
+.qs-btn:hover { border-color:var(--border-mid);color:var(--text-muted) }
+.qs-btn.preset-active { border-color:rgba(0,170,255,0.3);color:var(--blue-core);background:rgba(0,60,150,0.12) }
+
+/* ═══ SECTION 2 — DOMAIN LIBRARY ═══ */
+.domain-grid { display:grid;grid-template-columns:1fr 1fr;gap:8px;padding:0 18px 16px }
+.domain-card {
+  border:1px solid var(--border-dim);border-radius:3px;
+  background:rgba(5,10,22,0.6);padding:11px 12px;
+  transition:all 0.25s;position:relative;overflow:hidden;cursor:pointer;
+}
+.domain-card::before { content:'';position:absolute;top:0;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent,rgba(0,170,255,0.3),transparent);opacity:0;transition:opacity 0.3s }
+.domain-card:hover::before { opacity:1 }
+.domain-card:hover { border-color:var(--border-mid);box-shadow:var(--glow-sm) }
+.domain-card.domain-active { border-color:rgba(0,180,255,0.35);background:rgba(0,40,120,0.18) }
+.dc-top { display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:8px }
+.dc-icon { font-size:18px;line-height:1 }
+.dc-toggle { position:relative;width:26px;height:14px;flex-shrink:0 }
+.dc-toggle input { opacity:0;width:0;height:0;position:absolute }
+.dc-slider { position:absolute;inset:0;border-radius:7px;background:rgba(0,30,80,0.6);border:1px solid var(--border-dim);cursor:pointer;transition:all 0.25s }
+.dc-slider::after { content:'';position:absolute;width:10px;height:10px;border-radius:50%;background:var(--text-dim);top:1px;left:1px;transition:all 0.25s }
+.dc-toggle input:checked + .dc-slider { background:rgba(0,80,200,0.35);border-color:rgba(0,150,255,0.4);box-shadow:0 0 8px rgba(0,150,255,0.2) }
+.dc-toggle input:checked + .dc-slider::after { transform:translateX(12px);background:var(--blue-bright);box-shadow:0 0 6px var(--blue-bright) }
+.dc-name { font-family:var(--font-mono);font-size:10px;color:var(--text-secondary);letter-spacing:0.08em }
+.dc-count { font-family:var(--font-mono);font-size:8px;color:var(--text-dim);margin-top:1px }
+.dc-add-btn {
+  width:100%;margin-top:8px;padding:5px;text-align:center;
+  font-family:var(--font-mono);font-size:8px;letter-spacing:0.14em;
+  border:1px solid var(--border-dim);border-radius:2px;
+  color:var(--text-dim);cursor:pointer;transition:all 0.2s;background:transparent;
+}
+.dc-add-btn:hover { border-color:rgba(0,170,255,0.3);color:var(--blue-core);background:rgba(0,50,150,0.1) }
+
+/* ═══ RIGHT COLUMN SECTIONS ═══ */
+
+/* ── SECTION 3 — PROJECTS ── */
+.project-section { flex:1;display:flex;flex-direction:column;padding:18px 22px }
+.ps-header { display:flex;align-items:center;justify-content:space-between;margin-bottom:14px }
+.ps-title-row { display:flex;align-items:center;gap:8px }
+.ps-eyebrow { font-family:var(--font-mono);font-size:9px;letter-spacing:0.28em;color:var(--text-dim);text-transform:uppercase }
+.ps-count { font-family:var(--font-mono);font-size:9px;color:var(--text-muted) }
+.new-project-btn {
+  display:flex;align-items:center;gap:6px;padding:7px 14px;
+  background:linear-gradient(90deg,rgba(0,80,200,0.3),rgba(0,50,150,0.15));
+  border:1px solid rgba(0,150,255,0.35);border-radius:3px;
+  color:var(--blue-bright);font-family:var(--font-display);font-size:9px;
+  font-weight:700;letter-spacing:0.14em;cursor:pointer;transition:all 0.25s;
+  position:relative;overflow:hidden;
+}
+.new-project-btn::before { content:'';position:absolute;inset:0;background:linear-gradient(90deg,transparent,rgba(0,170,255,0.08),transparent);transform:translateX(-100%);transition:transform 0.5s }
+.new-project-btn:hover::before { transform:translateX(100%) }
+.new-project-btn:hover { border-color:var(--blue-bright);box-shadow:var(--glow-sm) }
+
+.project-list { display:flex;flex-direction:column;gap:8px }
+
+.project-row {
+  border:1px solid var(--border-dim);border-radius:3px;
+  background:rgba(5,10,22,0.65);padding:13px 14px;
+  display:flex;align-items:center;gap:12px;
+  transition:all 0.25s;position:relative;overflow:hidden;
+}
+.project-row::before { content:'';position:absolute;top:0;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent,rgba(0,170,255,0.25),transparent);opacity:0;transition:opacity 0.3s }
+.project-row:hover::before { opacity:1 }
+.project-row:hover { border-color:var(--border-mid) }
+.project-row.proj-active { border-color:rgba(170,0,255,0.3);background:rgba(60,0,150,0.12) }
+.project-row.proj-archived { opacity:0.4 }
+
+/* active left stripe */
+.proj-stripe { width:3px;height:36px;border-radius:2px;flex-shrink:0 }
+.proj-stripe.active { background:linear-gradient(180deg,#cc80ff,#8800ff);box-shadow:0 0 8px rgba(170,0,255,0.5) }
+.proj-stripe.inactive { background:var(--border-dim) }
+.proj-stripe.archived { background:rgba(20,30,50,0.5) }
+
+.proj-info { flex:1;min-width:0 }
+.proj-name { font-family:var(--font-mono);font-size:11px;color:var(--text-secondary);letter-spacing:0.06em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis }
+.proj-client { font-family:var(--font-body);font-size:10px;color:var(--text-muted);margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis }
+
+.proj-meta { display:flex;flex-direction:column;align-items:flex-end;gap:3px;flex-shrink:0 }
+.proj-elem-count { font-family:var(--font-mono);font-size:9px;color:var(--text-muted) }
+.proj-last { font-family:var(--font-mono);font-size:8px;color:var(--text-dim) }
+
+/* project toggle */
+.proj-toggle { position:relative;width:30px;height:16px;flex-shrink:0 }
+.proj-toggle input { opacity:0;width:0;height:0;position:absolute }
+.proj-tslider { position:absolute;inset:0;border-radius:8px;background:rgba(0,30,80,0.6);border:1px solid var(--border-dim);cursor:pointer;transition:all 0.25s }
+.proj-tslider::after { content:'';position:absolute;width:12px;height:12px;border-radius:50%;background:var(--text-dim);top:1px;left:1px;transition:all 0.25s }
+.proj-toggle input:checked + .proj-tslider { background:rgba(120,0,200,0.35);border-color:rgba(180,0,255,0.4);box-shadow:0 0 8px rgba(150,0,255,0.2) }
+.proj-toggle input:checked + .proj-tslider::after { transform:translateX(14px);background:#cc80ff;box-shadow:0 0 6px #cc80ff }
+
+.proj-actions { display:flex;align-items:center;gap:4px;flex-shrink:0 }
+.proj-act-btn {
+  width:26px;height:26px;display:flex;align-items:center;justify-content:center;
+  border:1px solid var(--border-dim);border-radius:2px;background:transparent;
+  color:var(--text-dim);cursor:pointer;transition:all 0.2s;font-size:11px;
+}
+.proj-act-btn:hover { border-color:var(--border-mid);color:var(--text-secondary) }
+.proj-act-btn.del:hover { border-color:rgba(255,60,60,0.35);color:#ff6060 }
+.proj-act-btn.arch:hover { border-color:rgba(255,180,0,0.3);color:#ffcc44 }
+
+/* ── NEW PROJECT FORM ── */
+.new-project-form {
+  display:none;border:1px solid rgba(0,170,255,0.25);border-radius:3px;
+  background:rgba(0,20,60,0.2);padding:14px;margin-bottom:8px;
+}
+.new-project-form.visible { display:block }
+.npf-row { display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:8px }
+.npf-field { display:flex;flex-direction:column;gap:4px }
+.npf-label { font-family:var(--font-mono);font-size:8px;letter-spacing:0.2em;color:var(--text-dim);text-transform:uppercase }
+.npf-input {
+  background:rgba(0,8,24,0.7);border:1px solid var(--border-dim);border-radius:2px;
+  padding:7px 10px;color:var(--text-primary);font-family:var(--font-mono);font-size:10px;
+  outline:none;transition:all 0.2s;
+}
+.npf-input::placeholder { color:var(--text-muted) }
+.npf-input:focus { border-color:var(--border-mid);box-shadow:var(--glow-sm) }
+.npf-actions { display:flex;gap:6px;justify-content:flex-end }
+.npf-btn { padding:6px 14px;border-radius:2px;font-family:var(--font-mono);font-size:9px;letter-spacing:0.12em;cursor:pointer;transition:all 0.2s }
+.npf-btn.primary { background:rgba(0,80,200,0.3);border:1px solid rgba(0,150,255,0.4);color:var(--blue-bright) }
+.npf-btn.primary:hover { box-shadow:var(--glow-sm) }
+.npf-btn.cancel { background:transparent;border:1px solid var(--border-dim);color:var(--text-muted) }
+.npf-btn.cancel:hover { border-color:var(--border-mid);color:var(--text-secondary) }
+
+/* ── SECTION 4 — LAYER PREVIEW ── */
+.layer-preview { border-top:1px solid var(--border-dim);padding:18px 22px;flex-shrink:0 }
+.lp-header { display:flex;align-items:center;justify-content:space-between;margin-bottom:14px }
+.lp-eyebrow { font-family:var(--font-mono);font-size:9px;letter-spacing:0.28em;color:var(--text-dim);text-transform:uppercase }
+.lp-total {
+  padding:8px 16px;border:1px solid rgba(0,200,255,0.3);border-radius:3px;
+  background:rgba(0,60,140,0.2);
+  font-family:var(--font-mono);font-size:11px;color:var(--text-secondary);
+  display:flex;align-items:center;gap:8px;
+}
+.lp-total-num { font-family:var(--font-display);font-size:22px;font-weight:900;color:var(--blue-bright);text-shadow:var(--glow-text) }
+.lp-total-text { font-size:10px;color:var(--text-muted);line-height:1.4 }
+
+/* breakdown bar */
+.lp-breakdown {
+  display:flex;align-items:stretch;height:8px;border-radius:4px;overflow:hidden;
+  margin-bottom:10px; gap:2px;
+}
+.lp-bar-seg { border-radius:3px;transition:flex 0.8s ease }
+.lp-bar-seg.global  { background:linear-gradient(90deg,#00aa55,#00cc88);box-shadow:0 0 8px rgba(0,180,100,0.3) }
+.lp-bar-seg.domain  { background:linear-gradient(90deg,#0066ff,#00aaff);box-shadow:0 0 8px rgba(0,150,255,0.3) }
+.lp-bar-seg.project { background:linear-gradient(90deg,#8800ff,#cc80ff);box-shadow:0 0 8px rgba(150,0,255,0.3) }
+
+/* breakdown legend */
+.lp-legend { display:flex;gap:16px }
+.lp-legend-item { display:flex;align-items:center;gap:6px }
+.lp-dot { width:8px;height:8px;border-radius:2px;flex-shrink:0 }
+.lp-dot.global  { background:#00cc88 }
+.lp-dot.domain  { background:var(--blue-core) }
+.lp-dot.project { background:#cc80ff }
+.lp-leg-label { font-family:var(--font-mono);font-size:9px;color:var(--text-muted) }
+.lp-leg-count { font-family:var(--font-display);font-size:12px;font-weight:700;color:var(--text-secondary);margin-left:2px }
+
+/* stacked bars detail */
+.lp-detail { display:flex;flex-direction:column;gap:6px;margin-top:12px }
+.lp-detail-row { display:flex;align-items:center;gap:10px }
+.lp-dr-label { font-family:var(--font-mono);font-size:9px;color:var(--text-muted);width:56px;flex-shrink:0 }
+.lp-dr-bar-wrap { flex:1;height:4px;background:var(--border-dim);border-radius:2px;overflow:hidden }
+.lp-dr-bar { height:100%;border-radius:2px;transition:width 1s ease }
+.lp-dr-num { font-family:var(--font-mono);font-size:9px;color:var(--text-muted);width:28px;text-align:right;flex-shrink:0 }
+
+/* scrollbar */
+::-webkit-scrollbar{width:4px}
+::-webkit-scrollbar-track{background:transparent}
+::-webkit-scrollbar-thumb{background:rgba(0,100,200,0.3);border-radius:2px}
+::-webkit-scrollbar-thumb:hover{background:rgba(0,150,255,0.5)}
+
+/* entrance */
+@keyframes slideLeft{from{transform:translateX(-20px);opacity:0}to{transform:translateX(0);opacity:1}}
+@keyframes fadeDown{from{transform:translateY(-12px);opacity:0}to{transform:translateY(0);opacity:1}}
+@keyframes fadeUp{from{transform:translateY(14px);opacity:0}to{transform:translateY(0);opacity:1}}
+.topbar{animation:fadeDown 0.4s cubic-bezier(0.16,1,0.3,1) both}
+.sidebar{animation:slideLeft 0.45s cubic-bezier(0.16,1,0.3,1) both}
+.nav-item{animation:fadeUp 0.4s cubic-bezier(0.16,1,0.3,1) both}
+.nav-item:nth-child(1){animation-delay:0.08s}.nav-item:nth-child(2){animation-delay:0.12s}
+.nav-item:nth-child(3){animation-delay:0.16s}.nav-item:nth-child(4){animation-delay:0.20s}
+.nav-item:nth-child(5){animation-delay:0.24s}.nav-item:nth-child(6){animation-delay:0.28s}
+.nav-item:nth-child(7){animation-delay:0.32s}.nav-item:nth-child(8){animation-delay:0.36s}
+.pm-page{animation:fadeUp 0.5s 0.2s cubic-bezier(0.16,1,0.3,1) both}
+
+/* cursor */
+#cursor{position:fixed;z-index:9999;width:6px;height:6px;background:var(--blue-bright);border-radius:50%;pointer-events:none;transform:translate(-50%,-50%);box-shadow:var(--glow-md);transition:transform 0.1s}
+#cursor-ring{position:fixed;z-index:9998;width:26px;height:26px;border:1px solid rgba(0,170,255,0.5);border-radius:50%;pointer-events:none;transform:translate(-50%,-50%);transition:width 0.2s,height 0.2s,border-color 0.2s}
+.has-tip{position:relative}
+.tip{position:absolute;left:calc(100% + 10px);top:50%;transform:translateY(-50%);background:var(--bg-card);border:1px solid var(--border-mid);border-radius:2px;padding:4px 9px;font-family:var(--font-mono);font-size:10px;color:var(--text-secondary);white-space:nowrap;pointer-events:none;opacity:0;transition:opacity 0.15s;z-index:200;box-shadow:var(--glow-sm)}
+.has-tip:hover .tip{opacity:1}
+
+/* modal */
+.modal-overlay{display:none;position:fixed;inset:0;z-index:500;align-items:center;justify-content:center;background:rgba(2,4,10,0.88);backdrop-filter:blur(12px)}
+.modal-overlay.active{display:flex}
+.modal-box{width:420px;max-width:90vw;border:1px solid var(--border-mid);border-radius:4px;background:var(--bg-card);box-shadow:var(--glow-md);position:relative;overflow:hidden;animation:fadeUp 0.3s cubic-bezier(0.16,1,0.3,1) both}
+.modal-top-line{height:1px;background:linear-gradient(90deg,transparent,rgba(0,200,255,0.7),transparent)}
+.modal-header{padding:14px 18px;border-bottom:1px solid var(--border-dim);display:flex;align-items:center;justify-content:space-between}
+.modal-title{font-family:var(--font-display);font-size:11px;font-weight:700;letter-spacing:0.12em;color:var(--blue-bright)}
+.modal-close{width:26px;height:26px;display:flex;align-items:center;justify-content:center;border:1px solid var(--border-dim);border-radius:2px;color:var(--text-muted);cursor:pointer;transition:all 0.2s;font-size:13px}
+.modal-close:hover{border-color:rgba(255,80,80,0.4);color:#ff6060}
+.modal-body{padding:18px}
+.modal-footer{padding:12px 18px;border-top:1px solid var(--border-dim);display:flex;gap:8px;justify-content:flex-end}
+.mf-btn{padding:8px 16px;border-radius:2px;font-family:var(--font-display);font-size:9px;font-weight:700;letter-spacing:0.14em;cursor:pointer;transition:all 0.2s}
+.mf-btn.primary{background:rgba(0,80,200,0.3);border:1px solid rgba(0,150,255,0.4);color:var(--blue-bright)}
+.mf-btn.primary:hover{box-shadow:var(--glow-sm)}
+.mf-btn.danger{background:rgba(180,0,0,0.2);border:1px solid rgba(255,60,60,0.3);color:#ff6060}
+.mf-btn.danger:hover{box-shadow:0 0 12px rgba(255,0,0,0.2)}
+.mf-btn.secondary{background:transparent;border:1px solid var(--border-dim);color:var(--text-muted)}
+.mf-btn.secondary:hover{border-color:var(--border-mid);color:var(--text-secondary)}
+.modal-warning-icon{font-size:28px;text-align:center;margin-bottom:10px}
+.modal-warning-text{font-family:var(--font-mono);font-size:11px;color:var(--text-secondary);text-align:center;line-height:1.6}
+</style>
+</head>
+<body>
+
+<!-- BG -->
+<div class="bg-root">
+  <div class="bg-space"></div>
+  <canvas id="starCanvas" style="position:absolute;inset:0;width:100%;height:100%;"></canvas>
+  <div class="bg-grid"></div>
+  <div class="bg-floor"></div>
+  <div class="bg-hex-giant">
+    <svg viewBox="0 0 850 850" fill="none">
+      <polygon points="425,30 780,217 780,633 425,820 70,633 70,217" stroke="rgba(0,120,255,1)" stroke-width="1.2" fill="none"/>
+      <polygon points="425,100 710,255 710,595 425,750 140,595 140,255" stroke="rgba(0,150,255,0.6)" stroke-width="0.7" fill="none"/>
+      <polygon points="425,185 650,303 650,547 425,665 200,547 200,303" stroke="rgba(0,180,255,0.4)" stroke-width="0.5" fill="none"/>
+    </svg>
+  </div>
+  <div class="orb orb-1"></div><div class="orb orb-2"></div><div class="orb orb-3"></div>
+  <div id="dataStreams"></div>
+  <div id="hexParticles"></div>
+  <div class="scan-beam"></div>
+  <div class="scanlines"></div>
+  <div class="vignette"></div>
+</div>
+
+<div id="glitchBars" class="glitch-bars"></div>
+<div id="cursor"></div>
+<div id="cursor-ring"></div>
+
+<!-- DELETE MODAL -->
+<div class="modal-overlay" id="deleteModal">
+  <div class="modal-box">
+    <div class="modal-top-line"></div>
+    <div class="modal-header">
+      <div class="modal-title">CONFIRM DELETE</div>
+      <div class="modal-close" id="deleteModalClose">✕</div>
+    </div>
+    <div class="modal-body">
+      <div class="modal-warning-icon">⚠</div>
+      <div class="modal-warning-text">Delete project <strong id="deleteProjectName" style="color:#ff6060"></strong>?<br>This action cannot be undone. All project-specific<br>elements will be removed from your library.</div>
+    </div>
+    <div class="modal-footer">
+      <button class="mf-btn secondary" id="deleteCancelBtn">CANCEL</button>
+      <button class="mf-btn danger" id="deleteConfirmBtn">DELETE PROJECT</button>
+    </div>
+  </div>
+</div>
+
+<!-- EDIT MODAL -->
+<div class="modal-overlay" id="editModal">
+  <div class="modal-box">
+    <div class="modal-top-line"></div>
+    <div class="modal-header">
+      <div class="modal-title">EDIT PROJECT</div>
+      <div class="modal-close" id="editModalClose">✕</div>
+    </div>
+    <div class="modal-body">
+      <div class="npf-row">
+        <div class="npf-field">
+          <div class="npf-label">Project Name</div>
+          <input class="npf-input" id="editName" placeholder="Project name">
+        </div>
+        <div class="npf-field">
+          <div class="npf-label">Client / Description</div>
+          <input class="npf-input" id="editClient" placeholder="Client or description">
+        </div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="mf-btn secondary" id="editCancelBtn">CANCEL</button>
+      <button class="mf-btn primary" id="editSaveBtn">SAVE CHANGES</button>
+    </div>
+  </div>
+</div>
+
+<div id="app" class="app">
+  <!-- TOPBAR -->
+  <header class="topbar">
+    <div class="topbar-logo">
+      <div class="logo-hex">
+        <svg viewBox="0 0 28 28" fill="none">
+          <polygon points="14,2 25,8 25,20 14,26 3,20 3,8" stroke="#00aaff" stroke-width="1.2" fill="none"/>
+          <polygon points="14,7 20,10.5 20,17.5 14,21 8,17.5 8,10.5" stroke="#00d4ff" stroke-width="0.7" fill="rgba(0,100,255,0.08)"/>
+          <circle cx="14" cy="14" r="3" fill="#00aaff" opacity="0.9"/>
+        </svg>
+      </div>
+      <div class="logo-text">
+        <div class="logo-name glitch-text" data-text="FECTTRAL">FECTTRAL</div>
+        <span class="logo-sub">DESIGN INTELLIGENCE</span>
+      </div>
+    </div>
+    <div class="topbar-center">
+      <div class="breadcrumb">
+        <span>studio</span><span class="sep">›</span><span>system</span><span class="sep">›</span>
+        <span class="current" id="breadCrumb">project-manager</span>
+      </div>
+      <div class="ctx-pill">
+        <span class="dot"></span>
+        <span id="ctxPillText">Global + Tech domain</span>
+      </div>
+    </div>
+    <div class="topbar-right">
+      <div class="ai-pill"><span class="pulse"></span><span>AI ONLINE</span></div>
+      <button class="icon-btn has-tip">⚙<span class="tip">Settings</span></button>
+      <button class="icon-btn has-tip">◎<span class="tip">Docs</span></button>
+    </div>
+  </header>
+
+  <div class="main-layout">
+    <!-- SIDEBAR -->
+    <aside class="sidebar">
+      <div class="nav-section">
+        <div class="nav-label">Studio</div>
+        <a class="nav-item" href="#"><span class="nav-icon">⬡</span><span>Overview</span></a>
+        <a class="nav-item" href="#"><span class="nav-icon">◈</span><span>Library</span><span class="nav-badge">127</span></a>
+      </div>
+      <div class="nav-section">
+        <div class="nav-label">Tools</div>
+        <a class="nav-item" href="#"><span class="nav-icon">⊞</span><span>Generator</span></a>
+        <a class="nav-item" href="#"><span class="nav-icon">✦</span><span>Review Queue</span><span class="nav-badge red">12</span></a>
+        <a class="nav-item" href="#"><span class="nav-icon">⇄</span><span>A/B Workshop</span></a>
+        <a class="nav-item" href="#"><span class="nav-icon">◎</span><span>Trend Radar</span></a>
+      </div>
+      <div class="nav-divider"></div>
+      <div class="nav-section">
+        <div class="nav-label">System</div>
+        <a class="nav-item active" href="#"><span class="nav-icon">⊞</span><span>Project Manager</span></a>
+        <a class="nav-item" href="#"><span class="nav-icon">◉</span><span>DNA Report</span></a>
+        <a class="nav-item" href="#"><span class="nav-icon">⊛</span><span>Settings</span></a>
+      </div>
+      <div class="sidebar-footer">
+        <div class="lib-stats">
+          <div class="stat-item"><span class="stat-num" id="sbGlobal">84</span><span class="stat-lbl">Global</span></div>
+          <div class="stat-sep"></div>
+          <div class="stat-item"><span class="stat-num" id="sbDomain">23</span><span class="stat-lbl">Domain</span></div>
+          <div class="stat-sep"></div>
+          <div class="stat-item"><span class="stat-num" id="sbProject">20</span><span class="stat-lbl">Project</span></div>
+        </div>
+        <div class="provider-card">
+          <div class="prov-top">
+            <span class="prov-label">AI Provider</span>
+            <div class="prov-status"><span class="dot"></span><span>Online</span></div>
+          </div>
+          <div class="prov-name">OLLAMA LOCAL</div>
+          <div class="prov-model">qwen2.5-coder:14b · 10GB</div>
+        </div>
+      </div>
+    </aside>
+
+    <!-- CONTENT -->
+    <main class="content">
+      <div class="pm-page">
+
+        <!-- PAGE HEADER -->
+        <div class="pm-header">
+          <div class="pmh-left">
+            <div class="pmh-eyebrow">// system · 08</div>
+            <div class="pmh-title glitch-text" data-text="PROJECT MANAGER">PROJECT MANAGER</div>
+            <div class="pmh-ctx">
+              Active Context:
+              <div class="pmh-ctx-badge" id="ctxLabel">Global + tech/domain</div>
+            </div>
+          </div>
+          <div class="pmh-right">
+            <div class="pmh-total-badge">
+              <span class="pmh-total-num" id="totalCount">127</span>
+              <div>
+                <div style="font-family:var(--font-display);font-size:9px;letter-spacing:0.12em;color:var(--text-secondary)">TOTAL ELEMENTS</div>
+                <div style="font-family:var(--font-mono);font-size:8px;color:var(--text-dim);margin-top:2px">in current context</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- BODY: two-column split -->
+        <div class="pm-body">
+
+          <!-- LEFT: Context + Domain -->
+          <div class="pm-left">
+
+            <!-- SECTION 1: ACTIVE CONTEXT -->
+            <div class="pm-section open" id="secCtx">
+              <div class="pms-header" onclick="toggleSection('secCtx')">
+                <div class="pms-header-left">
+                  <span class="pms-icon">◎</span>
+                  <span class="pms-title">Active Context</span>
+                </div>
+                <span class="pms-chevron">›</span>
+              </div>
+              <div class="pms-body">
+                <div class="ctx-section">
+
+                  <div class="active-ctx-row">
+                    <div class="acr-dot"></div>
+                    <div class="acr-text" id="acrText">Global + tech + NexaBank v2</div>
+                    <div class="acr-edit">EDIT</div>
+                  </div>
+
+                  <!-- Layer stack -->
+                  <div class="layer-stack">
+
+                    <!-- Layer 3: Project -->
+                    <div class="layer-row l3 active" id="layerProject"
+                         style="--layer-color:rgba(170,0,255,0.35);--layer-border:rgba(170,0,255,0.3);--layer-bg:rgba(60,0,150,0.12)">
+                      <div class="layer-num">3</div>
+                      <div class="layer-info">
+                        <div class="layer-name">Project Layer</div>
+                        <div class="layer-sub" id="layerProjectSub">NexaBank v2 · fintech client</div>
+                      </div>
+                      <div class="layer-count" id="layerProjectCount">20 elem</div>
+                      <div class="layer-status">
+                        <span class="layer-active-tag on" id="layerProjectTag">ON</span>
+                      </div>
+                    </div>
+
+                    <div class="layer-connector"></div>
+
+                    <!-- Layer 2: Domain -->
+                    <div class="layer-row l2 active" id="layerDomain"
+                         style="--layer-color:rgba(0,170,255,0.35);--layer-border:rgba(0,170,255,0.3);--layer-bg:rgba(0,50,150,0.15)">
+                      <div class="layer-num">2</div>
+                      <div class="layer-info">
+                        <div class="layer-name">Domain Layer</div>
+                        <div class="layer-sub" id="layerDomainSub">tech · 23 elements loaded</div>
+                      </div>
+                      <div class="layer-count" id="layerDomainCount">23 elem</div>
+                      <div class="layer-status">
+                        <span class="layer-active-tag on" id="layerDomainTag">ON</span>
+                      </div>
+                    </div>
+
+                    <div class="layer-connector"></div>
+
+                    <!-- Layer 1: Global -->
+                    <div class="layer-row l1 active"
+                         style="--layer-color:rgba(0,200,100,0.3);--layer-border:rgba(0,200,100,0.25);--layer-bg:rgba(0,60,30,0.15)">
+                      <div class="layer-num">1</div>
+                      <div class="layer-info">
+                        <div class="layer-name">Global Layer</div>
+                        <div class="layer-sub">Always active · base library</div>
+                      </div>
+                      <div class="layer-count">84 elem</div>
+                      <div class="layer-status">
+                        <span class="layer-active-tag on">ALWAYS</span>
+                      </div>
+                    </div>
+
+                  </div><!-- /layer stack -->
+
+                  <!-- Quick switch presets -->
+                  <div class="quick-switch">
+                    <button class="qs-btn" id="qs-global" onclick="setPreset('global')">Global only</button>
+                    <button class="qs-btn" id="qs-domain" onclick="setPreset('domain')">+ Domain</button>
+                    <button class="qs-btn preset-active" id="qs-full" onclick="setPreset('full')">+ Project</button>
+                  </div>
+
+                </div>
+              </div>
+            </div><!-- /sec ctx -->
+
+            <!-- SECTION 2: DOMAIN LIBRARY -->
+            <div class="pm-section open" id="secDomain">
+              <div class="pms-header" onclick="toggleSection('secDomain')">
+                <div class="pms-header-left">
+                  <span class="pms-icon">◈</span>
+                  <span class="pms-title">Domain Library</span>
+                  <span class="pms-count">(8 domains)</span>
+                </div>
+                <span class="pms-chevron">›</span>
+              </div>
+              <div class="pms-body">
+                <div class="domain-grid" id="domainGrid"></div>
+              </div>
+            </div><!-- /sec domain -->
+
+          </div><!-- /pm-left -->
+
+          <!-- RIGHT: Projects + Layer Preview -->
+          <div class="pm-right">
+
+            <!-- SECTION 3: PROJECT LIBRARY -->
+            <div class="project-section">
+              <div class="ps-header">
+                <div class="ps-title-row">
+                  <div class="ps-eyebrow">// Section 03 · Projects</div>
+                  <div class="ps-count" id="projCount">(4 projects)</div>
+                </div>
+                <button class="new-project-btn" id="newProjBtn">
+                  <span>＋</span><span>NEW PROJECT</span>
+                </button>
+              </div>
+
+              <!-- NEW PROJECT FORM -->
+              <div class="new-project-form" id="newProjForm">
+                <div class="npf-row">
+                  <div class="npf-field">
+                    <div class="npf-label">Project Name</div>
+                    <input class="npf-input" id="newProjName" placeholder="e.g. NexaBank v3">
+                  </div>
+                  <div class="npf-field">
+                    <div class="npf-label">Client / Description</div>
+                    <input class="npf-input" id="newProjClient" placeholder="e.g. FinTech banking app">
+                  </div>
+                </div>
+                <div class="npf-actions">
+                  <button class="npf-btn cancel" id="newProjCancel">CANCEL</button>
+                  <button class="npf-btn primary" id="newProjSave">CREATE PROJECT</button>
+                </div>
+              </div>
+
+              <div class="project-list" id="projectList"></div>
+            </div>
+
+            <!-- SECTION 4: LAYER PREVIEW -->
+            <div class="layer-preview">
+              <div class="lp-header">
+                <div class="lp-eyebrow">// Section 04 · Context Preview</div>
+                <div class="lp-total">
+                  <span class="lp-total-num" id="lpTotal">127</span>
+                  <div class="lp-total-text">elements in<br>current context</div>
+                </div>
+              </div>
+
+              <div class="lp-breakdown" id="lpBreakdown">
+                <div class="lp-bar-seg global"  id="barGlobal"  style="flex:84"></div>
+                <div class="lp-bar-seg domain"  id="barDomain"  style="flex:23"></div>
+                <div class="lp-bar-seg project" id="barProject" style="flex:20"></div>
+              </div>
+
+              <div class="lp-legend">
+                <div class="lp-legend-item">
+                  <div class="lp-dot global"></div>
+                  <div class="lp-leg-label">Global</div>
+                  <div class="lp-leg-count" id="legGlobal">84</div>
+                </div>
+                <div class="lp-legend-item">
+                  <div class="lp-dot domain"></div>
+                  <div class="lp-leg-label">Domain</div>
+                  <div class="lp-leg-count" id="legDomain">23</div>
+                </div>
+                <div class="lp-legend-item">
+                  <div class="lp-dot project"></div>
+                  <div class="lp-leg-label">Project</div>
+                  <div class="lp-leg-count" id="legProject">20</div>
+                </div>
+              </div>
+
+              <div class="lp-detail">
+                <div class="lp-detail-row">
+                  <div class="lp-dr-label">Global</div>
+                  <div class="lp-dr-bar-wrap"><div class="lp-dr-bar" id="drGlobal" style="width:66%;background:linear-gradient(90deg,#00aa55,#00cc88)"></div></div>
+                  <div class="lp-dr-num" id="drNumGlobal">84</div>
+                </div>
+                <div class="lp-detail-row">
+                  <div class="lp-dr-label">Domain</div>
+                  <div class="lp-dr-bar-wrap"><div class="lp-dr-bar" id="drDomain" style="width:18%;background:linear-gradient(90deg,#0066ff,#00aaff)"></div></div>
+                  <div class="lp-dr-num" id="drNumDomain">23</div>
+                </div>
+                <div class="lp-detail-row">
+                  <div class="lp-dr-label">Project</div>
+                  <div class="lp-dr-bar-wrap"><div class="lp-dr-bar" id="drProject" style="width:16%;background:linear-gradient(90deg,#8800ff,#cc80ff)"></div></div>
+                  <div class="lp-dr-num" id="drNumProject">20</div>
+                </div>
+              </div>
+
+            </div><!-- /layer preview -->
+
+          </div><!-- /pm-right -->
+
+        </div><!-- /pm-body -->
+
+      </div><!-- /pm-page -->
+    </main>
+  </div>
+</div>
+
+<script>
+/* ══ STAR CANVAS ══ */
+const canvas=document.getElementById('starCanvas'),ctx=canvas.getContext('2d');
+function resize(){canvas.width=window.innerWidth;canvas.height=window.innerHeight;}
+resize();window.addEventListener('resize',resize);
+const stars=Array.from({length:220},()=>({x:Math.random()*window.innerWidth,y:Math.random()*window.innerHeight,r:Math.random()*1.3,o:Math.random(),tw:Math.random()*Math.PI*2,sp:Math.random()*0.4+0.05}));
+function drawStars(){ctx.clearRect(0,0,canvas.width,canvas.height);stars.forEach(s=>{s.tw+=s.sp*0.018;const op=s.o*(0.35+0.65*Math.abs(Math.sin(s.tw)));ctx.beginPath();ctx.arc(s.x,s.y,s.r,0,Math.PI*2);ctx.fillStyle=`rgba(160,215,255,${op})`;ctx.fill();if(s.r>1.0){ctx.beginPath();ctx.arc(s.x,s.y,s.r*3.5,0,Math.PI*2);ctx.fillStyle=`rgba(0,160,255,${op*0.12})`;ctx.fill();}});requestAnimationFrame(drawStars);}
+drawStars();
+
+/* ══ STREAMS + PARTICLES ══ */
+const se=document.getElementById('dataStreams');
+for(let i=0;i<20;i++){const el=document.createElement('div');el.className='data-stream';el.style.cssText=`left:${Math.random()*100}%;height:${Math.random()*130+50}px;animation-duration:${Math.random()*5+3}s;animation-delay:${Math.random()*10}s;`;se.appendChild(el);}
+const he=document.getElementById('hexParticles'),syms=['⬡','⬢','◈','◉','◎','⊞','✦'];
+for(let i=0;i<14;i++){const el=document.createElement('div');el.className='hex-particle';el.textContent=syms[Math.floor(Math.random()*syms.length)];el.style.cssText=`left:${Math.random()*100}%;bottom:-60px;font-size:${Math.random()*22+9}px;animation-duration:${Math.random()*22+14}s;animation-delay:${Math.random()*18}s;`;he.appendChild(el);}
+
+/* ══ GLITCH ══ */
+const gb=document.getElementById('glitchBars'),appEl=document.getElementById('app');
+function triggerGlitch(intensity='low'){const count=intensity==='boot'?8:Math.floor(Math.random()*4)+2;for(let i=0;i<count;i++){const bar=document.createElement('div');bar.className='g-bar';const top=Math.random()*100,h=Math.random()*(intensity==='boot'?8:4)+1,tx=(Math.random()-0.5)*(intensity==='boot'?30:14),dur=Math.random()*80+40,isRGB=Math.random()>0.5;bar.style.cssText=`top:${top}%;height:${h}px;background:rgba(${isRGB?'0,210,255':'255,0,200'},${intensity==='boot'?0.12:0.07});transform:translateX(${tx}px) skewX(${(Math.random()-0.5)*2}deg);mix-blend-mode:screen;`;gb.appendChild(bar);let op=0;const step=1/(dur/16);let dir=1;(function a(){op+=step*dir;if(op>=1)dir=-1;if(op<=0&&dir===-1){bar.remove();return;}bar.style.opacity=op;requestAnimationFrame(a);})();setTimeout(()=>bar.remove(),dur+80);}if(Math.random()>0.5||intensity==='boot'){appEl.style.animation=`screenShake ${60+Math.random()*80}ms ease both`;setTimeout(()=>{appEl.style.animation='';},200);}}
+window.addEventListener('load',()=>{let n=0;const boot=()=>{if(n++>5)return;triggerGlitch('boot');setTimeout(boot,110);};setTimeout(boot,500);});
+function scheduleGlitch(){setTimeout(()=>{triggerGlitch('low');scheduleGlitch();},Math.random()*9000+5000);}scheduleGlitch();
+
+/* ══ CURSOR ══ */
+const cursor=document.getElementById('cursor'),ring=document.getElementById('cursor-ring');
+let mx=0,my=0,rx=0,ry=0;
+document.addEventListener('mousemove',e=>{mx=e.clientX;my=e.clientY;cursor.style.left=mx+'px';cursor.style.top=my+'px';});
+(function animRing(){rx+=(mx-rx)*0.1;ry+=(my-ry)*0.1;ring.style.left=rx+'px';ring.style.top=ry+'px';requestAnimationFrame(animRing);})();
+function bindCursor(){document.querySelectorAll('a,button,.domain-card,.project-row,.layer-row,.qs-btn,.nav-item,.provider-card,.acr-edit,.restore-btn').forEach(el=>{el.addEventListener('mouseenter',()=>{ring.style.width='36px';ring.style.height='36px';ring.style.borderColor='rgba(0,212,255,0.7)';cursor.style.transform='translate(-50%,-50%) scale(1.6)';});el.addEventListener('mouseleave',()=>{ring.style.width='26px';ring.style.height='26px';ring.style.borderColor='rgba(0,170,255,0.5)';cursor.style.transform='translate(-50%,-50%) scale(1)';});});}
+bindCursor();
+
+/* ══ NAV ══ */
+document.querySelectorAll('.nav-item').forEach(item=>{item.addEventListener('click',e=>{e.preventDefault();document.querySelectorAll('.nav-item').forEach(i=>i.classList.remove('active'));item.classList.add('active');document.getElementById('breadCrumb').textContent=item.querySelector('span:nth-child(2)').textContent.toLowerCase().replace(/\s+/g,'-');triggerGlitch('low');});});
+
+/* ══ SECTION TOGGLE ══ */
+function toggleSection(id){const sec=document.getElementById(id);sec.classList.toggle('open');triggerGlitch('low');}
+
+/* ══ STATE ══ */
+const DOMAIN_LIST = [
+  {id:'restaurant', name:'Restaurant',  icon:'🍽️', count:18, active:false},
+  {id:'fintech',    name:'Fintech',      icon:'💳', count:23, active:true},
+  {id:'fashion',    name:'Fashion',      icon:'👗', count:15, active:false},
+  {id:'tech',       name:'Tech',         icon:'⚙️', count:23, active:true},
+  {id:'portfolio',  name:'Portfolio',    icon:'✦',  count:12, active:false},
+  {id:'ecommerce',  name:'E-Commerce',   icon:'◈',  count:20, active:false},
+  {id:'health',     name:'Health',       icon:'⊕',  count:16, active:false},
+  {id:'education',  name:'Education',    icon:'⬡',  count:14, active:false},
+];
+
+let projects = [
+  {id:1, name:'NexaBank v2',    client:'FinTech banking app',       elemCount:20, lastUsed:'Today',   active:true,  archived:false},
+  {id:2, name:'LuxeAura',       client:'Fashion luxury e-commerce', elemCount:14, lastUsed:'3d ago',  active:false, archived:false},
+  {id:3, name:'HealthPulse',    client:'Medical dashboard SaaS',    elemCount:9,  lastUsed:'1w ago',  active:false, archived:false},
+  {id:4, name:'OpenDesk Pro',   client:'Productivity SaaS tool',    elemCount:17, lastUsed:'2w ago',  active:false, archived:true},
+];
+let nextId = 5;
+
+let activeDomainId  = 'tech';
+let activeProjectId = 1;
+let currentLayer    = 'full'; // global | domain | full
+
+// Layer preset counts
+const GLOBAL_COUNT = 84;
+
+function getDomainCount(){ return activeDomainId ? (DOMAIN_LIST.find(d=>d.id===activeDomainId)?.count||0) : 0; }
+function getProjectCount(){ return activeProjectId ? (projects.find(p=>p.id===activeProjectId)?.elemCount||0) : 0; }
+function getTotalCount(){
+  if(currentLayer==='global') return GLOBAL_COUNT;
+  if(currentLayer==='domain') return GLOBAL_COUNT + getDomainCount();
+  return GLOBAL_COUNT + getDomainCount() + getProjectCount();
+}
+
+/* ══ BUILD DOMAIN GRID ══ */
+function buildDomainGrid(){
+  const grid=document.getElementById('domainGrid');
+  grid.innerHTML='';
+  DOMAIN_LIST.forEach(d=>{
+    const el=document.createElement('div');
+    el.className='domain-card'+(d.active?' domain-active':'');
+    el.innerHTML=`
+      <div class="dc-top">
+        <div class="dc-icon">${d.icon}</div>
+        <label class="dc-toggle">
+          <input type="checkbox" ${d.active?'checked':''} data-domain="${d.id}">
+          <span class="dc-slider"></span>
+        </label>
+      </div>
+      <div class="dc-name">${d.name}</div>
+      <div class="dc-count">${d.count} elements</div>
+      <button class="dc-add-btn" data-domain-add="${d.id}">+ Add Elements</button>`;
+    grid.appendChild(el);
+    el.querySelector(`input[data-domain="${d.id}"]`).addEventListener('change', e=>{
+      d.active=e.target.checked;
+      el.classList.toggle('domain-active',d.active);
+      if(d.active){ activeDomainId=d.id; }
+      else if(activeDomainId===d.id){ activeDomainId=null; }
+      // Only one domain active at a time
+      if(d.active){
+        DOMAIN_LIST.forEach(x=>{ if(x.id!==d.id&&x.active){ x.active=false; activeDomainId=d.id; }});
+        buildDomainGrid();
+      }
+      updateLayerDisplay();
+      triggerGlitch('low');
+    });
+    el.querySelector(`[data-domain-add="${d.id}"]`).addEventListener('click',e=>{
+      e.stopPropagation();
+      triggerGlitch('low');
+    });
+  });
+  bindCursor();
+}
+
+/* ══ BUILD PROJECT LIST ══ */
+function buildProjectList(){
+  const list=document.getElementById('projectList');
+  list.innerHTML='';
+  document.getElementById('projCount').textContent=`(${projects.filter(p=>!p.archived).length} projects)`;
+  projects.forEach(p=>{
+    const el=document.createElement('div');
+    el.className='project-row'+(p.active&&!p.archived?' proj-active':'')+(p.archived?' proj-archived':'');
+    const stripeClass=p.archived?'archived':(p.active?'active':'inactive');
+    el.innerHTML=`
+      <div class="proj-stripe ${stripeClass}"></div>
+      <div class="proj-info">
+        <div class="proj-name">${p.name}${p.archived?' <span style="font-size:8px;color:var(--text-dim);margin-left:4px;">[ARCHIVED]</span>':''}</div>
+        <div class="proj-client">${p.client}</div>
+      </div>
+      <div class="proj-meta">
+        <div class="proj-elem-count">${p.elemCount} elem</div>
+        <div class="proj-last">${p.lastUsed}</div>
+      </div>
+      ${!p.archived?`<label class="proj-toggle">
+        <input type="checkbox" ${p.active?'checked':''} data-proj-toggle="${p.id}">
+        <span class="proj-tslider"></span>
+      </label>`:''}
+      <div class="proj-actions">
+        <button class="proj-act-btn has-tip" data-proj-edit="${p.id}">✎<span class="tip">Edit</span></button>
+        <button class="proj-act-btn arch has-tip" data-proj-arch="${p.id}">${p.archived?'↺':'▣'}<span class="tip">${p.archived?'Unarchive':'Archive'}</span></button>
+        <button class="proj-act-btn del has-tip" data-proj-del="${p.id}">✕<span class="tip">Delete</span></button>
+      </div>`;
+    list.appendChild(el);
+
+    // Toggle active
+    const togInput = el.querySelector(`[data-proj-toggle="${p.id}"]`);
+    if(togInput){
+      togInput.addEventListener('change',e=>{
+        // deactivate others
+        projects.forEach(x=>x.active=false);
+        p.active=e.target.checked;
+        activeProjectId = p.active ? p.id : null;
+        buildProjectList();
+        updateLayerDisplay();
+        triggerGlitch('low');
+      });
+    }
+
+    // Edit
+    el.querySelector(`[data-proj-edit="${p.id}"]`).addEventListener('click',()=>openEdit(p));
+    // Archive
+    el.querySelector(`[data-proj-arch="${p.id}"]`).addEventListener('click',()=>{
+      p.archived=!p.archived;
+      if(p.archived&&p.active){p.active=false;activeProjectId=null;}
+      buildProjectList();updateLayerDisplay();triggerGlitch('low');
+    });
+    // Delete
+    el.querySelector(`[data-proj-del="${p.id}"]`).addEventListener('click',()=>openDelete(p));
+  });
+  bindCursor();
+}
+
+/* ══ UPDATE LAYER DISPLAY ══ */
+function updateLayerDisplay(){
+  const dc = activeDomainId ? DOMAIN_LIST.find(d=>d.id===activeDomainId) : null;
+  const pc = activeProjectId ? projects.find(p=>p.id===activeProjectId) : null;
+
+  // Active context row
+  const parts=[];
+  parts.push('Global');
+  if(dc&&currentLayer!=='global') parts.push(dc.name.toLowerCase());
+  if(pc&&currentLayer==='full') parts.push(pc.name);
+  document.getElementById('acrText').textContent = parts.join(' + ');
+  document.getElementById('ctxLabel').textContent = parts.join(' + ');
+  document.getElementById('ctxPillText').textContent = parts.join(' + ');
+
+  // Layer rows
+  const showDomain = currentLayer!=='global' && dc;
+  const showProject = currentLayer==='full' && pc;
+
+  const lDom = document.getElementById('layerDomain');
+  const lProj = document.getElementById('layerProject');
+
+  lDom.className='layer-row l2'+(showDomain?' active':' inactive');
+  document.getElementById('layerDomainSub').textContent = dc ? `${dc.name.toLowerCase()} · ${dc.count} elements` : 'None active';
+  document.getElementById('layerDomainCount').textContent = dc&&showDomain ? `${dc.count} elem` : '—';
+  document.getElementById('layerDomainTag').className = 'layer-active-tag '+(showDomain?'on':'off');
+  document.getElementById('layerDomainTag').textContent = showDomain ? 'ON' : 'OFF';
+
+  lProj.className='layer-row l3'+(showProject?' active':' inactive');
+  document.getElementById('layerProjectSub').textContent = pc&&showProject ? `${pc.name} · ${pc.client}` : 'None active';
+  document.getElementById('layerProjectCount').textContent = pc&&showProject ? `${pc.elemCount} elem` : '—';
+  document.getElementById('layerProjectTag').className = 'layer-active-tag '+(showProject?'on':'off');
+  document.getElementById('layerProjectTag').textContent = showProject ? 'ON' : 'OFF';
+
+  // Counts
+  const g = GLOBAL_COUNT;
+  const d = showDomain ? (dc?.count||0) : 0;
+  const p = showProject ? (pc?.elemCount||0) : 0;
+  const total = g + d + p;
+
+  document.getElementById('totalCount').textContent = total;
+  document.getElementById('lpTotal').textContent    = total;
+  document.getElementById('legGlobal').textContent  = g;
+  document.getElementById('legDomain').textContent  = d;
+  document.getElementById('legProject').textContent = p;
+  document.getElementById('drNumGlobal').textContent  = g;
+  document.getElementById('drNumDomain').textContent  = d;
+  document.getElementById('drNumProject').textContent = p;
+  document.getElementById('sbGlobal').textContent  = g;
+  document.getElementById('sbDomain').textContent  = d;
+  document.getElementById('sbProject').textContent = p;
+
+  // bars
+  document.getElementById('barGlobal').style.flex  = g;
+  document.getElementById('barDomain').style.flex  = d||0.5;
+  document.getElementById('barProject').style.flex = p||0.5;
+  document.getElementById('drGlobal').style.width  = (g/total*100)+'%';
+  document.getElementById('drDomain').style.width  = total>0?(d/total*100)+'%':'0%';
+  document.getElementById('drProject').style.width = total>0?(p/total*100)+'%':'0%';
+}
+
+/* ══ PRESETS ══ */
+function setPreset(mode){
+  currentLayer=mode;
+  document.querySelectorAll('.qs-btn').forEach(b=>b.classList.remove('preset-active'));
+  document.getElementById('qs-'+mode).classList.add('preset-active');
+  updateLayerDisplay();
+  triggerGlitch('low');
+}
+window.setPreset=setPreset;
+
+/* ══ SECTION ACCORDION ══ */
+window.toggleSection=function(id){
+  const sec=document.getElementById(id);sec.classList.toggle('open');
+};
+
+/* ══ NEW PROJECT FORM ══ */
+document.getElementById('newProjBtn').addEventListener('click',()=>{
+  const f=document.getElementById('newProjForm');
+  f.classList.toggle('visible');
+  if(f.classList.contains('visible'))document.getElementById('newProjName').focus();
+});
+document.getElementById('newProjCancel').addEventListener('click',()=>{
+  document.getElementById('newProjForm').classList.remove('visible');
+  document.getElementById('newProjName').value='';
+  document.getElementById('newProjClient').value='';
+});
+document.getElementById('newProjSave').addEventListener('click',()=>{
+  const name=document.getElementById('newProjName').value.trim();
+  const client=document.getElementById('newProjClient').value.trim();
+  if(!name) return;
+  projects.unshift({id:nextId++,name,client:client||'New project',elemCount:0,lastUsed:'Just now',active:false,archived:false});
+  document.getElementById('newProjForm').classList.remove('visible');
+  document.getElementById('newProjName').value='';
+  document.getElementById('newProjClient').value='';
+  buildProjectList();triggerGlitch('low');
+});
+
+/* ══ EDIT MODAL ══ */
+let editingProjId=null;
+function openEdit(p){
+  editingProjId=p.id;
+  document.getElementById('editName').value=p.name;
+  document.getElementById('editClient').value=p.client;
+  document.getElementById('editModal').classList.add('active');
+}
+document.getElementById('editModalClose').addEventListener('click',()=>document.getElementById('editModal').classList.remove('active'));
+document.getElementById('editCancelBtn').addEventListener('click',()=>document.getElementById('editModal').classList.remove('active'));
+document.getElementById('editSaveBtn').addEventListener('click',()=>{
+  const p=projects.find(x=>x.id===editingProjId);if(!p)return;
+  p.name=document.getElementById('editName').value.trim()||p.name;
+  p.client=document.getElementById('editClient').value.trim()||p.client;
+  document.getElementById('editModal').classList.remove('active');
+  buildProjectList();updateLayerDisplay();triggerGlitch('low');
+});
+
+/* ══ DELETE MODAL ══ */
+let deletingProjId=null;
+function openDelete(p){
+  deletingProjId=p.id;
+  document.getElementById('deleteProjectName').textContent='"'+p.name+'"';
+  document.getElementById('deleteModal').classList.add('active');
+}
+document.getElementById('deleteModalClose').addEventListener('click',()=>document.getElementById('deleteModal').classList.remove('active'));
+document.getElementById('deleteCancelBtn').addEventListener('click',()=>document.getElementById('deleteModal').classList.remove('active'));
+document.getElementById('deleteConfirmBtn').addEventListener('click',()=>{
+  const idx=projects.findIndex(x=>x.id===deletingProjId);
+  if(idx>-1){
+    if(projects[idx].active){activeProjectId=null;}
+    projects.splice(idx,1);
+  }
+  document.getElementById('deleteModal').classList.remove('active');
+  buildProjectList();updateLayerDisplay();triggerGlitch('low');
+});
+
+// close modals on backdrop click
+['deleteModal','editModal'].forEach(id=>{
+  document.getElementById(id).addEventListener('click',e=>{if(e.target.id===id)e.target.classList.remove('active');});
+});
+
+/* ══ INIT ══ */
+buildDomainGrid();
+buildProjectList();
+updateLayerDisplay();
+</script>
+</body>
+</html>

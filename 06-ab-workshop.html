@@ -1,0 +1,1400 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>FectTral – A/B Workshop</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;600;700;900&family=Exo+2:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html, body { height: 100%; overflow: hidden; }
+
+:root {
+  --bg-void:       #020408;
+  --bg-deep:       #050912;
+  --bg-panel:      #0a1428;
+  --bg-card:       #0d1a32;
+  --blue-core:     #00aaff;
+  --blue-bright:   #00d4ff;
+  --blue-electric: #0066ff;
+  --blue-dim:      #003a8c;
+  --glow-sm:   0 0 8px rgba(0,170,255,0.4);
+  --glow-md:   0 0 16px rgba(0,170,255,0.5), 0 0 32px rgba(0,102,255,0.2);
+  --glow-text: 0 0 10px rgba(0,212,255,0.8), 0 0 20px rgba(0,170,255,0.4);
+  --border-dim:    rgba(0,140,255,0.10);
+  --border-mid:    rgba(0,170,255,0.22);
+  --text-primary:  #e8f4ff;
+  --text-secondary:#8ab8d8;
+  --text-muted:    #3a5a78;
+  --text-dim:      #1a3050;
+  --font-display: 'Orbitron', monospace;
+  --font-body:    'Exo 2', sans-serif;
+  --font-mono:    'JetBrains Mono', monospace;
+  --sidebar-w: 220px;
+  --topbar-h:  48px;
+}
+
+body {
+  font-family: var(--font-body);
+  background: var(--bg-void);
+  color: var(--text-primary);
+  display: flex; flex-direction: column;
+  height: 100vh; cursor: none; overflow: hidden;
+}
+
+/* ═══ BACKGROUND ═══ */
+.bg-root { position: fixed; inset: 0; z-index: 0; overflow: hidden; }
+.bg-space {
+  position: absolute; inset: 0;
+  background:
+    radial-gradient(ellipse at 20% 80%, rgba(0,40,120,0.6) 0%, transparent 45%),
+    radial-gradient(ellipse at 80% 10%, rgba(0,20,80,0.5) 0%, transparent 40%),
+    radial-gradient(ellipse at 50% 50%, rgba(0,10,40,0.4) 0%, transparent 65%),
+    #020408;
+}
+.bg-grid {
+  position: absolute; inset: 0;
+  background-image: radial-gradient(circle, rgba(0,130,255,0.18) 1px, transparent 1px);
+  background-size: 36px 36px;
+  animation: gridDrift 60s linear infinite;
+  mask-image: radial-gradient(ellipse 80% 80% at center, black 30%, transparent 80%);
+}
+@keyframes gridDrift { from{background-position:0 0;} to{background-position:36px 36px;} }
+.bg-floor {
+  position: absolute; bottom:0; left:0; right:0; height:55%;
+  background-image:
+    linear-gradient(rgba(0,100,255,0.07) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(0,100,255,0.07) 1px, transparent 1px);
+  background-size: 70px 35px;
+  transform: perspective(500px) rotateX(65deg); transform-origin: bottom center;
+  mask-image: linear-gradient(to bottom, transparent 0%, black 50%);
+  animation: floorScroll 20s linear infinite;
+}
+@keyframes floorScroll { from{background-position:0 0;} to{background-position:0 35px;} }
+.bg-hex-giant {
+  position: absolute; width:850px; height:850px;
+  top:50%; left:50%; transform:translate(-50%,-50%);
+  animation: slowRotate 150s linear infinite; opacity:0.035; pointer-events:none;
+}
+.bg-hex-giant svg { width:100%; height:100%; }
+@keyframes slowRotate {
+  from{transform:translate(-50%,-50%) rotate(0deg);}
+  to{transform:translate(-50%,-50%) rotate(360deg);}
+}
+.orb { position:absolute; border-radius:50%; filter:blur(90px); pointer-events:none; }
+.orb-1 { width:680px;height:680px;background:radial-gradient(circle,rgba(0,50,180,0.55) 0%,transparent 70%);top:-220px;left:-180px;animation:orb1 28s ease-in-out infinite; }
+.orb-2 { width:480px;height:480px;background:radial-gradient(circle,rgba(0,110,255,0.45) 0%,transparent 70%);bottom:-120px;right:-120px;animation:orb2 32s ease-in-out infinite; }
+.orb-3 { width:320px;height:320px;background:radial-gradient(circle,rgba(0,180,255,0.22) 0%,transparent 70%);top:35%;left:40%;animation:orb3 22s ease-in-out infinite; }
+@keyframes orb1 { 0%,100%{transform:translate(0,0) scale(1);} 33%{transform:translate(50px,70px) scale(1.08);} 66%{transform:translate(-25px,35px) scale(0.95);} }
+@keyframes orb2 { 0%,100%{transform:translate(0,0);} 50%{transform:translate(-70px,-55px);} }
+@keyframes orb3 { 0%,100%{transform:translate(0,0) scale(1);} 50%{transform:translate(25px,-45px) scale(1.25);} }
+.data-stream { position:absolute;width:1px;background:linear-gradient(to bottom,transparent 0%,rgba(0,170,255,0.7) 50%,transparent 100%);animation:streamFall linear infinite;pointer-events:none; }
+@keyframes streamFall { 0%{transform:translateY(-200px);opacity:0;} 10%{opacity:1;} 85%{opacity:0.6;} 100%{transform:translateY(110vh);opacity:0;} }
+.hex-particle { position:absolute;color:rgba(0,150,255,0.35);text-shadow:0 0 10px rgba(0,170,255,0.5);animation:hexFloat linear infinite;pointer-events:none; }
+@keyframes hexFloat { 0%{transform:translateY(110vh) rotate(0deg);opacity:0;} 8%{opacity:0.7;} 92%{opacity:0.2;} 100%{transform:translateY(-10vh) rotate(200deg);opacity:0;} }
+.scan-beam { position:absolute;left:0;right:0;height:2px;background:linear-gradient(90deg,transparent 0%,rgba(0,150,255,0.08) 20%,rgba(0,212,255,0.35) 50%,rgba(0,150,255,0.08) 80%,transparent 100%);animation:beamSweep 10s linear infinite;pointer-events:none; }
+@keyframes beamSweep { from{top:-2px;} to{top:100%;} }
+.scanlines { position:absolute;inset:0;pointer-events:none;background:repeating-linear-gradient(0deg,transparent,transparent 3px,rgba(0,0,0,0.06) 3px,rgba(0,0,0,0.06) 4px); }
+.vignette { position:absolute;inset:0;pointer-events:none;background:radial-gradient(ellipse at center,transparent 45%,rgba(0,0,0,0.75) 100%); }
+
+/* ═══ GLITCH ═══ */
+.glitch-text { position:relative; display:inline-block; }
+.glitch-text::before,.glitch-text::after { content:attr(data-text);position:absolute;top:0;left:0;width:100%;height:100%;font-family:inherit;font-size:inherit;font-weight:inherit;letter-spacing:inherit; }
+.glitch-text::before { color:#00ffee;animation:gBefore 7s infinite;clip-path:polygon(0 20%,100% 20%,100% 40%,0 40%); }
+.glitch-text::after  { color:#ff00cc;animation:gAfter 7s infinite;clip-path:polygon(0 65%,100% 65%,100% 80%,0 80%); }
+@keyframes gBefore { 0%,93%,100%{transform:translateX(0);opacity:0;} 94%{transform:translateX(-4px);opacity:0.9;} 95%{transform:translateX(3px);opacity:0.7;} 96%{transform:translateX(-2px);opacity:0.8;} 97%{transform:translateX(0);opacity:0;} }
+@keyframes gAfter  { 0%,92%,100%{transform:translateX(0);opacity:0;} 93%{transform:translateX(4px);opacity:0.8;} 94%{transform:translateX(-3px);opacity:0.6;} 95%{transform:translateX(2px);opacity:0.7;} 96%{transform:translateX(0);opacity:0;} }
+.glitch-bars { position:fixed;inset:0;z-index:999;pointer-events:none;overflow:hidden; }
+.g-bar { position:absolute;left:0;right:0;opacity:0; }
+@keyframes screenShake { 0%,100%{transform:translate(0,0) skewX(0deg);filter:none;} 20%{transform:translate(-3px,1px) skewX(-0.4deg);filter:hue-rotate(80deg) brightness(1.15);} 40%{transform:translate(3px,-1px) skewX(0.4deg);filter:hue-rotate(-80deg);} 60%{transform:translate(-2px,0px);filter:brightness(1.3) saturate(1.5);} 80%{transform:translate(2px,1px) skewX(0.2deg);filter:none;} }
+
+/* ═══ APP SHELL ═══ */
+.app { position:relative;z-index:2;display:flex;flex-direction:column;height:100vh; }
+
+/* TOPBAR */
+.topbar {
+  height:var(--topbar-h); display:flex;align-items:center;justify-content:space-between;
+  padding:0 20px 0 0; border-bottom:1px solid var(--border-dim);
+  background:linear-gradient(90deg,rgba(4,8,16,0.98) 0%,rgba(7,13,25,0.96) 100%);
+  backdrop-filter:blur(30px); flex-shrink:0; position:relative; overflow:hidden;
+}
+.topbar::after { content:'';position:absolute;bottom:0;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent 0%,rgba(0,150,255,0.25) 25%,rgba(0,212,255,0.7) 50%,rgba(0,150,255,0.25) 75%,transparent 100%);animation:barGlow 5s ease-in-out infinite; }
+@keyframes barGlow { 0%,100%{opacity:0.5;} 50%{opacity:1;} }
+.topbar-logo { width:var(--sidebar-w);display:flex;align-items:center;gap:10px;padding:0 18px;border-right:1px solid var(--border-dim);height:100%; }
+.logo-hex { width:28px;height:28px;flex-shrink:0;animation:hexGlow 4s ease-in-out infinite; }
+.logo-hex svg { width:100%;height:100%; }
+@keyframes hexGlow { 0%,100%{filter:drop-shadow(0 0 6px rgba(0,170,255,0.7));} 50%{filter:drop-shadow(0 0 18px rgba(0,212,255,1)) drop-shadow(0 0 35px rgba(0,80,255,0.5));} }
+.logo-text { font-family:var(--font-display);line-height:1; }
+.logo-name { font-size:13px;font-weight:700;letter-spacing:0.12em;color:var(--blue-bright);text-shadow:var(--glow-text); }
+.logo-sub { display:block;font-size:7px;font-weight:400;letter-spacing:0.38em;color:var(--text-muted);margin-top:3px; }
+.topbar-center { flex:1;display:flex;align-items:center;padding:0 24px;gap:12px; }
+.breadcrumb { display:flex;align-items:center;gap:6px;font-family:var(--font-mono);font-size:11px;color:var(--text-muted); }
+.breadcrumb .sep { color:var(--blue-dim); }
+.breadcrumb .current { color:var(--blue-core);text-shadow:0 0 8px rgba(0,170,255,0.5); }
+.ctx-pill { display:flex;align-items:center;gap:6px;padding:3px 10px;border:1px solid var(--border-dim);border-radius:2px;font-family:var(--font-mono);font-size:10px;color:var(--text-muted);background:rgba(0,40,100,0.2); }
+.ctx-pill .dot { width:5px;height:5px;border-radius:50%;background:var(--blue-core);box-shadow:0 0 6px var(--blue-core);animation:blink 2s ease-in-out infinite; }
+@keyframes blink { 0%,100%{opacity:1;} 50%{opacity:0.15;} }
+.topbar-right { display:flex;align-items:center;gap:10px; }
+.ai-pill { display:flex;align-items:center;gap:7px;padding:5px 12px;border:1px solid rgba(0,200,100,0.2);border-radius:2px;background:rgba(0,25,12,0.5);font-family:var(--font-mono);font-size:10px;color:#00cc66;cursor:pointer;transition:all 0.2s; }
+.ai-pill:hover { border-color:rgba(0,200,100,0.4);box-shadow:0 0 10px rgba(0,200,100,0.15); }
+.ai-pill .pulse { width:6px;height:6px;border-radius:50%;background:#00cc66;box-shadow:0 0 8px #00cc66;animation:pDot 1.5s ease-in-out infinite; }
+@keyframes pDot { 0%,100%{transform:scale(1);opacity:1;} 50%{transform:scale(1.5);opacity:0.5;} }
+.icon-btn { width:30px;height:30px;display:flex;align-items:center;justify-content:center;border:1px solid var(--border-dim);border-radius:2px;background:transparent;color:var(--text-muted);cursor:pointer;transition:all 0.2s;font-size:14px; }
+.icon-btn:hover { border-color:var(--border-mid);color:var(--blue-bright);box-shadow:var(--glow-sm); }
+
+/* MAIN LAYOUT */
+.main-layout { display:flex;flex:1;overflow:hidden; }
+
+/* SIDEBAR */
+.sidebar {
+  width:var(--sidebar-w);flex-shrink:0;display:flex;flex-direction:column;
+  border-right:1px solid var(--border-dim);
+  background:linear-gradient(180deg,rgba(4,8,18,0.97) 0%,rgba(2,4,10,0.99) 100%);
+  backdrop-filter:blur(40px); padding:12px 0; overflow-y:auto;overflow-x:hidden;position:relative;
+}
+.sidebar::after { content:'';position:absolute;top:0;right:0;bottom:0;width:1px;background:linear-gradient(180deg,transparent 0%,rgba(0,100,255,0.15) 25%,rgba(0,170,255,0.45) 50%,rgba(0,100,255,0.15) 75%,transparent 100%);animation:sideGlow 6s ease-in-out infinite; }
+@keyframes sideGlow { 0%,100%{opacity:0.5;} 50%{opacity:1;} }
+.nav-section { margin-bottom:2px; }
+.nav-label { padding:8px 16px 4px;font-family:var(--font-mono);font-size:9px;letter-spacing:0.3em;color:var(--text-dim);text-transform:uppercase; }
+.nav-item { position:relative;display:flex;align-items:center;gap:10px;padding:9px 16px;margin:1px 8px;border-radius:3px;cursor:pointer;font-size:12px;font-weight:500;letter-spacing:0.04em;color:var(--text-muted);transition:all 0.25s;border:1px solid transparent;text-decoration:none;overflow:hidden; }
+.nav-item::before { content:'';position:absolute;inset:0;background:linear-gradient(90deg,transparent 0%,rgba(0,140,255,0.07) 50%,transparent 100%);transform:translateX(-100%);transition:transform 0.5s ease; }
+.nav-item:hover::before { transform:translateX(100%); }
+.nav-item:hover { color:var(--text-secondary);background:rgba(0,70,150,0.1);border-color:var(--border-dim); }
+.nav-item.active { color:var(--blue-bright);background:linear-gradient(90deg,rgba(0,90,220,0.16) 0%,rgba(0,50,130,0.06) 100%);border-color:rgba(0,160,255,0.18);text-shadow:0 0 8px rgba(0,170,255,0.5); }
+.nav-item.active::after { content:'';position:absolute;left:-8px;top:50%;transform:translateY(-50%);width:3px;height:55%;background:linear-gradient(180deg,var(--blue-bright),var(--blue-electric));border-radius:0 2px 2px 0;box-shadow:0 0 10px var(--blue-bright),0 0 22px rgba(0,160,255,0.4); }
+.nav-icon { width:16px;display:flex;align-items:center;justify-content:center;font-size:13px;flex-shrink:0; }
+.nav-badge { margin-left:auto;background:rgba(0,70,170,0.3);border:1px solid rgba(0,140,255,0.22);border-radius:2px;padding:1px 5px;font-family:var(--font-mono);font-size:9px;color:var(--blue-core);min-width:18px;text-align:center; }
+.nav-badge.red { background:rgba(170,0,40,0.25);border-color:rgba(255,50,90,0.3);color:#ff5580;animation:redBlink 2s ease-in-out infinite; }
+@keyframes redBlink { 0%,100%{box-shadow:none;} 50%{box-shadow:0 0 8px rgba(255,50,100,0.5);} }
+.nav-divider { height:1px;margin:8px 16px;background:linear-gradient(90deg,transparent,var(--border-dim),transparent); }
+.sidebar-footer { margin-top:auto;padding:10px 8px 4px;border-top:1px solid var(--border-dim); }
+.lib-stats { display:flex;align-items:center;justify-content:space-between;padding:6px 10px 10px; }
+.stat-item { text-align:center; }
+.stat-num { font-family:var(--font-display);font-size:16px;font-weight:700;color:var(--blue-bright);text-shadow:var(--glow-text);display:block; }
+.stat-lbl { font-family:var(--font-mono);font-size:8px;letter-spacing:0.14em;color:var(--text-dim);text-transform:uppercase; }
+.stat-sep { width:1px;height:26px;background:var(--border-dim); }
+.provider-card { padding:10px 12px;border:1px solid var(--border-dim);border-radius:3px;background:var(--bg-card);cursor:pointer;transition:all 0.25s;position:relative;overflow:hidden; }
+.provider-card::before { content:'';position:absolute;top:0;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent,rgba(0,170,255,0.45),transparent);opacity:0;transition:opacity 0.3s; }
+.provider-card:hover::before { opacity:1; }
+.provider-card:hover { border-color:var(--border-mid);box-shadow:var(--glow-sm); }
+.prov-top { display:flex;align-items:center;justify-content:space-between;margin-bottom:5px; }
+.prov-label { font-family:var(--font-mono);font-size:9px;letter-spacing:0.2em;color:var(--text-dim); }
+.prov-status { display:flex;align-items:center;gap:4px;font-family:var(--font-mono);font-size:9px;color:#00cc66; }
+.prov-status .dot { width:5px;height:5px;border-radius:50%;background:#00cc66;box-shadow:0 0 6px #00cc66; }
+.prov-name { font-family:var(--font-display);font-size:10px;font-weight:600;color:var(--blue-core);letter-spacing:0.1em; }
+.prov-model { font-family:var(--font-mono);font-size:9px;color:var(--text-muted);margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis; }
+
+/* CONTENT */
+.content { flex:1;overflow-y:auto;overflow-x:hidden;position:relative; }
+
+/* ═══ A/B WORKSHOP PAGE ═══ */
+.ab-page {
+  display: flex; flex-direction: column;
+  height: 100%; overflow: hidden;
+}
+
+/* Page header */
+.ab-header {
+  flex-shrink: 0;
+  padding: 18px 28px 14px;
+  border-bottom: 1px solid var(--border-dim);
+  background: linear-gradient(180deg, rgba(0,10,30,0.6) 0%, transparent 100%);
+  display: flex; align-items: flex-start; justify-content: space-between;
+}
+.ab-header-left {}
+.ab-eyebrow {
+  font-family: var(--font-mono); font-size: 9px;
+  letter-spacing: 0.35em; color: var(--text-dim); text-transform: uppercase;
+  margin-bottom: 5px;
+}
+.ab-title {
+  font-family: var(--font-display); font-size: 20px; font-weight: 900;
+  letter-spacing: 0.14em; color: var(--blue-bright); text-shadow: var(--glow-text);
+  line-height: 1;
+}
+.ab-subtitle {
+  font-family: var(--font-mono); font-size: 10px;
+  color: var(--text-muted); margin-top: 6px; letter-spacing: 0.04em;
+}
+.ab-header-right {
+  display: flex; align-items: center; gap: 8px;
+}
+.step-indicator {
+  display: flex; align-items: center; gap: 0;
+}
+.step-dot {
+  display: flex; align-items: center; gap: 0;
+}
+.step-num {
+  font-family: var(--font-mono); font-size: 9px;
+  letter-spacing: 0.1em; padding: 4px 10px;
+  border: 1px solid var(--border-dim); border-radius: 2px;
+  color: var(--text-muted); background: rgba(0,20,50,0.4);
+  transition: all 0.3s;
+}
+.step-num.active {
+  color: var(--blue-bright); border-color: rgba(0,170,255,0.4);
+  background: rgba(0,60,150,0.2); box-shadow: var(--glow-sm);
+}
+.step-num.done {
+  color: #00cc66; border-color: rgba(0,180,80,0.3);
+  background: rgba(0,40,20,0.3);
+}
+.step-line { width: 20px; height: 1px; background: var(--border-dim); margin: 0 2px; }
+
+/* ═══ BODY AREA ═══ */
+.ab-body {
+  flex: 1; overflow: hidden; display: flex;
+}
+
+/* HISTORY PANEL */
+.history-panel {
+  width: 200px; flex-shrink: 0;
+  border-right: 1px solid var(--border-dim);
+  display: flex; flex-direction: column;
+  background: rgba(2,5,14,0.5);
+}
+.hp-header {
+  padding: 12px 14px 8px;
+  border-bottom: 1px solid var(--border-dim);
+  font-family: var(--font-mono); font-size: 9px;
+  letter-spacing: 0.25em; color: var(--text-dim); text-transform: uppercase;
+}
+.hp-list { flex: 1; overflow-y: auto; padding: 8px 0; }
+.hp-item {
+  padding: 9px 14px; cursor: pointer;
+  border-left: 2px solid transparent;
+  transition: all 0.2s; position: relative;
+}
+.hp-item:hover { background: rgba(0,60,150,0.1); border-left-color: var(--border-mid); }
+.hp-item.active-hist { background: rgba(0,60,150,0.12); border-left-color: var(--blue-core); }
+.hp-item-title {
+  font-family: var(--font-mono); font-size: 10px;
+  color: var(--text-secondary); margin-bottom: 4px;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+.hp-item-meta {
+  display: flex; align-items: center; justify-content: space-between;
+}
+.hp-winner {
+  font-family: var(--font-mono); font-size: 8px;
+  color: var(--blue-core); letter-spacing: 0.06em;
+}
+.hp-date {
+  font-family: var(--font-mono); font-size: 8px; color: var(--text-dim);
+}
+.hp-moods {
+  margin-top: 4px; display: flex; gap: 3px; flex-wrap: wrap;
+}
+.hp-mood-tag {
+  font-family: var(--font-mono); font-size: 7px;
+  padding: 1px 4px; border-radius: 1px; letter-spacing: 0.08em;
+}
+.hp-mood-tag.elegant { background: rgba(170,0,255,0.15); color: #cc80ff; border: 1px solid rgba(170,0,255,0.2); }
+.hp-mood-tag.bold { background: rgba(255,100,0,0.12); color: #ff9944; border: 1px solid rgba(255,100,0,0.2); }
+.hp-mood-tag.minimal { background: rgba(0,150,255,0.1); color: var(--blue-core); border: 1px solid rgba(0,150,255,0.2); }
+.hp-mood-tag.dark { background: rgba(50,50,80,0.3); color: #8888cc; border: 1px solid rgba(100,100,180,0.2); }
+.hp-win-count {
+  margin-top: 12px; padding: 10px 14px;
+  border-top: 1px solid var(--border-dim);
+}
+.hp-wc-title { font-family: var(--font-mono); font-size: 8px; letter-spacing: 0.2em; color: var(--text-dim); text-transform: uppercase; margin-bottom: 7px; }
+.hp-wc-row { display: flex; align-items: center; justify-content: space-between; margin-bottom: 4px; }
+.hp-wc-mood { font-family: var(--font-mono); font-size: 9px; color: var(--text-muted); }
+.hp-wc-bar-wrap { flex: 1; height: 3px; background: var(--border-dim); margin: 0 8px; border-radius: 2px; overflow: hidden; }
+.hp-wc-bar { height: 100%; border-radius: 2px; transition: width 0.8s; }
+.hp-wc-bar.elegant { background: #cc80ff; }
+.hp-wc-bar.bold { background: #ff9944; }
+.hp-wc-bar.minimal { background: var(--blue-core); }
+.hp-wc-num { font-family: var(--font-mono); font-size: 9px; color: var(--text-muted); min-width: 16px; text-align: right; }
+
+/* ═══ MAIN CONTENT AREA ═══ */
+.ab-main { flex: 1; overflow-y: auto; overflow-x: hidden; }
+
+/* STEP 1 — SETUP */
+.step-setup {
+  padding: 28px 32px;
+  display: flex; flex-direction: column; gap: 20px;
+}
+.setup-card {
+  border: 1px solid var(--border-dim); border-radius: 4px;
+  background: rgba(6,12,24,0.7); backdrop-filter: blur(20px);
+  padding: 24px 28px; position: relative; overflow: hidden;
+}
+.setup-card::before { content:'';position:absolute;top:8px;left:8px;width:14px;height:14px;border-top:1px solid rgba(0,150,255,0.4);border-left:1px solid rgba(0,150,255,0.4); }
+.setup-card::after  { content:'';position:absolute;bottom:8px;right:8px;width:14px;height:14px;border-bottom:1px solid rgba(0,150,255,0.4);border-right:1px solid rgba(0,150,255,0.4); }
+.setup-card-top { position:absolute;top:0;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent,rgba(0,170,255,0.4),transparent); }
+.setup-label {
+  font-family: var(--font-mono); font-size: 9px;
+  letter-spacing: 0.28em; color: var(--text-dim); text-transform: uppercase;
+  margin-bottom: 10px;
+}
+.setup-heading {
+  font-family: var(--font-display); font-size: 13px; font-weight: 600;
+  letter-spacing: 0.1em; color: var(--text-secondary); margin-bottom: 14px;
+}
+.ctx-textarea {
+  width: 100%; background: rgba(0,10,30,0.6);
+  border: 1px solid var(--border-dim); border-radius: 3px;
+  padding: 12px 14px; color: var(--text-primary);
+  font-family: var(--font-mono); font-size: 11px; line-height: 1.7;
+  resize: none; outline: none; transition: all 0.25s;
+  min-height: 90px;
+}
+.ctx-textarea::placeholder { color: var(--text-muted); }
+.ctx-textarea:focus { border-color: var(--border-mid); box-shadow: var(--glow-sm); }
+.setup-options {
+  display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-top: 14px;
+}
+.opt-group { display: flex; flex-direction: column; gap: 6px; }
+.opt-label { font-family: var(--font-mono); font-size: 9px; letter-spacing: 0.2em; color: var(--text-dim); text-transform: uppercase; }
+.opt-select {
+  background: rgba(0,10,30,0.6); border: 1px solid var(--border-dim);
+  border-radius: 3px; padding: 7px 10px; color: var(--text-primary);
+  font-family: var(--font-mono); font-size: 10px; outline: none;
+  cursor: pointer; transition: all 0.2s; appearance: none;
+}
+.opt-select:focus { border-color: var(--border-mid); box-shadow: var(--glow-sm); }
+.mood-chips { display: flex; flex-wrap: wrap; gap: 5px; }
+.mood-chip {
+  padding: 4px 10px; border-radius: 2px; cursor: pointer;
+  font-family: var(--font-mono); font-size: 9px; letter-spacing: 0.1em;
+  border: 1px solid var(--border-dim); color: var(--text-muted);
+  transition: all 0.2s; user-select: none;
+}
+.mood-chip.selected {
+  border-color: var(--blue-core); color: var(--blue-bright);
+  background: rgba(0,100,255,0.12); box-shadow: var(--glow-sm);
+}
+.mood-chip:hover:not(.selected) { border-color: var(--border-mid); color: var(--text-secondary); }
+.generate-btn {
+  display: flex; align-items: center; justify-content: center; gap: 10px;
+  padding: 14px 28px; width: 100%;
+  background: linear-gradient(90deg, rgba(0,80,200,0.3) 0%, rgba(0,50,150,0.2) 100%);
+  border: 1px solid rgba(0,150,255,0.35); border-radius: 3px;
+  color: var(--blue-bright); font-family: var(--font-display); font-size: 12px;
+  font-weight: 700; letter-spacing: 0.18em; cursor: pointer; transition: all 0.25s;
+  position: relative; overflow: hidden;
+}
+.generate-btn::before {
+  content: ''; position: absolute; inset: 0;
+  background: linear-gradient(90deg, transparent 0%, rgba(0,170,255,0.08) 50%, transparent 100%);
+  transform: translateX(-100%); transition: transform 0.6s ease;
+}
+.generate-btn:hover::before { transform: translateX(100%); }
+.generate-btn:hover {
+  border-color: var(--blue-bright); box-shadow: var(--glow-md);
+  background: linear-gradient(90deg, rgba(0,100,220,0.4) 0%, rgba(0,70,180,0.25) 100%);
+}
+.btn-icon { font-size: 16px; }
+
+/* ═══ STEP 2 — COMPARE ═══ */
+.step-compare { padding: 20px 24px; }
+.compare-intro { margin-bottom: 18px; }
+.compare-intro-label {
+  font-family: var(--font-mono); font-size: 9px; letter-spacing: 0.3em;
+  color: var(--text-dim); text-transform: uppercase; margin-bottom: 4px;
+}
+.compare-intro-text {
+  font-family: var(--font-body); font-size: 12px; color: var(--text-muted);
+}
+.variants-grid {
+  display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px;
+}
+.variant-card {
+  border: 1px solid var(--border-dim); border-radius: 4px;
+  background: rgba(6,12,24,0.75); backdrop-filter: blur(20px);
+  display: flex; flex-direction: column; overflow: hidden;
+  transition: all 0.3s; position: relative;
+}
+.variant-card:hover { border-color: var(--border-mid); box-shadow: var(--glow-sm); }
+.variant-card.winner-card {
+  border-color: rgba(0,212,255,0.5);
+  box-shadow: 0 0 24px rgba(0,170,255,0.2), inset 0 0 24px rgba(0,50,150,0.1);
+}
+.vc-top-line { height: 1px; background: linear-gradient(90deg, transparent, rgba(0,170,255,0.4), transparent); }
+.vc-top-line.a { background: linear-gradient(90deg, transparent, rgba(0,212,255,0.7), transparent); }
+.vc-top-line.b { background: linear-gradient(90deg, transparent, rgba(170,0,255,0.7), transparent); }
+.vc-top-line.c { background: linear-gradient(90deg, transparent, rgba(255,150,0,0.7), transparent); }
+.vc-header {
+  padding: 12px 14px; display: flex; align-items: center; justify-content: space-between;
+  border-bottom: 1px solid var(--border-dim);
+}
+.vc-label {
+  font-family: var(--font-display); font-size: 16px; font-weight: 900;
+  letter-spacing: 0.1em;
+}
+.vc-label.a { color: var(--blue-bright); text-shadow: var(--glow-text); }
+.vc-label.b { color: #cc80ff; text-shadow: 0 0 10px rgba(170,0,255,0.8); }
+.vc-label.c { color: #ff9944; text-shadow: 0 0 10px rgba(255,150,0,0.8); }
+.vc-mood-badge {
+  font-family: var(--font-mono); font-size: 8px; letter-spacing: 0.12em;
+  padding: 2px 7px; border-radius: 2px; text-transform: uppercase;
+}
+.vc-mood-badge.elegant { background: rgba(170,0,255,0.15); color: #cc80ff; border: 1px solid rgba(170,0,255,0.25); }
+.vc-mood-badge.bold    { background: rgba(255,100,0,0.12);  color: #ff9944; border: 1px solid rgba(255,100,0,0.25); }
+.vc-mood-badge.minimal { background: rgba(0,150,255,0.1);   color: var(--blue-core); border: 1px solid rgba(0,150,255,0.25); }
+.vc-elements { padding: 10px 14px; border-bottom: 1px solid var(--border-dim); }
+.vc-elem-label { font-family: var(--font-mono); font-size: 8px; letter-spacing: 0.2em; color: var(--text-dim); text-transform: uppercase; margin-bottom: 6px; }
+.vc-elem-list { display: flex; flex-direction: column; gap: 3px; }
+.vc-elem-item {
+  display: flex; align-items: center; gap: 6px;
+  font-family: var(--font-mono); font-size: 10px; color: var(--text-secondary);
+}
+.vc-elem-dot { width: 4px; height: 4px; border-radius: 50%; flex-shrink: 0; }
+.vc-elem-dot.a { background: var(--blue-bright); box-shadow: 0 0 5px var(--blue-bright); }
+.vc-elem-dot.b { background: #cc80ff; box-shadow: 0 0 5px #cc80ff; }
+.vc-elem-dot.c { background: #ff9944; box-shadow: 0 0 5px #ff9944; }
+/* Preview area */
+.vc-preview { flex: 1; position: relative; }
+.preview-toggle {
+  display: flex; border-bottom: 1px solid var(--border-dim);
+}
+.ptog-btn {
+  flex: 1; padding: 7px; text-align: center;
+  font-family: var(--font-mono); font-size: 9px; letter-spacing: 0.12em;
+  color: var(--text-muted); cursor: pointer; transition: all 0.2s;
+  border-right: 1px solid var(--border-dim); user-select: none;
+}
+.ptog-btn:last-child { border-right: none; }
+.ptog-btn.active { color: var(--blue-bright); background: rgba(0,80,200,0.1); }
+.ptog-btn:hover:not(.active) { color: var(--text-secondary); background: rgba(0,40,100,0.08); }
+.preview-pane { padding: 12px 14px; }
+.code-preview {
+  background: rgba(0,5,15,0.8); border: 1px solid var(--border-dim);
+  border-radius: 3px; padding: 10px 12px; overflow: auto;
+  max-height: 110px;
+}
+.code-preview code {
+  font-family: var(--font-mono); font-size: 9px; color: #8ab8d8;
+  white-space: pre; display: block; line-height: 1.6;
+}
+.code-preview .kw { color: var(--blue-bright); }
+.code-preview .prop { color: #cc80ff; }
+.code-preview .val { color: #ff9944; }
+.rendered-preview {
+  background: rgba(0,5,15,0.8); border: 1px solid var(--border-dim);
+  border-radius: 3px; padding: 10px 12px; min-height: 90px;
+  display: flex; align-items: center; justify-content: center;
+}
+.render-demo-a { font-family: 'Playfair Display', serif; color: #e8f4ff; font-size: 14px; font-style: italic; text-align: center; line-height: 1.5; }
+.render-demo-b { font-family: var(--font-display); color: #ff9944; font-size: 13px; font-weight: 900; letter-spacing: 0.15em; text-transform: uppercase; text-align: center; }
+.render-demo-c { font-family: var(--font-mono); color: var(--blue-core); font-size: 11px; text-align: left; letter-spacing: 0.05em; }
+.vc-mood-summary {
+  padding: 8px 14px; border-top: 1px solid var(--border-dim);
+  font-family: var(--font-mono); font-size: 9px; color: var(--text-muted);
+  line-height: 1.6; font-style: italic;
+}
+/* PICK button */
+.vc-footer { padding: 12px 14px; }
+.pick-btn {
+  width: 100%; padding: 11px;
+  font-family: var(--font-display); font-size: 11px; font-weight: 700;
+  letter-spacing: 0.18em; cursor: pointer; border-radius: 3px;
+  transition: all 0.25s; position: relative; overflow: hidden;
+  display: flex; align-items: center; justify-content: center; gap: 8px;
+}
+.pick-btn::before {
+  content: ''; position: absolute; inset: 0;
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.08), transparent);
+  transform: translateX(-100%); transition: transform 0.5s;
+}
+.pick-btn:hover::before { transform: translateX(100%); }
+.pick-btn.a {
+  background: linear-gradient(90deg, rgba(0,100,220,0.35), rgba(0,70,180,0.2));
+  border: 1px solid rgba(0,170,255,0.45); color: var(--blue-bright);
+}
+.pick-btn.a:hover { box-shadow: 0 0 20px rgba(0,170,255,0.4), 0 0 40px rgba(0,80,255,0.15); border-color: var(--blue-bright); }
+.pick-btn.b {
+  background: linear-gradient(90deg, rgba(120,0,200,0.3), rgba(80,0,150,0.15));
+  border: 1px solid rgba(170,0,255,0.35); color: #cc80ff;
+}
+.pick-btn.b:hover { box-shadow: 0 0 20px rgba(170,0,255,0.35); border-color: #cc80ff; }
+.pick-btn.c {
+  background: linear-gradient(90deg, rgba(180,80,0,0.3), rgba(130,60,0,0.15));
+  border: 1px solid rgba(255,140,0,0.35); color: #ff9944;
+}
+.pick-btn.c:hover { box-shadow: 0 0 20px rgba(255,140,0,0.3); border-color: #ff9944; }
+@keyframes pickGlow {
+  0%,100% { box-shadow: 0 0 10px rgba(0,200,255,0.5); }
+  50% { box-shadow: 0 0 30px rgba(0,200,255,0.8), 0 0 60px rgba(0,100,255,0.3); }
+}
+
+/* ═══ STEP 3 — RESULT ═══ */
+.step-result { padding: 28px 32px; display: flex; flex-direction: column; gap: 16px; }
+.result-confirm-card {
+  border: 1px solid rgba(0,200,100,0.3); border-radius: 4px;
+  background: rgba(0,20,12,0.6); backdrop-filter: blur(20px);
+  padding: 22px 26px; position: relative; overflow: hidden;
+}
+.result-confirm-card::before { content:'';position:absolute;top:0;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent,rgba(0,200,100,0.5),transparent); }
+.rc-check { font-size: 28px; margin-bottom: 8px; }
+.rc-title { font-family: var(--font-display); font-size: 16px; font-weight: 700; letter-spacing: 0.1em; color: #00ff88; text-shadow: 0 0 12px rgba(0,255,100,0.5); margin-bottom: 6px; }
+.rc-sub { font-family: var(--font-mono); font-size: 10px; color: #00cc66; letter-spacing: 0.05em; }
+.dna-update-card {
+  border: 1px solid var(--border-dim); border-radius: 4px;
+  background: rgba(6,12,24,0.7); backdrop-filter: blur(20px);
+  padding: 20px 24px;
+}
+.dna-update-title { font-family: var(--font-mono); font-size: 9px; letter-spacing: 0.28em; color: var(--text-dim); text-transform: uppercase; margin-bottom: 12px; }
+.dna-delta {
+  display: flex; align-items: center; gap: 10px;
+  font-family: var(--font-mono); font-size: 11px; color: var(--text-secondary);
+  margin-bottom: 8px;
+}
+.dna-delta-badge {
+  padding: 2px 8px; border-radius: 2px; font-size: 10px;
+  background: rgba(170,0,255,0.15); color: #cc80ff;
+  border: 1px solid rgba(170,0,255,0.25);
+}
+.dna-score-row {
+  display: flex; align-items: center; gap: 14px; margin-top: 14px;
+}
+.dna-score-num { font-family: var(--font-display); font-size: 28px; font-weight: 900; color: var(--blue-bright); text-shadow: var(--glow-text); }
+.dna-score-info { display: flex; flex-direction: column; gap: 3px; }
+.dna-score-label { font-family: var(--font-mono); font-size: 11px; color: var(--text-secondary); }
+.dna-score-prev { font-family: var(--font-mono); font-size: 9px; color: var(--text-muted); }
+.dna-bar-wrap { flex: 1; height: 6px; background: var(--border-dim); border-radius: 3px; overflow: hidden; position: relative; }
+.dna-bar-fill { height: 100%; border-radius: 3px; background: linear-gradient(90deg, var(--blue-electric), var(--blue-bright)); transition: width 1.2s ease; position: relative; }
+.dna-bar-fill::after { content:'';position:absolute;right:0;top:0;bottom:0;width:4px;background:white;filter:blur(2px);opacity:0.7;animation:dnaPulse 2s ease-in-out infinite; }
+@keyframes dnaPulse { 0%,100%{opacity:0.4;} 50%{opacity:1;} }
+.result-actions { display: flex; gap: 12px; }
+.result-btn {
+  flex: 1; padding: 11px; cursor: pointer; border-radius: 3px;
+  font-family: var(--font-display); font-size: 10px; font-weight: 700;
+  letter-spacing: 0.14em; transition: all 0.25s; display: flex;
+  align-items: center; justify-content: center; gap: 7px;
+}
+.result-btn.primary {
+  background: linear-gradient(90deg, rgba(0,80,200,0.35), rgba(0,50,150,0.2));
+  border: 1px solid rgba(0,150,255,0.4); color: var(--blue-bright);
+}
+.result-btn.primary:hover { box-shadow: var(--glow-md); border-color: var(--blue-bright); }
+.result-btn.secondary {
+  background: rgba(10,20,40,0.5); border: 1px solid var(--border-dim); color: var(--text-muted);
+}
+.result-btn.secondary:hover { border-color: var(--border-mid); color: var(--text-secondary); }
+
+/* ═══ LOADING STATE ═══ */
+.generating-overlay {
+  display: none; position: absolute; inset: 0;
+  background: rgba(2,4,10,0.85); backdrop-filter: blur(10px);
+  z-index: 100; align-items: center; justify-content: center;
+  flex-direction: column; gap: 16px;
+}
+.generating-overlay.active { display: flex; }
+.gen-spinner {
+  width: 48px; height: 48px;
+  border: 2px solid var(--border-dim);
+  border-top-color: var(--blue-bright);
+  border-radius: 50%; animation: spin 0.7s linear infinite;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+.gen-label { font-family: var(--font-mono); font-size: 11px; color: var(--blue-core); letter-spacing: 0.1em; }
+.gen-log { font-family: var(--font-mono); font-size: 9px; color: var(--text-muted); text-align: center; }
+
+/* SCROLLBAR */
+::-webkit-scrollbar { width: 4px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: rgba(0,100,200,0.3); border-radius: 2px; }
+::-webkit-scrollbar-thumb:hover { background: rgba(0,150,255,0.5); }
+
+/* ENTRANCE ANIMATIONS */
+@keyframes slideLeft { from{transform:translateX(-20px);opacity:0;} to{transform:translateX(0);opacity:1;} }
+@keyframes fadeDown { from{transform:translateY(-12px);opacity:0;} to{transform:translateY(0);opacity:1;} }
+@keyframes fadeUp { from{transform:translateY(14px);opacity:0;} to{transform:translateY(0);opacity:1;} }
+.topbar { animation: fadeDown 0.4s cubic-bezier(0.16,1,0.3,1) both; }
+.sidebar { animation: slideLeft 0.45s cubic-bezier(0.16,1,0.3,1) both; }
+.nav-item { animation: fadeUp 0.4s cubic-bezier(0.16,1,0.3,1) both; }
+.nav-item:nth-child(1){animation-delay:0.08s;} .nav-item:nth-child(2){animation-delay:0.12s;}
+.nav-item:nth-child(3){animation-delay:0.16s;} .nav-item:nth-child(4){animation-delay:0.20s;}
+.nav-item:nth-child(5){animation-delay:0.24s;} .nav-item:nth-child(6){animation-delay:0.28s;}
+.nav-item:nth-child(7){animation-delay:0.32s;} .nav-item:nth-child(8){animation-delay:0.36s;}
+.ab-page { animation: fadeUp 0.55s 0.2s cubic-bezier(0.16,1,0.3,1) both; }
+
+/* CURSOR */
+#cursor { position:fixed;z-index:9999;width:6px;height:6px;background:var(--blue-bright);border-radius:50%;pointer-events:none;transform:translate(-50%,-50%);box-shadow:var(--glow-md);transition:transform 0.1s; }
+#cursor-ring { position:fixed;z-index:9998;width:26px;height:26px;border:1px solid rgba(0,170,255,0.5);border-radius:50%;pointer-events:none;transform:translate(-50%,-50%);transition:width 0.2s,height 0.2s,border-color 0.2s; }
+
+/* tooltip */
+.has-tip { position:relative; }
+.tip { position:absolute;left:calc(100% + 10px);top:50%;transform:translateY(-50%);background:var(--bg-card);border:1px solid var(--border-mid);border-radius:2px;padding:4px 9px;font-family:var(--font-mono);font-size:10px;color:var(--text-secondary);white-space:nowrap;pointer-events:none;opacity:0;transition:opacity 0.15s;z-index:200;box-shadow:var(--glow-sm); }
+.has-tip:hover .tip { opacity:1; }
+
+/* step sections */
+.step-section { display: none; }
+.step-section.visible { display: block; }
+</style>
+</head>
+<body>
+
+<!-- BACKGROUND -->
+<div class="bg-root">
+  <div class="bg-space"></div>
+  <canvas id="starCanvas" style="position:absolute;inset:0;width:100%;height:100%;"></canvas>
+  <div class="bg-grid"></div>
+  <div class="bg-floor"></div>
+  <div class="bg-hex-giant">
+    <svg viewBox="0 0 850 850" fill="none">
+      <polygon points="425,30 780,217 780,633 425,820 70,633 70,217" stroke="rgba(0,120,255,1)" stroke-width="1.2" fill="none"/>
+      <polygon points="425,100 710,255 710,595 425,750 140,595 140,255" stroke="rgba(0,150,255,0.6)" stroke-width="0.7" fill="none"/>
+      <polygon points="425,185 650,303 650,547 425,665 200,547 200,303" stroke="rgba(0,180,255,0.4)" stroke-width="0.5" fill="none"/>
+    </svg>
+  </div>
+  <div class="orb orb-1"></div>
+  <div class="orb orb-2"></div>
+  <div class="orb orb-3"></div>
+  <div id="dataStreams"></div>
+  <div id="hexParticles"></div>
+  <div class="scan-beam"></div>
+  <div class="scanlines"></div>
+  <div class="vignette"></div>
+</div>
+
+<div id="glitchBars" class="glitch-bars"></div>
+<div id="cursor"></div>
+<div id="cursor-ring"></div>
+
+<div id="app" class="app">
+
+  <!-- TOPBAR -->
+  <header class="topbar">
+    <div class="topbar-logo">
+      <div class="logo-hex">
+        <svg viewBox="0 0 28 28" fill="none">
+          <polygon points="14,2 25,8 25,20 14,26 3,20 3,8" stroke="#00aaff" stroke-width="1.2" fill="none"/>
+          <polygon points="14,7 20,10.5 20,17.5 14,21 8,17.5 8,10.5" stroke="#00d4ff" stroke-width="0.7" fill="rgba(0,100,255,0.08)"/>
+          <circle cx="14" cy="14" r="3" fill="#00aaff" opacity="0.9"/>
+        </svg>
+      </div>
+      <div class="logo-text">
+        <div class="logo-name glitch-text" data-text="FECTTRAL">FECTTRAL</div>
+        <span class="logo-sub">DESIGN INTELLIGENCE</span>
+      </div>
+    </div>
+    <div class="topbar-center">
+      <div class="breadcrumb">
+        <span>studio</span>
+        <span class="sep">›</span>
+        <span>tools</span>
+        <span class="sep">›</span>
+        <span class="current" id="breadCrumb">a/b-workshop</span>
+      </div>
+      <div class="ctx-pill">
+        <span class="dot"></span>
+        <span>Session: workshop-09</span>
+      </div>
+    </div>
+    <div class="topbar-right">
+      <div class="ai-pill">
+        <span class="pulse"></span>
+        <span>AI ONLINE</span>
+      </div>
+      <button class="icon-btn has-tip">⚙<span class="tip">Settings</span></button>
+      <button class="icon-btn has-tip">◎<span class="tip">History</span></button>
+    </div>
+  </header>
+
+  <div class="main-layout">
+
+    <!-- SIDEBAR -->
+    <aside class="sidebar">
+      <div class="nav-section">
+        <div class="nav-label">Studio</div>
+        <a class="nav-item" href="#">
+          <span class="nav-icon">⬡</span><span>Overview</span>
+        </a>
+        <a class="nav-item" href="#">
+          <span class="nav-icon">◈</span><span>Library</span>
+          <span class="nav-badge">84</span>
+        </a>
+      </div>
+      <div class="nav-section">
+        <div class="nav-label">Tools</div>
+        <a class="nav-item" href="#">
+          <span class="nav-icon">⊞</span><span>Generator</span>
+        </a>
+        <a class="nav-item" href="#">
+          <span class="nav-icon">✦</span><span>Review Queue</span>
+          <span class="nav-badge red">12</span>
+        </a>
+        <a class="nav-item active" href="#">
+          <span class="nav-icon">⇄</span><span>A/B Workshop</span>
+        </a>
+        <a class="nav-item" href="#">
+          <span class="nav-icon">⬡</span><span>Web Fetcher</span>
+        </a>
+      </div>
+      <div class="nav-divider"></div>
+      <div class="nav-section">
+        <div class="nav-label">Intelligence</div>
+        <a class="nav-item" href="#">
+          <span class="nav-icon">◎</span><span>DNA Report</span>
+        </a>
+        <a class="nav-item" href="#">
+          <span class="nav-icon">◉</span><span>Analytics</span>
+        </a>
+      </div>
+      <div class="nav-section">
+        <div class="nav-label">System</div>
+        <a class="nav-item" href="#">
+          <span class="nav-icon">⊛</span><span>Settings</span>
+        </a>
+      </div>
+      <div class="sidebar-footer">
+        <div class="lib-stats">
+          <div class="stat-item"><span class="stat-num">84</span><span class="stat-lbl">Elements</span></div>
+          <div class="stat-sep"></div>
+          <div class="stat-item"><span class="stat-num">11</span><span class="stat-lbl">Categories</span></div>
+          <div class="stat-sep"></div>
+          <div class="stat-item"><span class="stat-num">3</span><span class="stat-lbl">Layers</span></div>
+        </div>
+        <div class="provider-card">
+          <div class="prov-top">
+            <span class="prov-label">AI Provider</span>
+            <div class="prov-status"><span class="dot"></span><span>Online</span></div>
+          </div>
+          <div class="prov-name">OLLAMA LOCAL</div>
+          <div class="prov-model">qwen2.5-coder:14b · 10GB</div>
+        </div>
+      </div>
+    </aside>
+
+    <!-- CONTENT -->
+    <main class="content">
+      <div class="ab-page">
+
+        <!-- PAGE HEADER -->
+        <div class="ab-header">
+          <div class="ab-header-left">
+            <div class="ab-eyebrow">// tool · 06</div>
+            <div class="ab-title glitch-text" data-text="A/B WORKSHOP">A/B WORKSHOP</div>
+            <div class="ab-subtitle">Generate 3 variants, pick your favorite, train your DNA</div>
+          </div>
+          <div class="ab-header-right">
+            <div class="step-indicator">
+              <div class="step-dot">
+                <div class="step-num done" id="step-ind-1">STEP 1</div>
+              </div>
+              <div class="step-line"></div>
+              <div class="step-dot">
+                <div class="step-num active" id="step-ind-2">STEP 2</div>
+              </div>
+              <div class="step-line"></div>
+              <div class="step-dot">
+                <div class="step-num" id="step-ind-3">STEP 3</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- BODY -->
+        <div class="ab-body">
+
+          <!-- HISTORY PANEL -->
+          <div class="history-panel">
+            <div class="hp-header">// History</div>
+            <div class="hp-list">
+              <div class="hp-item active-hist">
+                <div class="hp-item-title">Landing Hero Section</div>
+                <div class="hp-item-meta">
+                  <div class="hp-winner">Winner: A</div>
+                  <div class="hp-date">Today</div>
+                </div>
+                <div class="hp-moods">
+                  <span class="hp-mood-tag elegant">elegant</span>
+                </div>
+              </div>
+              <div class="hp-item">
+                <div class="hp-item-title">CTA Button Style</div>
+                <div class="hp-item-meta">
+                  <div class="hp-winner">Winner: C</div>
+                  <div class="hp-date">2d ago</div>
+                </div>
+                <div class="hp-moods">
+                  <span class="hp-mood-tag bold">bold</span>
+                </div>
+              </div>
+              <div class="hp-item">
+                <div class="hp-item-title">Navigation Bar</div>
+                <div class="hp-item-meta">
+                  <div class="hp-winner">Winner: A</div>
+                  <div class="hp-date">3d ago</div>
+                </div>
+                <div class="hp-moods">
+                  <span class="hp-mood-tag minimal">minimal</span>
+                </div>
+              </div>
+              <div class="hp-item">
+                <div class="hp-item-title">Card Component</div>
+                <div class="hp-item-meta">
+                  <div class="hp-winner">Winner: B</div>
+                  <div class="hp-date">5d ago</div>
+                </div>
+                <div class="hp-moods">
+                  <span class="hp-mood-tag dark">dark</span>
+                  <span class="hp-mood-tag elegant">elegant</span>
+                </div>
+              </div>
+              <div class="hp-item">
+                <div class="hp-item-title">Typography Scale</div>
+                <div class="hp-item-meta">
+                  <div class="hp-winner">Winner: A</div>
+                  <div class="hp-date">1w ago</div>
+                </div>
+                <div class="hp-moods">
+                  <span class="hp-mood-tag elegant">elegant</span>
+                </div>
+              </div>
+            </div>
+            <div class="hp-win-count">
+              <div class="hp-wc-title">Mood Wins</div>
+              <div class="hp-wc-row">
+                <div class="hp-wc-mood">elegant</div>
+                <div class="hp-wc-bar-wrap"><div class="hp-wc-bar elegant" style="width:80%"></div></div>
+                <div class="hp-wc-num">8</div>
+              </div>
+              <div class="hp-wc-row">
+                <div class="hp-wc-mood">bold</div>
+                <div class="hp-wc-bar-wrap"><div class="hp-wc-bar bold" style="width:40%"></div></div>
+                <div class="hp-wc-num">4</div>
+              </div>
+              <div class="hp-wc-row">
+                <div class="hp-wc-mood">minimal</div>
+                <div class="hp-wc-bar-wrap"><div class="hp-wc-bar minimal" style="width:30%"></div></div>
+                <div class="hp-wc-num">3</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- MAIN SCROLLABLE -->
+          <div class="ab-main" style="position:relative;">
+
+            <!-- GENERATING OVERLAY -->
+            <div class="generating-overlay" id="genOverlay">
+              <div class="gen-spinner"></div>
+              <div class="gen-label">GENERATING VARIANTS...</div>
+              <div class="gen-log" id="genLog">Analyzing library · Sampling combinations...</div>
+            </div>
+
+            <!-- STEP 1: SETUP -->
+            <div class="step-section visible" id="sectionSetup">
+              <div class="step-setup">
+
+                <div class="setup-card">
+                  <div class="setup-card-top"></div>
+                  <div class="setup-label">// Step 01 · Context</div>
+                  <div class="setup-heading">Project Description</div>
+                  <textarea class="ctx-textarea" id="projectDesc" rows="4" placeholder="Describe your project, target audience, and design goals...
+e.g. A luxury real estate landing page targeting high-net-worth clients. Clean, editorial, premium feel. Hero section with large typography and subtle animations."></textarea>
+
+                  <div class="setup-options">
+                    <div class="opt-group">
+                      <div class="opt-label">Component Type</div>
+                      <select class="opt-select">
+                        <option>Hero Section</option>
+                        <option>Navigation Bar</option>
+                        <option>Card Component</option>
+                        <option>CTA Button</option>
+                        <option>Typography Scale</option>
+                        <option>Form Layout</option>
+                        <option>Footer</option>
+                      </select>
+                    </div>
+                    <div class="opt-group">
+                      <div class="opt-label">Complexity</div>
+                      <select class="opt-select">
+                        <option>Standard (3 elements)</option>
+                        <option>Rich (5 elements)</option>
+                        <option>Minimal (2 elements)</option>
+                      </select>
+                    </div>
+                  </div>
+                </div>
+
+                <div class="setup-card">
+                  <div class="setup-card-top"></div>
+                  <div class="setup-label">// Step 01 · Mood Filter</div>
+                  <div class="setup-heading">Mood Preferences <span style="color:var(--text-dim);font-size:11px;font-weight:400;">(optional)</span></div>
+                  <div class="mood-chips" id="moodChips">
+                    <div class="mood-chip">elegant</div>
+                    <div class="mood-chip selected">bold</div>
+                    <div class="mood-chip">minimal</div>
+                    <div class="mood-chip">dark luxury</div>
+                    <div class="mood-chip">playful</div>
+                    <div class="mood-chip">editorial</div>
+                    <div class="mood-chip">futuristic</div>
+                    <div class="mood-chip">organic</div>
+                  </div>
+                </div>
+
+                <button class="generate-btn" id="generateBtn">
+                  <span class="btn-icon">⇄</span>
+                  <span>GENERATE 3 VARIANTS</span>
+                </button>
+
+              </div>
+            </div><!-- /step 1 -->
+
+            <!-- STEP 2: COMPARE -->
+            <div class="step-section" id="sectionCompare">
+              <div class="step-compare">
+                <div class="compare-intro">
+                  <div class="compare-intro-label">// Step 02 · Compare Variants</div>
+                  <div class="compare-intro-text">3 combinations generated from your library · Select your preferred variant to train your DNA</div>
+                </div>
+
+                <div class="variants-grid">
+
+                  <!-- VARIANT A -->
+                  <div class="variant-card" id="cardA">
+                    <div class="vc-top-line a"></div>
+                    <div class="vc-header">
+                      <div class="vc-label a">Variant A</div>
+                      <div class="vc-mood-badge elegant">elegant</div>
+                    </div>
+                    <div class="vc-elements">
+                      <div class="vc-elem-label">// Elements Used</div>
+                      <div class="vc-elem-list">
+                        <div class="vc-elem-item"><div class="vc-elem-dot a"></div>Playfair Display heading</div>
+                        <div class="vc-elem-item"><div class="vc-elem-dot a"></div>Thin border card</div>
+                        <div class="vc-elem-item"><div class="vc-elem-dot a"></div>Gold accent palette</div>
+                      </div>
+                    </div>
+                    <div class="vc-preview">
+                      <div class="preview-toggle">
+                        <div class="ptog-btn active" data-variant="A" data-mode="code">CODE</div>
+                        <div class="ptog-btn" data-variant="A" data-mode="render">RENDER</div>
+                      </div>
+                      <div class="preview-pane">
+                        <div class="code-preview" id="previewA-code">
+<code><span class="kw">.hero-heading</span> {
+  <span class="prop">font-family</span>: <span class="val">'Playfair Display'</span>;
+  <span class="prop">font-size</span>: <span class="val">72px</span>;
+  <span class="prop">font-weight</span>: <span class="val">300</span>;
+  <span class="prop">letter-spacing</span>: <span class="val">-0.02em</span>;
+  <span class="prop">color</span>: <span class="val">#c8a96e</span>;
+}</code>
+                        </div>
+                        <div class="rendered-preview" id="previewA-render" style="display:none">
+                          <div class="render-demo-a">Luxury Living<br><span style="font-size:10px;font-family:monospace;color:#8ab8d8;font-style:normal;">Where Elegance Meets Architecture</span></div>
+                        </div>
+                      </div>
+                    </div>
+                    <div class="vc-mood-summary">"Refined editorial tone — serif elegance with restrained gold accents"</div>
+                    <div class="vc-footer">
+                      <button class="pick-btn a" data-variant="A">✦ PICK THIS</button>
+                    </div>
+                  </div>
+
+                  <!-- VARIANT B -->
+                  <div class="variant-card" id="cardB">
+                    <div class="vc-top-line b"></div>
+                    <div class="vc-header">
+                      <div class="vc-label b">Variant B</div>
+                      <div class="vc-mood-badge bold">bold</div>
+                    </div>
+                    <div class="vc-elements">
+                      <div class="vc-elem-label">// Elements Used</div>
+                      <div class="vc-elem-list">
+                        <div class="vc-elem-item"><div class="vc-elem-dot b"></div>Orbitron display font</div>
+                        <div class="vc-elem-item"><div class="vc-elem-dot b"></div>Gradient fill button</div>
+                        <div class="vc-elem-item"><div class="vc-elem-dot b"></div>Purple neon glow</div>
+                      </div>
+                    </div>
+                    <div class="vc-preview">
+                      <div class="preview-toggle">
+                        <div class="ptog-btn active" data-variant="B" data-mode="code">CODE</div>
+                        <div class="ptog-btn" data-variant="B" data-mode="render">RENDER</div>
+                      </div>
+                      <div class="preview-pane">
+                        <div class="code-preview" id="previewB-code">
+<code><span class="kw">.hero-heading</span> {
+  <span class="prop">font-family</span>: <span class="val">'Orbitron'</span>;
+  <span class="prop">font-size</span>: <span class="val">64px</span>;
+  <span class="prop">font-weight</span>: <span class="val">900</span>;
+  <span class="prop">text-transform</span>: <span class="val">uppercase</span>;
+  <span class="prop">color</span>: <span class="val">#cc80ff</span>;
+}</code>
+                        </div>
+                        <div class="rendered-preview" id="previewB-render" style="display:none">
+                          <div class="render-demo-b">LUXURY<br>LIVING</div>
+                        </div>
+                      </div>
+                    </div>
+                    <div class="vc-mood-summary">"High-impact futuristic — commanding presence with electric purple identity"</div>
+                    <div class="vc-footer">
+                      <button class="pick-btn b" data-variant="B">✦ PICK THIS</button>
+                    </div>
+                  </div>
+
+                  <!-- VARIANT C -->
+                  <div class="variant-card" id="cardC">
+                    <div class="vc-top-line c"></div>
+                    <div class="vc-header">
+                      <div class="vc-label c">Variant C</div>
+                      <div class="vc-mood-badge minimal">minimal</div>
+                    </div>
+                    <div class="vc-elements">
+                      <div class="vc-elem-label">// Elements Used</div>
+                      <div class="vc-elem-list">
+                        <div class="vc-elem-item"><div class="vc-elem-dot c"></div>Mono spaced type</div>
+                        <div class="vc-elem-item"><div class="vc-elem-dot c"></div>Hairline borders</div>
+                        <div class="vc-elem-item"><div class="vc-elem-dot c"></div>Muted blue palette</div>
+                      </div>
+                    </div>
+                    <div class="vc-preview">
+                      <div class="preview-toggle">
+                        <div class="ptog-btn active" data-variant="C" data-mode="code">CODE</div>
+                        <div class="ptog-btn" data-variant="C" data-mode="render">RENDER</div>
+                      </div>
+                      <div class="preview-pane">
+                        <div class="code-preview" id="previewC-code">
+<code><span class="kw">.hero-heading</span> {
+  <span class="prop">font-family</span>: <span class="val">'JetBrains Mono'</span>;
+  <span class="prop">font-size</span>: <span class="val">48px</span>;
+  <span class="prop">font-weight</span>: <span class="val">400</span>;
+  <span class="prop">letter-spacing</span>: <span class="val">0.08em</span>;
+  <span class="prop">color</span>: <span class="val">#8ab8d8</span>;
+}</code>
+                        </div>
+                        <div class="rendered-preview" id="previewC-render" style="display:none">
+                          <div class="render-demo-c">// luxury_living<br>Precision Architecture<br><span style="color:#3a5a78;">_01 › premium_space</span></div>
+                        </div>
+                      </div>
+                    </div>
+                    <div class="vc-mood-summary">"Technical minimalism — disciplined whitespace with monospace clarity"</div>
+                    <div class="vc-footer">
+                      <button class="pick-btn c" data-variant="C">✦ PICK THIS</button>
+                    </div>
+                  </div>
+
+                </div><!-- /variants grid -->
+
+                <div style="margin-top:16px;display:flex;gap:10px;justify-content:flex-end;">
+                  <button class="result-btn secondary" id="backToSetupBtn" style="flex:0;padding:9px 18px;">
+                    ← REGENERATE
+                  </button>
+                </div>
+              </div>
+            </div><!-- /step 2 -->
+
+            <!-- STEP 3: RESULT -->
+            <div class="step-section" id="sectionResult">
+              <div class="step-result">
+
+                <div class="result-confirm-card">
+                  <div class="rc-check">✓</div>
+                  <div class="rc-title" id="resultTitle">Variant A Selected</div>
+                  <div class="rc-sub" id="resultSub">elegant · Playfair Display · Gold accent palette</div>
+                </div>
+
+                <div class="dna-update-card">
+                  <div class="dna-update-title">// DNA Update</div>
+                  <div class="dna-delta">
+                    <span class="dna-delta-badge" id="dnaWeight">+0.3 weight</span>
+                    <span id="dnaUpdateText">added to elegant elements</span>
+                  </div>
+                  <div class="dna-delta" style="margin-top:4px;">
+                    <span class="dna-delta-badge" style="background:rgba(0,150,100,0.15);color:#00cc88;border-color:rgba(0,150,100,0.25);">+3% accuracy</span>
+                    <span>DNA training applied from selection</span>
+                  </div>
+                  <div class="dna-score-row" style="margin-top:18px;">
+                    <div class="dna-score-num" id="dnaScoreNum">68%</div>
+                    <div class="dna-score-info">
+                      <div class="dna-score-label">DNA Accuracy</div>
+                      <div class="dna-score-prev" id="dnaScorePrev">was 65% before this session</div>
+                    </div>
+                    <div class="dna-bar-wrap" style="max-width:200px;">
+                      <div class="dna-bar-fill" id="dnaBarFill" style="width:0%"></div>
+                    </div>
+                  </div>
+                </div>
+
+                <div class="result-actions">
+                  <button class="result-btn primary" id="generateAgainBtn">
+                    <span>⇄</span> GENERATE AGAIN
+                  </button>
+                  <button class="result-btn secondary" id="continueBtn">
+                    CONTINUE TO LIBRARY →
+                  </button>
+                </div>
+
+              </div>
+            </div><!-- /step 3 -->
+
+          </div><!-- /ab-main -->
+
+        </div><!-- /ab-body -->
+      </div><!-- /ab-page -->
+    </main>
+
+  </div>
+</div>
+
+<script>
+/* ══ STAR CANVAS ══ */
+const canvas = document.getElementById('starCanvas');
+const ctx = canvas.getContext('2d');
+function resize() { canvas.width = window.innerWidth; canvas.height = window.innerHeight; }
+resize(); window.addEventListener('resize', resize);
+const stars = Array.from({length:220}, () => ({
+  x: Math.random()*window.innerWidth, y: Math.random()*window.innerHeight,
+  r: Math.random()*1.3, o: Math.random(), tw: Math.random()*Math.PI*2, sp: Math.random()*0.4+0.05,
+}));
+function drawStars() {
+  ctx.clearRect(0,0,canvas.width,canvas.height);
+  stars.forEach(s => {
+    s.tw += s.sp * 0.018;
+    const op = s.o * (0.35 + 0.65 * Math.abs(Math.sin(s.tw)));
+    ctx.beginPath(); ctx.arc(s.x,s.y,s.r,0,Math.PI*2);
+    ctx.fillStyle = `rgba(160,215,255,${op})`; ctx.fill();
+    if (s.r > 1.0) {
+      ctx.beginPath(); ctx.arc(s.x,s.y,s.r*3.5,0,Math.PI*2);
+      ctx.fillStyle = `rgba(0,160,255,${op*0.12})`; ctx.fill();
+    }
+  });
+  requestAnimationFrame(drawStars);
+}
+drawStars();
+
+/* ══ DATA STREAMS ══ */
+const streamsEl = document.getElementById('dataStreams');
+for (let i=0; i<20; i++) {
+  const el = document.createElement('div');
+  el.className = 'data-stream';
+  const h = Math.random()*130+50;
+  const dur = Math.random()*5+3;
+  el.style.cssText = `left:${Math.random()*100}%;height:${h}px;animation-duration:${dur}s;animation-delay:${Math.random()*10}s;`;
+  streamsEl.appendChild(el);
+}
+
+/* ══ HEX PARTICLES ══ */
+const hexEl = document.getElementById('hexParticles');
+const syms = ['⬡','⬢','◈','◉','◎','⊞','✦'];
+for (let i=0; i<16; i++) {
+  const el = document.createElement('div');
+  el.className = 'hex-particle';
+  const size = Math.random()*22+9;
+  el.textContent = syms[Math.floor(Math.random()*syms.length)];
+  el.style.cssText = `left:${Math.random()*100}%;bottom:-60px;font-size:${size}px;animation-duration:${Math.random()*22+14}s;animation-delay:${Math.random()*18}s;`;
+  hexEl.appendChild(el);
+}
+
+/* ══ GLITCH ENGINE ══ */
+const glitchBars = document.getElementById('glitchBars');
+const appEl = document.getElementById('app');
+function triggerGlitch(intensity = 'low') {
+  const count = intensity === 'boot' ? 8 : Math.floor(Math.random()*4)+2;
+  for (let i=0; i<count; i++) {
+    const bar = document.createElement('div');
+    bar.className = 'g-bar';
+    const top = Math.random()*100, h = Math.random()*(intensity==='boot'?8:4)+1;
+    const tx = (Math.random()-0.5)*(intensity==='boot'?30:14);
+    const dur = Math.random()*80+40;
+    const isRGB = Math.random()>0.5;
+    bar.style.cssText = `top:${top}%;height:${h}px;background:rgba(${isRGB?'0,210,255':'255,0,200'},${intensity==='boot'?0.12:0.07});transform:translateX(${tx}px) skewX(${(Math.random()-0.5)*2}deg);mix-blend-mode:screen;`;
+    glitchBars.appendChild(bar);
+    let op=0; const step=1/(dur/16); let dir=1; let frame;
+    (function anim() {
+      op+=step*dir; if(op>=1)dir=-1;
+      if(op<=0&&dir===-1){bar.remove();return;}
+      bar.style.opacity=op; frame=requestAnimationFrame(anim);
+    })();
+    setTimeout(()=>{cancelAnimationFrame(frame);bar.remove();},dur+60);
+  }
+  if(Math.random()>0.5||intensity==='boot'){
+    appEl.style.animation=`screenShake ${60+Math.random()*80}ms ease both`;
+    setTimeout(()=>{appEl.style.animation='';},200);
+  }
+}
+window.addEventListener('load',()=>{
+  let n=0; const boot=()=>{if(n++>5)return;triggerGlitch('boot');setTimeout(boot,110);};
+  setTimeout(boot,500);
+});
+function scheduleGlitch() { const delay=Math.random()*9000+5000; setTimeout(()=>{triggerGlitch('low');scheduleGlitch();},delay); }
+scheduleGlitch();
+
+/* ══ CURSOR ══ */
+const cursor = document.getElementById('cursor');
+const ring   = document.getElementById('cursor-ring');
+let mx=0,my=0,rx=0,ry=0;
+document.addEventListener('mousemove', e=>{mx=e.clientX;my=e.clientY;cursor.style.left=mx+'px';cursor.style.top=my+'px';});
+(function animRing(){rx+=(mx-rx)*0.1;ry+=(my-ry)*0.1;ring.style.left=rx+'px';ring.style.top=ry+'px';requestAnimationFrame(animRing);})();
+function updateCursorTargets(){
+  document.querySelectorAll('a,button,.hp-item,.mood-chip,.ptog-btn,.variant-card,.provider-card,.nav-item').forEach(el=>{
+    el.addEventListener('mouseenter',()=>{ring.style.width='36px';ring.style.height='36px';ring.style.borderColor='rgba(0,212,255,0.7)';cursor.style.transform='translate(-50%,-50%) scale(1.6)';});
+    el.addEventListener('mouseleave',()=>{ring.style.width='26px';ring.style.height='26px';ring.style.borderColor='rgba(0,170,255,0.5)';cursor.style.transform='translate(-50%,-50%) scale(1)';});
+  });
+}
+updateCursorTargets();
+
+/* ══ NAV ══ */
+document.querySelectorAll('.nav-item').forEach(item=>{
+  item.addEventListener('click', e=>{
+    e.preventDefault();
+    document.querySelectorAll('.nav-item').forEach(i=>i.classList.remove('active'));
+    item.classList.add('active');
+    document.getElementById('breadCrumb').textContent = item.querySelector('span:nth-child(2)').textContent.toLowerCase().replace(/\s+/g,'-');
+    triggerGlitch('low');
+  });
+});
+
+/* ══ MOOD CHIPS ══ */
+document.querySelectorAll('.mood-chip').forEach(chip=>{
+  chip.addEventListener('click',()=>{
+    chip.classList.toggle('selected');
+    triggerGlitch('low');
+  });
+});
+
+/* ══ STEP TRANSITIONS ══ */
+let currentStep = 1;
+let pickedVariant = 'A';
+
+function showSection(id) {
+  document.querySelectorAll('.step-section').forEach(s=>s.classList.remove('visible'));
+  document.getElementById(id).classList.add('visible');
+}
+
+function updateStepIndicators(step) {
+  const s1 = document.getElementById('step-ind-1');
+  const s2 = document.getElementById('step-ind-2');
+  const s3 = document.getElementById('step-ind-3');
+  s1.className = 'step-num'; s2.className = 'step-num'; s3.className = 'step-num';
+  if (step === 1) { s1.classList.add('active'); }
+  if (step === 2) { s1.classList.add('done'); s2.classList.add('active'); }
+  if (step === 3) { s1.classList.add('done'); s2.classList.add('done'); s3.classList.add('active'); }
+}
+
+/* GENERATE BUTTON */
+document.getElementById('generateBtn').addEventListener('click', ()=>{
+  const desc = document.getElementById('projectDesc').value.trim();
+  const genOverlay = document.getElementById('genOverlay');
+  const genLog = document.getElementById('genLog');
+
+  genOverlay.classList.add('active');
+  const logs = [
+    'Analyzing library · Sampling combinations...',
+    'Filtering by mood profile...',
+    'Sampling elegant elements · 3 found',
+    'Composing Variant A · B · C...',
+    'Running compatibility check...',
+    'Generating mood summaries...',
+    'Variants ready ✓'
+  ];
+  let li = 0;
+  const logInterval = setInterval(()=>{
+    if(li < logs.length) { genLog.textContent = logs[li++]; }
+    else {
+      clearInterval(logInterval);
+      genOverlay.classList.remove('active');
+      currentStep = 2;
+      updateStepIndicators(2);
+      showSection('sectionCompare');
+      triggerGlitch('low');
+    }
+  }, 320);
+});
+
+/* BACK / REGENERATE */
+document.getElementById('backToSetupBtn').addEventListener('click', ()=>{
+  currentStep = 1;
+  updateStepIndicators(1);
+  showSection('sectionSetup');
+  triggerGlitch('low');
+});
+
+/* PICK BUTTONS */
+document.querySelectorAll('.pick-btn').forEach(btn=>{
+  btn.addEventListener('click', ()=>{
+    pickedVariant = btn.dataset.variant;
+    triggerGlitch('low');
+
+    // Build result data per variant
+    const variantData = {
+      A: { title: 'Variant A Selected', sub: 'elegant · Playfair Display · Gold accent palette', weight: '+0.3 weight', update: 'added to elegant elements', score: '68%', prev: 'was 65% before this session', bar: 68 },
+      B: { title: 'Variant B Selected', sub: 'bold · Orbitron display · Purple neon glow',        weight: '+0.4 weight', update: 'added to bold elements',    score: '71%', prev: 'was 65% before this session', bar: 71 },
+      C: { title: 'Variant C Selected', sub: 'minimal · Mono spaced · Muted blue palette',        weight: '+0.2 weight', update: 'added to minimal elements', score: '67%', prev: 'was 65% before this session', bar: 67 },
+    };
+    const d = variantData[pickedVariant];
+    document.getElementById('resultTitle').textContent   = d.title;
+    document.getElementById('resultSub').textContent     = d.sub;
+    document.getElementById('dnaWeight').textContent     = d.weight;
+    document.getElementById('dnaUpdateText').textContent = d.update;
+    document.getElementById('dnaScoreNum').textContent   = d.score;
+    document.getElementById('dnaScorePrev').textContent  = d.prev;
+
+    currentStep = 3;
+    updateStepIndicators(3);
+    showSection('sectionResult');
+
+    // animate DNA bar
+    setTimeout(()=>{
+      document.getElementById('dnaBarFill').style.width = d.bar + '%';
+    }, 200);
+
+    // add to history panel (visual only)
+    addHistoryEntry(pickedVariant, d.sub.split(' · ')[0]);
+    updateCursorTargets();
+  });
+});
+
+/* GENERATE AGAIN */
+document.getElementById('generateAgainBtn').addEventListener('click', ()=>{
+  currentStep = 1;
+  updateStepIndicators(1);
+  showSection('sectionSetup');
+  document.getElementById('dnaBarFill').style.width = '0%';
+  triggerGlitch('low');
+});
+
+/* CONTINUE */
+document.getElementById('continueBtn').addEventListener('click', ()=>{
+  triggerGlitch('low');
+  document.querySelector('.nav-item:nth-child(2)').click();
+});
+
+/* History panel entries */
+function addHistoryEntry(variant, mood) {
+  const list = document.querySelector('.hp-list');
+  const entry = document.createElement('div');
+  entry.className = 'hp-item';
+  const desc = document.getElementById('projectDesc').value.trim() || 'A/B Session';
+  const title = desc.length > 20 ? desc.substring(0,20)+'…' : desc;
+  entry.innerHTML = `
+    <div class="hp-item-title">${title}</div>
+    <div class="hp-item-meta">
+      <div class="hp-winner">Winner: ${variant}</div>
+      <div class="hp-date">Now</div>
+    </div>
+    <div class="hp-moods"><span class="hp-mood-tag ${mood}">${mood}</span></div>
+  `;
+  list.insertBefore(entry, list.firstChild);
+  list.querySelectorAll('.hp-item').forEach(i=>i.classList.remove('active-hist'));
+  entry.classList.add('active-hist');
+}
+
+/* PREVIEW TOGGLES */
+document.querySelectorAll('.preview-toggle').forEach(tog=>{
+  tog.querySelectorAll('.ptog-btn').forEach(btn=>{
+    btn.addEventListener('click', ()=>{
+      const variant = btn.dataset.variant;
+      const mode    = btn.dataset.mode;
+      tog.querySelectorAll('.ptog-btn').forEach(b=>b.classList.remove('active'));
+      btn.classList.add('active');
+      const codeEl   = document.getElementById(`preview${variant}-code`);
+      const renderEl = document.getElementById(`preview${variant}-render`);
+      if(mode === 'code') { codeEl.style.display='block'; renderEl.style.display='none'; }
+      else                { codeEl.style.display='none';  renderEl.style.display='flex'; }
+    });
+  });
+});
+
+/* INIT */
+updateStepIndicators(2);
+showSection('sectionCompare');
+</script>
+</body>
+</html>

@@ -1,0 +1,896 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>FectTral – Welcome</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;600;700;900&family=Exo+2:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%;overflow:hidden}
+:root{
+  --bg-void:#020408;
+  --blue-core:#00aaff;--blue-bright:#00d4ff;--blue-electric:#0066ff;
+  --glow-sm:0 0 8px rgba(0,170,255,0.4);
+  --glow-md:0 0 20px rgba(0,170,255,0.5),0 0 40px rgba(0,102,255,0.25);
+  --glow-lg:0 0 40px rgba(0,170,255,0.6),0 0 80px rgba(0,80,255,0.3);
+  --glow-text:0 0 12px rgba(0,212,255,0.9),0 0 24px rgba(0,170,255,0.5);
+  --border-dim:rgba(0,140,255,0.12);--border-mid:rgba(0,170,255,0.25);
+  --text-primary:#e8f4ff;--text-secondary:#8ab8d8;--text-muted:#3a5a78;--text-dim:#1a3050;
+  --font-display:'Orbitron',monospace;--font-body:'Exo 2',sans-serif;--font-mono:'JetBrains Mono',monospace;
+  --green:#00cc88;--orange:#ffaa00;--red:#ff4455;
+}
+body{font-family:var(--font-body);background:var(--bg-void);color:var(--text-primary);cursor:none;overflow:hidden}
+
+/* ══ BG ══ */
+.bg-root{position:fixed;inset:0;z-index:0}
+.bg-space{position:absolute;inset:0;background:
+  radial-gradient(ellipse at 15% 85%,rgba(0,50,160,0.65) 0%,transparent 42%),
+  radial-gradient(ellipse at 85% 10%,rgba(0,25,100,0.55) 0%,transparent 38%),
+  radial-gradient(ellipse at 50% 50%,rgba(0,12,45,0.5) 0%,transparent 60%),#020408}
+.bg-grid{position:absolute;inset:0;
+  background-image:radial-gradient(circle,rgba(0,130,255,0.16) 1px,transparent 1px);
+  background-size:40px 40px;
+  mask-image:radial-gradient(ellipse 70% 70% at center,black 20%,transparent 75%);
+  animation:gridDrift 80s linear infinite}
+@keyframes gridDrift{from{background-position:0 0}to{background-position:40px 40px}}
+
+/* perspective floor */
+.bg-floor{position:absolute;bottom:0;left:0;right:0;height:50%;
+  background-image:linear-gradient(rgba(0,100,255,0.06) 1px,transparent 1px),
+  linear-gradient(90deg,rgba(0,100,255,0.06) 1px,transparent 1px);
+  background-size:80px 40px;
+  transform:perspective(600px) rotateX(68deg);transform-origin:bottom center;
+  mask-image:linear-gradient(to bottom,transparent 0%,black 55%);
+  animation:floorScroll 18s linear infinite}
+@keyframes floorScroll{from{background-position:0 0}to{background-position:0 40px}}
+
+.orb{position:absolute;border-radius:50%;filter:blur(100px);pointer-events:none}
+.orb-1{width:700px;height:700px;background:radial-gradient(circle,rgba(0,55,200,0.5) 0%,transparent 70%);top:-250px;left:-200px;animation:orb1 30s ease-in-out infinite}
+.orb-2{width:500px;height:500px;background:radial-gradient(circle,rgba(0,120,255,0.4) 0%,transparent 70%);bottom:-130px;right:-130px;animation:orb2 35s ease-in-out infinite}
+.orb-3{width:350px;height:350px;background:radial-gradient(circle,rgba(0,190,255,0.2) 0%,transparent 70%);top:30%;left:42%;animation:orb3 24s ease-in-out infinite}
+@keyframes orb1{0%,100%{transform:translate(0,0) scale(1)}40%{transform:translate(60px,80px) scale(1.1)}70%{transform:translate(-30px,40px) scale(0.9)}}
+@keyframes orb2{0%,100%{transform:translate(0,0)}55%{transform:translate(-80px,-60px)}}
+@keyframes orb3{0%,100%{transform:translate(0,0) scale(1)}50%{transform:translate(30px,-50px) scale(1.3)}}
+
+.scanlines{position:absolute;inset:0;pointer-events:none;
+  background:repeating-linear-gradient(0deg,transparent,transparent 3px,rgba(0,0,0,0.05) 3px,rgba(0,0,0,0.05) 4px)}
+.vignette{position:absolute;inset:0;pointer-events:none;
+  background:radial-gradient(ellipse at center,transparent 40%,rgba(0,0,0,0.82) 100%)}
+
+/* floating particles */
+.particle{position:absolute;pointer-events:none;animation:particleFloat linear infinite}
+@keyframes particleFloat{0%{transform:translateY(110vh) rotate(0deg);opacity:0}8%{opacity:0.6}90%{opacity:0.15}100%{transform:translateY(-10vh) rotate(220deg);opacity:0}}
+
+/* scan beam */
+.scan-beam{position:absolute;left:0;right:0;height:1px;
+  background:linear-gradient(90deg,transparent,rgba(0,212,255,0.3) 50%,transparent);
+  animation:beamSweep 12s linear infinite;pointer-events:none}
+@keyframes beamSweep{from{top:0}to{top:100%}}
+
+/* cursor */
+#cursor{position:fixed;z-index:9999;width:6px;height:6px;background:var(--blue-bright);border-radius:50%;pointer-events:none;transform:translate(-50%,-50%);box-shadow:var(--glow-md)}
+#cursor-ring{position:fixed;z-index:9998;width:28px;height:28px;border:1px solid rgba(0,170,255,0.5);border-radius:50%;pointer-events:none;transform:translate(-50%,-50%);transition:width 0.2s,height 0.2s,border-color 0.2s}
+
+/* glitch bars */
+.glitch-bars{position:fixed;inset:0;z-index:999;pointer-events:none;overflow:hidden}
+.g-bar{position:absolute;left:0;right:0;opacity:0}
+
+/* ══ SCREEN SYSTEM ══ */
+.screens{position:relative;z-index:2;width:100vw;height:100vh;display:flex;align-items:center;justify-content:center}
+
+.screen{
+  position:absolute;inset:0;display:flex;align-items:center;justify-content:center;
+  opacity:0;pointer-events:none;transition:none;
+}
+.screen.active{opacity:1;pointer-events:auto}
+
+/* ══ PROGRESS DOTS ══ */
+.progress{
+  position:fixed;bottom:32px;left:50%;transform:translateX(-50%);
+  z-index:10;display:flex;align-items:center;gap:10px;
+}
+.prog-dot{
+  width:6px;height:6px;border-radius:50%;
+  background:var(--text-dim);border:1px solid var(--border-dim);
+  transition:all 0.4s ease;cursor:pointer;
+}
+.prog-dot.active{width:24px;border-radius:3px;background:var(--blue-core);box-shadow:0 0 10px var(--blue-core)}
+.prog-dot.done{background:rgba(0,170,255,0.4);border-color:rgba(0,170,255,0.3)}
+
+/* ══ SHARED COMPONENTS ══ */
+.screen-card{
+  width:min(560px,90vw);
+  background:rgba(6,12,26,0.82);
+  border:1px solid var(--border-dim);
+  border-radius:6px;
+  backdrop-filter:blur(40px);
+  position:relative;overflow:hidden;
+}
+.card-top-line{height:1px;background:linear-gradient(90deg,transparent,rgba(0,200,255,0.7),transparent)}
+
+/* primary button */
+.btn-primary{
+  display:flex;align-items:center;justify-content:center;gap:10px;
+  padding:14px 32px;width:100%;border-radius:4px;
+  background:linear-gradient(90deg,rgba(0,90,220,0.4),rgba(0,60,180,0.25));
+  border:1px solid rgba(0,160,255,0.5);
+  color:var(--blue-bright);font-family:var(--font-display);font-size:12px;
+  font-weight:700;letter-spacing:0.18em;cursor:pointer;transition:all 0.3s;
+  position:relative;overflow:hidden;
+}
+.btn-primary::before{content:'';position:absolute;inset:0;
+  background:linear-gradient(90deg,transparent,rgba(0,170,255,0.12),transparent);
+  transform:translateX(-100%);transition:transform 0.6s}
+.btn-primary:hover::before{transform:translateX(100%)}
+.btn-primary:hover{border-color:var(--blue-bright);box-shadow:var(--glow-md);text-shadow:var(--glow-text)}
+.btn-primary:active{transform:scale(0.98)}
+
+/* secondary button */
+.btn-secondary{
+  display:flex;align-items:center;justify-content:center;gap:8px;
+  padding:11px 24px;border-radius:3px;
+  background:transparent;border:1px solid var(--border-dim);
+  color:var(--text-muted);font-family:var(--font-mono);font-size:10px;
+  letter-spacing:0.14em;cursor:pointer;transition:all 0.25s;
+}
+.btn-secondary:hover{border-color:var(--border-mid);color:var(--text-secondary)}
+
+/* field */
+.field-label{font-family:var(--font-mono);font-size:8px;letter-spacing:0.28em;color:var(--text-dim);text-transform:uppercase;margin-bottom:6px}
+.field-input{
+  width:100%;background:rgba(0,8,24,0.7);border:1px solid var(--border-dim);border-radius:3px;
+  padding:10px 14px;color:var(--text-primary);font-family:var(--font-mono);font-size:11px;
+  outline:none;transition:all 0.2s;
+}
+.field-input::placeholder{color:var(--text-muted)}
+.field-input:focus{border-color:var(--border-mid);box-shadow:var(--glow-sm)}
+
+/* glitch text */
+.glitch-text{position:relative;display:inline-block}
+.glitch-text::before,.glitch-text::after{content:attr(data-text);position:absolute;top:0;left:0;width:100%;height:100%;font-family:inherit;font-size:inherit;font-weight:inherit;letter-spacing:inherit}
+.glitch-text::before{color:#00ffee;animation:gBefore 6s infinite;clip-path:polygon(0 18%,100% 18%,100% 38%,0 38%)}
+.glitch-text::after{color:#ff00cc;animation:gAfter 6s infinite;clip-path:polygon(0 62%,100% 62%,100% 80%,0 80%)}
+@keyframes gBefore{0%,91%,100%{transform:translateX(0);opacity:0}92%{transform:translateX(-5px);opacity:0.9}93%{transform:translateX(4px);opacity:0.7}94%{opacity:0}}
+@keyframes gAfter{0%,90%,100%{transform:translateX(0);opacity:0}91%{transform:translateX(5px);opacity:0.8}92%{transform:translateX(-3px);opacity:0.6}93%{opacity:0}}
+
+/* ════════════════════════════════
+   SCREEN 1 — WELCOME
+════════════════════════════════ */
+#screen1 .card-body{padding:56px 52px 48px;text-align:center}
+
+/* Logo animation */
+.logo-wrap{display:flex;flex-direction:column;align-items:center;margin-bottom:36px}
+.logo-hex-big{width:80px;height:80px;margin-bottom:16px;animation:hexGlow 4s ease-in-out infinite}
+@keyframes hexGlow{0%,100%{filter:drop-shadow(0 0 10px rgba(0,170,255,0.8))}50%{filter:drop-shadow(0 0 28px rgba(0,212,255,1)) drop-shadow(0 0 55px rgba(0,80,255,0.6))}}
+.logo-hex-big svg{width:100%;height:100%}
+.logo-rings{position:absolute;width:80px;height:80px}
+.logo-ring{position:absolute;border-radius:50%;border:1px solid rgba(0,170,255,0.2);animation:ringExpand 3s ease-out infinite}
+.logo-ring:nth-child(1){width:100%;height:100%;animation-delay:0s}
+.logo-ring:nth-child(2){width:140%;height:140%;top:-20%;left:-20%;animation-delay:0.6s}
+.logo-ring:nth-child(3){width:190%;height:190%;top:-45%;left:-45%;animation-delay:1.2s}
+@keyframes ringExpand{0%{transform:scale(0.8);opacity:0.8}100%{transform:scale(1.5);opacity:0}}
+
+.s1-name{font-family:var(--font-display);font-size:28px;font-weight:900;letter-spacing:0.2em;color:var(--blue-bright);text-shadow:var(--glow-text);margin-bottom:6px}
+.s1-version{font-family:var(--font-mono);font-size:9px;letter-spacing:0.3em;color:var(--text-dim);margin-bottom:28px}
+.s1-tagline{font-family:var(--font-body);font-size:15px;font-weight:300;color:var(--text-secondary);line-height:1.65;margin-bottom:8px;letter-spacing:0.02em}
+.s1-tagline strong{color:var(--text-primary);font-weight:600}
+.s1-features{display:flex;gap:20px;justify-content:center;margin-bottom:40px;flex-wrap:wrap}
+.s1-feat{display:flex;align-items:center;gap:6px;font-family:var(--font-mono);font-size:9px;color:var(--text-muted);letter-spacing:0.1em}
+.s1-feat-dot{width:5px;height:5px;border-radius:50%;background:var(--blue-core);box-shadow:0 0 6px var(--blue-core)}
+
+/* ════════════════════════════════
+   SCREEN 2 — SETUP AI
+════════════════════════════════ */
+#screen2 .card-body{padding:36px 44px 40px}
+.s2-title{font-family:var(--font-display);font-size:14px;font-weight:700;letter-spacing:0.14em;color:var(--blue-bright);text-shadow:var(--glow-text);margin-bottom:4px}
+.s2-sub{font-family:var(--font-mono);font-size:9px;color:var(--text-dim);letter-spacing:0.2em;margin-bottom:28px}
+
+/* detection status */
+.detect-box{
+  border:1px solid var(--border-dim);border-radius:4px;padding:16px 18px;
+  margin-bottom:20px;background:rgba(2,5,14,0.5);position:relative;overflow:hidden;
+  transition:border-color 0.3s,background 0.3s;
+}
+.detect-box.ok{border-color:rgba(0,200,120,0.35);background:rgba(0,40,25,0.3)}
+.detect-box.warn{border-color:rgba(255,160,0,0.35);background:rgba(50,30,0,0.3)}
+.detect-box::before{content:'';position:absolute;top:0;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent,var(--detect-color,rgba(0,200,120,0.5)),transparent)}
+.detect-box.ok::before{--detect-color:rgba(0,200,120,0.5)}
+.detect-box.warn::before{--detect-color:rgba(255,160,0,0.5)}
+
+.detect-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:8px}
+.detect-label{font-family:var(--font-mono);font-size:8px;letter-spacing:0.25em;color:var(--text-dim);text-transform:uppercase}
+.detect-status{display:flex;align-items:center;gap:7px;font-family:var(--font-mono);font-size:10px}
+.detect-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0}
+.detect-dot.ok{background:var(--green);box-shadow:0 0 10px var(--green)}
+.detect-dot.warn{background:var(--orange);box-shadow:0 0 10px var(--orange);animation:warnPulse 1.5s ease-in-out infinite}
+.detect-dot.scanning{background:var(--blue-core);animation:scanPulse 0.7s ease-in-out infinite}
+@keyframes warnPulse{0%,100%{opacity:1}50%{opacity:0.3}}
+@keyframes scanPulse{0%,100%{transform:scale(1);box-shadow:0 0 6px var(--blue-core)}50%{transform:scale(1.6);box-shadow:0 0 14px var(--blue-core)}}
+.detect-msg{color:var(--text-secondary)}
+.detect-msg.ok{color:var(--green)}
+.detect-msg.warn{color:var(--orange)}
+.detect-url{font-family:var(--font-mono);font-size:9px;color:var(--text-dim);margin-top:3px}
+
+/* install instructions */
+.install-box{
+  background:rgba(50,25,0,0.3);border:1px solid rgba(255,160,0,0.2);border-radius:3px;
+  padding:12px 14px;margin-top:10px;display:none;
+}
+.install-box.show{display:block}
+.install-step{display:flex;align-items:flex-start;gap:8px;font-family:var(--font-mono);font-size:9px;color:var(--text-muted);margin-bottom:6px;line-height:1.5}
+.install-step:last-child{margin-bottom:0}
+.install-step-num{color:var(--orange);flex-shrink:0;font-weight:700}
+.install-cmd{display:inline-block;background:rgba(0,0,0,0.4);border:1px solid rgba(255,160,0,0.15);border-radius:2px;padding:1px 6px;color:#ffcc66;font-family:var(--font-mono);font-size:9px;margin-top:2px}
+
+/* model selector */
+.model-section{margin-bottom:20px}
+.model-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.model-card{
+  border:1px solid var(--border-dim);border-radius:3px;padding:12px 14px;
+  cursor:pointer;transition:all 0.2s;background:rgba(3,8,20,0.6);position:relative;overflow:hidden;
+}
+.model-card::before{content:'';position:absolute;top:0;left:0;right:0;height:1px;
+  background:linear-gradient(90deg,transparent,rgba(0,170,255,0.3),transparent);opacity:0;transition:opacity 0.2s}
+.model-card:hover::before{opacity:1}
+.model-card:hover{border-color:var(--border-mid)}
+.model-card.selected{border-color:rgba(0,170,255,0.45);background:rgba(0,50,150,0.18)}
+.model-card.selected::after{content:'✓';position:absolute;top:8px;right:10px;font-size:10px;color:var(--blue-bright)}
+.mc-name{font-family:var(--font-mono);font-size:10px;color:var(--text-secondary);letter-spacing:0.06em;margin-bottom:3px}
+.mc-size{font-family:var(--font-mono);font-size:8px;color:var(--text-dim)}
+.mc-tags{display:flex;gap:4px;margin-top:6px;flex-wrap:wrap}
+.mc-tag{padding:1px 5px;border-radius:1px;font-family:var(--font-mono);font-size:7px;letter-spacing:0.1em;
+  border:1px solid var(--border-dim);color:var(--text-dim)}
+
+/* test generate */
+.test-gen-row{display:flex;align-items:center;gap:10px;margin-bottom:20px}
+.test-gen-btn{
+  display:flex;align-items:center;gap:6px;padding:9px 16px;border-radius:3px;flex-shrink:0;
+  border:1px solid rgba(0,150,255,0.3);color:var(--blue-core);background:rgba(0,40,120,0.15);
+  font-family:var(--font-mono);font-size:9px;letter-spacing:0.12em;cursor:pointer;transition:all 0.25s;
+}
+.test-gen-btn:hover{border-color:var(--blue-bright);color:var(--blue-bright);box-shadow:var(--glow-sm)}
+.test-gen-result{font-family:var(--font-mono);font-size:9px;color:var(--text-muted);flex:1}
+.test-gen-result.ok{color:var(--green)}
+.test-gen-result.err{color:var(--red)}
+
+/* ════════════════════════════════
+   SCREEN 3 — FIRST FETCH
+════════════════════════════════ */
+#screen3 .card-body{padding:36px 44px 40px}
+.s3-title{font-family:var(--font-display);font-size:14px;font-weight:700;letter-spacing:0.14em;color:var(--blue-bright);text-shadow:var(--glow-text);margin-bottom:4px}
+.s3-sub{font-family:var(--font-mono);font-size:9px;color:var(--text-dim);letter-spacing:0.2em;margin-bottom:28px}
+
+/* source options */
+.source-options{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:20px}
+.source-opt{
+  border:1px solid var(--border-dim);border-radius:3px;padding:14px 10px;
+  text-align:center;cursor:pointer;transition:all 0.2s;background:rgba(3,8,20,0.5);
+  position:relative;overflow:hidden;
+}
+.source-opt::before{content:'';position:absolute;top:0;left:0;right:0;height:1px;
+  background:linear-gradient(90deg,transparent,rgba(0,170,255,0.3),transparent);opacity:0;transition:opacity 0.2s}
+.source-opt:hover::before,.source-opt.selected::before{opacity:1}
+.source-opt:hover,.source-opt.selected{border-color:var(--border-mid);background:rgba(0,40,120,0.15)}
+.source-opt.selected{border-color:rgba(0,170,255,0.4)}
+.so-icon{font-size:20px;margin-bottom:6px}
+.so-name{font-family:var(--font-mono);font-size:8px;letter-spacing:0.1em;color:var(--text-muted)}
+.source-opt.selected .so-name{color:var(--blue-bright)}
+
+/* url input row */
+.url-row{display:flex;gap:8px;margin-bottom:16px}
+.url-row .field-input{flex:1}
+.url-fetch-btn{
+  padding:0 16px;border-radius:3px;flex-shrink:0;
+  border:1px solid rgba(0,150,255,0.35);color:var(--blue-core);background:rgba(0,50,150,0.12);
+  font-family:var(--font-mono);font-size:9px;letter-spacing:0.1em;cursor:pointer;transition:all 0.2s;
+  white-space:nowrap;
+}
+.url-fetch-btn:hover{border-color:var(--blue-bright);box-shadow:var(--glow-sm);color:var(--blue-bright)}
+
+/* fetch preview */
+.fetch-preview{
+  border:1px solid var(--border-dim);border-radius:3px;padding:14px;
+  background:rgba(2,5,14,0.6);min-height:60px;display:flex;align-items:center;
+  gap:12px;margin-bottom:16px;transition:border-color 0.3s;
+}
+.fetch-preview.loading .fp-icon{animation:fpSpin 1s linear infinite}
+@keyframes fpSpin{to{transform:rotate(360deg)}}
+.fetch-preview.success{border-color:rgba(0,200,100,0.3)}
+.fp-icon{font-size:22px;flex-shrink:0;color:var(--text-dim);transition:color 0.3s}
+.fetch-preview.success .fp-icon{color:var(--green)}
+.fp-info{}
+.fp-title{font-family:var(--font-mono);font-size:10px;color:var(--text-secondary);margin-bottom:2px}
+.fp-meta{font-family:var(--font-mono);font-size:8px;color:var(--text-dim)}
+.fp-tags{display:flex;gap:4px;margin-top:5px;flex-wrap:wrap}
+.fp-tag{padding:2px 7px;border-radius:1px;font-family:var(--font-mono);font-size:8px;
+  border:1px solid var(--border-dim);color:var(--text-muted)}
+
+/* divider */
+.or-divider{display:flex;align-items:center;gap:12px;margin-bottom:16px}
+.or-line{flex:1;height:1px;background:linear-gradient(90deg,transparent,var(--border-dim),transparent)}
+.or-text{font-family:var(--font-mono);font-size:8px;color:var(--text-dim);letter-spacing:0.2em}
+
+/* ════════════════════════════════
+   SCREEN 4 — READY
+════════════════════════════════ */
+#screen4 .card-body{padding:48px 52px 44px;text-align:center}
+.s4-ready-icon{font-size:36px;margin-bottom:20px;animation:readyBounce 2s ease-in-out infinite}
+@keyframes readyBounce{0%,100%{transform:scale(1)}50%{transform:scale(1.08)}}
+.s4-title{font-family:var(--font-display);font-size:20px;font-weight:900;letter-spacing:0.16em;color:var(--blue-bright);text-shadow:var(--glow-text);margin-bottom:6px}
+.s4-sub{font-family:var(--font-mono);font-size:9px;color:var(--text-dim);letter-spacing:0.25em;margin-bottom:28px;text-transform:uppercase}
+
+/* DNA meter */
+.dna-meter{margin-bottom:28px}
+.dna-meter-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px}
+.dna-meter-label{font-family:var(--font-mono);font-size:9px;letter-spacing:0.2em;color:var(--text-dim);text-transform:uppercase}
+.dna-meter-val{font-family:var(--font-display);font-size:13px;font-weight:700;color:var(--blue-bright)}
+.dna-bar-wrap{height:6px;background:rgba(0,30,80,0.5);border-radius:3px;overflow:hidden;border:1px solid var(--border-dim);margin-bottom:8px}
+.dna-bar-fill{height:100%;width:0%;background:linear-gradient(90deg,var(--blue-electric),var(--blue-bright));border-radius:3px;transition:width 2s ease}
+.dna-hexes{display:flex;gap:4px;justify-content:center;flex-wrap:wrap}
+.dna-hex{
+  width:28px;height:28px;border:1px solid var(--border-dim);border-radius:2px;
+  display:flex;align-items:center;justify-content:center;font-size:10px;color:var(--text-dim);
+  transition:all 0.5s ease;
+}
+.dna-hex.lit{border-color:rgba(0,170,255,0.3);color:var(--blue-core);background:rgba(0,60,180,0.12);box-shadow:var(--glow-sm)}
+
+/* stats row */
+.ready-stats{display:flex;gap:0;border:1px solid var(--border-dim);border-radius:3px;overflow:hidden;margin-bottom:28px}
+.rs-item{flex:1;padding:14px 8px;text-align:center;border-right:1px solid var(--border-dim)}
+.rs-item:last-child{border-right:none}
+.rs-num{font-family:var(--font-display);font-size:18px;font-weight:700;color:var(--blue-bright);text-shadow:var(--glow-text)}
+.rs-label{font-family:var(--font-mono);font-size:8px;letter-spacing:0.14em;color:var(--text-dim);text-transform:uppercase;margin-top:3px}
+
+.s4-quote{font-family:var(--font-body);font-size:12px;font-weight:300;color:var(--text-muted);
+  line-height:1.7;margin-bottom:32px;font-style:italic;letter-spacing:0.02em}
+
+/* ════════════ TRANSITIONS ════════════ */
+@keyframes screenEnter{from{opacity:0;transform:translateY(30px) scale(0.97)}to{opacity:1;transform:translateY(0) scale(1)}}
+@keyframes screenExit{from{opacity:1;transform:translateY(0) scale(1)}to{opacity:0;transform:translateY(-20px) scale(1.02)}}
+.screen-entering{animation:screenEnter 0.55s cubic-bezier(0.16,1,0.3,1) forwards}
+.screen-exiting{animation:screenExit 0.35s cubic-bezier(0.4,0,1,1) forwards}
+
+/* card inner animations on screen 1 */
+@keyframes fadeUp{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:translateY(0)}}
+.s1-logo-anim{animation:fadeUp 0.6s 0.2s cubic-bezier(0.16,1,0.3,1) both}
+.s1-name-anim{animation:fadeUp 0.6s 0.45s cubic-bezier(0.16,1,0.3,1) both}
+.s1-tag-anim{animation:fadeUp 0.6s 0.6s cubic-bezier(0.16,1,0.3,1) both}
+.s1-feat-anim{animation:fadeUp 0.5s 0.75s cubic-bezier(0.16,1,0.3,1) both}
+.s1-btn-anim{animation:fadeUp 0.5s 0.9s cubic-bezier(0.16,1,0.3,1) both}
+
+/* scrollbar */
+::-webkit-scrollbar{width:0}
+</style>
+</head>
+<body>
+
+<!-- BG -->
+<div class="bg-root">
+  <div class="bg-space"></div>
+  <canvas id="starCanvas" style="position:absolute;inset:0;width:100%;height:100%;"></canvas>
+  <div class="bg-grid"></div>
+  <div class="bg-floor"></div>
+  <div class="orb orb-1"></div><div class="orb orb-2"></div><div class="orb orb-3"></div>
+  <div id="particles"></div>
+  <div class="scan-beam"></div>
+  <div class="scanlines"></div>
+  <div class="vignette"></div>
+</div>
+
+<div id="glitchBars" class="glitch-bars"></div>
+<div id="cursor"></div>
+<div id="cursor-ring"></div>
+
+<!-- PROGRESS -->
+<div class="progress" id="progress">
+  <div class="prog-dot active" onclick="goTo(0)"></div>
+  <div class="prog-dot" onclick="goTo(1)"></div>
+  <div class="prog-dot" onclick="goTo(2)"></div>
+  <div class="prog-dot" onclick="goTo(3)"></div>
+</div>
+
+<div class="screens">
+
+  <!-- ═══ SCREEN 1: WELCOME ═══ -->
+  <div class="screen active" id="screen1">
+    <div class="screen-card">
+      <div class="card-top-line"></div>
+      <div class="card-body">
+
+        <div class="logo-wrap s1-logo-anim" style="position:relative;width:80px;align-self:center;margin:0 auto 20px">
+          <div class="logo-rings">
+            <div class="logo-ring"></div>
+            <div class="logo-ring"></div>
+            <div class="logo-ring"></div>
+          </div>
+          <div class="logo-hex-big">
+            <svg viewBox="0 0 80 80" fill="none">
+              <polygon points="40,4 72,22 72,58 40,76 8,58 8,22" stroke="#00aaff" stroke-width="1.5" fill="none"/>
+              <polygon points="40,16 62,28.5 62,51.5 40,64 18,51.5 18,28.5" stroke="#00d4ff" stroke-width="1" fill="rgba(0,80,200,0.07)"/>
+              <polygon points="40,28 52,35 52,49 40,56 28,49 28,35" stroke="rgba(0,212,255,0.5)" stroke-width="0.7" fill="rgba(0,120,255,0.05)"/>
+              <circle cx="40" cy="40" r="6" fill="#00aaff" opacity="0.9"/>
+              <circle cx="40" cy="40" r="10" fill="rgba(0,170,255,0.15)"/>
+              <!-- circuit lines -->
+              <line x1="40" y1="40" x2="40" y2="16" stroke="rgba(0,170,255,0.25)" stroke-width="0.5" stroke-dasharray="2,3"/>
+              <line x1="40" y1="40" x2="62" y2="51.5" stroke="rgba(0,170,255,0.25)" stroke-width="0.5" stroke-dasharray="2,3"/>
+              <line x1="40" y1="40" x2="18" y2="51.5" stroke="rgba(0,170,255,0.25)" stroke-width="0.5" stroke-dasharray="2,3"/>
+            </svg>
+          </div>
+        </div>
+
+        <div class="s1-name-anim">
+          <div class="s1-name glitch-text" data-text="FECTTRAL">FECTTRAL</div>
+          <div class="s1-version">v1.4.0 · Design Intelligence System</div>
+        </div>
+
+        <div class="s1-tag-anim">
+          <div class="s1-tagline">
+            Your <strong>AI Design Library</strong>.<br>
+            Personal. Local. <strong>Yours.</strong>
+          </div>
+        </div>
+
+        <div class="s1-features s1-feat-anim">
+          <div class="s1-feat"><div class="s1-feat-dot"></div>Runs fully local</div>
+          <div class="s1-feat"><div class="s1-feat-dot"></div>Learns your taste</div>
+          <div class="s1-feat"><div class="s1-feat-dot"></div>Zero cloud dependency</div>
+        </div>
+
+        <div class="s1-btn-anim">
+          <button class="btn-primary" onclick="nextScreen()">
+            <span>GET STARTED</span>
+            <span style="font-size:14px">→</span>
+          </button>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══ SCREEN 2: SETUP AI ═══ -->
+  <div class="screen" id="screen2">
+    <div class="screen-card">
+      <div class="card-top-line"></div>
+      <div class="card-body">
+
+        <div style="display:flex;align-items:center;gap:8px;margin-bottom:4px">
+          <span style="font-family:var(--font-mono);font-size:8px;letter-spacing:0.3em;color:var(--text-dim)">02 / 04</span>
+        </div>
+        <div class="s2-title glitch-text" data-text="SETUP AI PROVIDER">SETUP AI PROVIDER</div>
+        <div class="s2-sub">// connect your local model engine</div>
+
+        <!-- Detection status -->
+        <div class="detect-box" id="detectBox">
+          <div class="detect-header">
+            <span class="detect-label">// Ollama Detection</span>
+            <div class="detect-status">
+              <div class="detect-dot scanning" id="detectDot"></div>
+              <span class="detect-msg" id="detectMsg">Scanning localhost:11434...</span>
+            </div>
+          </div>
+          <div class="detect-url" id="detectUrl">http://localhost:11434</div>
+          <!-- install instructions (shown if not found) -->
+          <div class="install-box" id="installBox">
+            <div class="install-step"><span class="install-step-num">1.</span><span>Download Ollama from <span class="install-cmd">ollama.ai</span></span></div>
+            <div class="install-step"><span class="install-step-num">2.</span><span>Run installer, then open terminal</span></div>
+            <div class="install-step"><span class="install-step-num">3.</span><span>Pull a model: <span class="install-cmd">ollama pull qwen2.5-coder:14b</span></span></div>
+            <div class="install-step"><span class="install-step-num">4.</span><span>Restart FectTral to re-detect</span></div>
+          </div>
+        </div>
+
+        <!-- Model selector -->
+        <div class="model-section">
+          <div class="field-label" style="margin-bottom:8px">// Select Primary Model</div>
+          <div class="model-grid" id="modelGrid">
+            <div class="model-card selected" onclick="selectModel(this)">
+              <div class="mc-name">qwen2.5-coder:14b</div>
+              <div class="mc-size">8.2 GB · Recommended</div>
+              <div class="mc-tags"><span class="mc-tag">CODE</span><span class="mc-tag">DNA</span><span class="mc-tag">TAGGING</span></div>
+            </div>
+            <div class="model-card" onclick="selectModel(this)">
+              <div class="mc-name">llama3.2:3b</div>
+              <div class="mc-size">2.0 GB · Lightweight</div>
+              <div class="mc-tags"><span class="mc-tag">CHAT</span><span class="mc-tag">FAST</span></div>
+            </div>
+            <div class="model-card" onclick="selectModel(this)">
+              <div class="mc-name">deepseek-coder:6.7b</div>
+              <div class="mc-size">3.8 GB · Balanced</div>
+              <div class="mc-tags"><span class="mc-tag">CODE</span><span class="mc-tag">ANALYSIS</span></div>
+            </div>
+            <div class="model-card" onclick="selectModel(this)">
+              <div class="mc-name">mistral:7b</div>
+              <div class="mc-size">4.1 GB · General</div>
+              <div class="mc-tags"><span class="mc-tag">CHAT</span><span class="mc-tag">SUMMARY</span></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Test generate -->
+        <div class="test-gen-row">
+          <button class="test-gen-btn" id="testGenBtn" onclick="runTestGen()">
+            <span id="testGenIcon">⟳</span> Test Generate
+          </button>
+          <div class="test-gen-result" id="testGenResult">Run a quick test to verify the model works</div>
+        </div>
+
+        <div style="display:flex;gap:8px">
+          <button class="btn-secondary" onclick="prevScreen()" style="flex:0 0 auto;padding:11px 20px">← Back</button>
+          <button class="btn-primary" onclick="nextScreen()" id="s2NextBtn">
+            <span>CONTINUE</span><span style="font-size:14px">→</span>
+          </button>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══ SCREEN 3: FIRST FETCH ═══ -->
+  <div class="screen" id="screen3">
+    <div class="screen-card">
+      <div class="card-top-line"></div>
+      <div class="card-body">
+
+        <div style="display:flex;align-items:center;gap:8px;margin-bottom:4px">
+          <span style="font-family:var(--font-mono);font-size:8px;letter-spacing:0.3em;color:var(--text-dim)">03 / 04</span>
+        </div>
+        <div class="s3-title glitch-text" data-text="FIRST FETCH">FIRST FETCH</div>
+        <div class="s3-sub">// start building your library</div>
+
+        <!-- Quick source presets -->
+        <div class="field-label" style="margin-bottom:8px">// Quick start from inspiration source</div>
+        <div class="source-options" id="sourceOptions">
+          <div class="source-opt" onclick="pickSource(this,'https://awwwards.com')">
+            <div class="so-icon">🏆</div>
+            <div class="so-name">AWWWARDS</div>
+          </div>
+          <div class="source-opt" onclick="pickSource(this,'https://linear.app')">
+            <div class="so-icon">⬡</div>
+            <div class="so-name">LINEAR</div>
+          </div>
+          <div class="source-opt" onclick="pickSource(this,'https://dribbble.com')">
+            <div class="so-icon">◈</div>
+            <div class="so-name">DRIBBBLE</div>
+          </div>
+        </div>
+
+        <div class="or-divider"><div class="or-line"></div><div class="or-text">// OR PASTE URL</div><div class="or-line"></div></div>
+
+        <!-- URL input -->
+        <div class="url-row">
+          <input class="field-input" id="urlInput" placeholder="https://linear.app/changelog" oninput="clearPreview()">
+          <button class="url-fetch-btn" onclick="doFetch()">⟳ FETCH</button>
+        </div>
+
+        <!-- Fetch preview -->
+        <div class="fetch-preview" id="fetchPreview">
+          <div class="fp-icon">◎</div>
+          <div class="fp-info">
+            <div class="fp-title" style="color:var(--text-muted)">Paste a URL or pick a source above</div>
+            <div class="fp-meta">AI will extract design elements automatically</div>
+          </div>
+        </div>
+
+        <div style="display:flex;gap:8px">
+          <button class="btn-secondary" onclick="prevScreen()" style="flex:0 0 auto;padding:11px 20px">← Back</button>
+          <button class="btn-primary" onclick="nextScreen()">
+            <span id="s3BtnLabel">ADD TO LIBRARY</span><span style="font-size:14px">→</span>
+          </button>
+        </div>
+
+        <div style="text-align:center;margin-top:12px">
+          <span style="font-family:var(--font-mono);font-size:9px;color:var(--text-dim);cursor:pointer;border-bottom:1px solid var(--border-dim);padding-bottom:1px"
+            onclick="nextScreen()">Skip, I'll add elements later →</span>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══ SCREEN 4: READY ═══ -->
+  <div class="screen" id="screen4">
+    <div class="screen-card">
+      <div class="card-top-line"></div>
+      <div class="card-body">
+
+        <div class="s4-ready-icon">✦</div>
+        <div class="s4-title glitch-text" data-text="FECTTRAL IS READY">FECTTRAL IS READY</div>
+        <div class="s4-sub">// your library awaits</div>
+
+        <!-- DNA Strength -->
+        <div class="dna-meter">
+          <div class="dna-meter-header">
+            <div class="dna-meter-label">// DNA Strength</div>
+            <div class="dna-meter-val" id="dnaVal">0%</div>
+          </div>
+          <div class="dna-bar-wrap">
+            <div class="dna-bar-fill" id="dnaBar"></div>
+          </div>
+          <div class="dna-hexes" id="dnaHexes"></div>
+        </div>
+
+        <!-- Stats -->
+        <div class="ready-stats">
+          <div class="rs-item">
+            <div class="rs-num" id="statElem">0</div>
+            <div class="rs-label">Elements</div>
+          </div>
+          <div class="rs-item">
+            <div class="rs-num" id="statDom">0</div>
+            <div class="rs-label">Domains</div>
+          </div>
+          <div class="rs-item">
+            <div class="rs-num" id="statProj">0</div>
+            <div class="rs-label">Projects</div>
+          </div>
+          <div class="rs-item">
+            <div class="rs-num" id="statAI">1</div>
+            <div class="rs-label">AI Models</div>
+          </div>
+        </div>
+
+        <div class="s4-quote">"Your library grows with every design you save.<br>The more you curate, the smarter it becomes."</div>
+
+        <button class="btn-primary" onclick="openLibrary()">
+          <span>◈</span>
+          <span>OPEN LIBRARY</span>
+          <span style="font-size:14px">→</span>
+        </button>
+
+      </div>
+    </div>
+  </div>
+
+</div><!-- /screens -->
+
+<script>
+/* ══ STARS ══ */
+const canvas=document.getElementById('starCanvas'),ctx=canvas.getContext('2d');
+function resize(){canvas.width=window.innerWidth;canvas.height=window.innerHeight}
+resize();window.addEventListener('resize',resize);
+const stars=Array.from({length:250},()=>({x:Math.random()*window.innerWidth,y:Math.random()*window.innerHeight,r:Math.random()*1.4,o:Math.random(),tw:Math.random()*Math.PI*2,sp:Math.random()*0.5+0.04}));
+function drawStars(){ctx.clearRect(0,0,canvas.width,canvas.height);stars.forEach(s=>{s.tw+=s.sp*0.016;const op=s.o*(0.3+0.7*Math.abs(Math.sin(s.tw)));ctx.beginPath();ctx.arc(s.x,s.y,s.r,0,Math.PI*2);ctx.fillStyle=`rgba(160,215,255,${op})`;ctx.fill();if(s.r>1.1){ctx.beginPath();ctx.arc(s.x,s.y,s.r*4,0,Math.PI*2);ctx.fillStyle=`rgba(0,160,255,${op*0.1})`;ctx.fill()}});requestAnimationFrame(drawStars)}
+drawStars();
+
+/* PARTICLES */
+const pe=document.getElementById('particles');
+const syms=['⬡','⬢','◈','◉','◎','✦','⊞'];
+for(let i=0;i<18;i++){const el=document.createElement('div');el.className='particle';el.textContent=syms[Math.floor(Math.random()*syms.length)];el.style.cssText=`left:${Math.random()*100}%;bottom:-60px;font-size:${Math.random()*20+8}px;color:rgba(0,${100+Math.floor(Math.random()*100)},255,${0.1+Math.random()*0.2});animation-duration:${Math.random()*24+14}s;animation-delay:${Math.random()*20}s;`;pe.appendChild(el)}
+
+/* GLITCH */
+const gb=document.getElementById('glitchBars');
+function triggerGlitch(intensity='low'){const count=intensity==='boot'?6:Math.floor(Math.random()*3)+2;for(let i=0;i<count;i++){const bar=document.createElement('div');bar.className='g-bar';const isRGB=Math.random()>0.5;bar.style.cssText=`top:${Math.random()*100}%;height:${Math.random()*4+1}px;background:rgba(${isRGB?'0,210,255':'255,0,200'},0.07);transform:translateX(${(Math.random()-0.5)*20}px);mix-blend-mode:screen;`;gb.appendChild(bar);let op=0,dir=1;const step=1/((Math.random()*80+40)/16);(function a(){op+=step*dir;if(op>=1)dir=-1;if(op<=0&&dir===-1){bar.remove();return}bar.style.opacity=op;requestAnimationFrame(a)})();setTimeout(()=>bar.remove(),200)}}
+window.addEventListener('load',()=>{let n=0;const b=()=>{if(n++>4)return;triggerGlitch('boot');setTimeout(b,120)};setTimeout(b,600)});
+setInterval(()=>triggerGlitch(),Math.random()*8000+5000);
+
+/* CURSOR */
+const cursor=document.getElementById('cursor'),ring=document.getElementById('cursor-ring');
+let mx=0,my=0,rx=0,ry=0;
+document.addEventListener('mousemove',e=>{mx=e.clientX;my=e.clientY;cursor.style.left=mx+'px';cursor.style.top=my+'px'});
+(function animRing(){rx+=(mx-rx)*0.1;ry+=(my-ry)*0.1;ring.style.left=rx+'px';ring.style.top=ry+'px';requestAnimationFrame(animRing)})();
+document.querySelectorAll('button,.model-card,.source-opt,.prog-dot,.mc-tag').forEach(el=>{
+  el.addEventListener('mouseenter',()=>{ring.style.width='38px';ring.style.height='38px';ring.style.borderColor='rgba(0,212,255,0.8)';cursor.style.transform='translate(-50%,-50%) scale(1.5)'});
+  el.addEventListener('mouseleave',()=>{ring.style.width='28px';ring.style.height='28px';ring.style.borderColor='rgba(0,170,255,0.5)';cursor.style.transform='translate(-50%,-50%) scale(1)'});
+});
+
+/* ══ SCREEN NAVIGATION ══ */
+let current=0;
+const screens=document.querySelectorAll('.screen');
+const dots=document.querySelectorAll('.prog-dot');
+
+function goTo(index){
+  if(index===current)return;
+  const prev=screens[current];
+  const next=screens[index];
+  prev.classList.add('screen-exiting');
+  setTimeout(()=>{
+    prev.classList.remove('active','screen-exiting');
+    next.classList.add('active','screen-entering');
+    setTimeout(()=>next.classList.remove('screen-entering'),600);
+    current=index;
+    updateDots();
+    onScreenEnter(index);
+    triggerGlitch('low');
+  },320);
+}
+
+function nextScreen(){goTo(Math.min(current+1,3))}
+function prevScreen(){goTo(Math.max(current-1,0))}
+
+function updateDots(){
+  dots.forEach((d,i)=>{
+    d.classList.remove('active','done');
+    if(i===current)d.classList.add('active');
+    else if(i<current)d.classList.add('done');
+  });
+}
+
+function onScreenEnter(idx){
+  if(idx===1) initScreen2();
+  if(idx===3) initScreen4();
+}
+
+/* ══ SCREEN 2 LOGIC ══ */
+let ollamaFound=true; // simulate found
+
+function initScreen2(){
+  const dot=document.getElementById('detectDot');
+  const msg=document.getElementById('detectMsg');
+  const box=document.getElementById('detectBox');
+  const installBox=document.getElementById('installBox');
+
+  // Simulate scanning
+  dot.className='detect-dot scanning';
+  msg.textContent='Scanning localhost:11434...';
+  msg.className='detect-msg';
+  box.className='detect-box';
+  installBox.classList.remove('show');
+
+  setTimeout(()=>{
+    if(ollamaFound){
+      dot.className='detect-dot ok';
+      msg.textContent='Connected · 4 models detected';
+      msg.className='detect-msg ok';
+      box.className='detect-box ok';
+    } else {
+      dot.className='detect-dot warn';
+      msg.textContent='Ollama not found — install required';
+      msg.className='detect-msg warn';
+      box.className='detect-box warn';
+      installBox.classList.add('show');
+    }
+    triggerGlitch('low');
+  }, 1400+Math.random()*600);
+}
+
+function selectModel(el){
+  document.querySelectorAll('.model-card').forEach(c=>c.classList.remove('selected'));
+  el.classList.add('selected');
+  document.getElementById('testGenResult').textContent='Run a quick test to verify the model works';
+  document.getElementById('testGenResult').className='test-gen-result';
+}
+
+let testRunning=false;
+function runTestGen(){
+  if(testRunning)return;
+  testRunning=true;
+  const btn=document.getElementById('testGenBtn');
+  const res=document.getElementById('testGenResult');
+  const icon=document.getElementById('testGenIcon');
+  btn.disabled=true;
+  res.textContent='Generating test output...';res.className='test-gen-result';
+  icon.style.animation='fpSpin 0.7s linear infinite';icon.style.display='inline-block';
+  setTimeout(()=>{
+    testRunning=false;
+    btn.disabled=false;
+    icon.style.animation='';
+    const ok=Math.random()>0.15;
+    if(ok){
+      res.textContent='✓ Model responding · avg 320ms · ready';
+      res.className='test-gen-result ok';
+    } else {
+      res.textContent='✗ No response · check model is loaded';
+      res.className='test-gen-result err';
+    }
+    triggerGlitch('low');
+  },1800+Math.random()*1000);
+}
+
+/* ══ SCREEN 3 LOGIC ══ */
+let fetchDone=false;
+function pickSource(el, url){
+  document.querySelectorAll('.source-opt').forEach(s=>s.classList.remove('selected'));
+  el.classList.add('selected');
+  document.getElementById('urlInput').value=url;
+  doFetch();
+}
+
+function clearPreview(){
+  fetchDone=false;
+  document.getElementById('s3BtnLabel').textContent='ADD TO LIBRARY';
+  const fp=document.getElementById('fetchPreview');
+  fp.className='fetch-preview';
+  fp.innerHTML=`<div class="fp-icon">◎</div><div class="fp-info"><div class="fp-title" style="color:var(--text-muted)">Paste a URL or pick a source above</div><div class="fp-meta">AI will extract design elements automatically</div></div>`;
+}
+
+const FAKE_RESULTS=[
+  {icon:'🏆',title:'Awwwards — Site of the Day Collection',meta:'147 design elements detected',tags:['TYPOGRAPHY','ANIMATION','COLOR','LAYOUT']},
+  {icon:'⬡',title:'Linear — Product Design System',meta:'83 design elements detected',tags:['COMPONENT','INTERACTION','MINIMAL']},
+  {icon:'◈',title:'Dribbble — Trending UI Shots',meta:'211 design elements detected',tags:['CARD','GLASSMORPHISM','GRADIENT']},
+  {icon:'◎',title:'Design System — Component Library',meta:'64 design elements detected',tags:['BUTTON','FORM','TYPOGRAPHY']},
+];
+
+function doFetch(){
+  const url=document.getElementById('urlInput').value.trim();
+  if(!url)return;
+  const fp=document.getElementById('fetchPreview');
+  fp.className='fetch-preview loading';
+  fp.innerHTML=`<div class="fp-icon" style="animation:fpSpin 1s linear infinite;display:inline-block">⟳</div><div class="fp-info"><div class="fp-title">Fetching ${url.replace('https://','').split('/')[0]}...</div><div class="fp-meta">AI is analyzing design elements</div></div>`;
+
+  setTimeout(()=>{
+    fetchDone=true;
+    document.getElementById('s3BtnLabel').textContent='ADD TO LIBRARY';
+    const r=FAKE_RESULTS[Math.floor(Math.random()*FAKE_RESULTS.length)];
+    fp.className='fetch-preview success';
+    fp.innerHTML=`<div class="fp-icon">${r.icon}</div><div class="fp-info"><div class="fp-title">${r.title}</div><div class="fp-meta">${r.meta}</div><div class="fp-tags">${r.tags.map(t=>`<span class="fp-tag">${t}</span>`).join('')}</div></div>`;
+    triggerGlitch('low');
+  },1600+Math.random()*1000);
+}
+
+/* ══ SCREEN 4 LOGIC ══ */
+function initScreen4(){
+  // Build hex grid
+  const hexes=document.getElementById('dnaHexes');
+  const syms2=['⬡','◈','◉','✦','⊞','◎'];
+  hexes.innerHTML='';
+  for(let i=0;i<18;i++){
+    const h=document.createElement('div');
+    h.className='dna-hex';
+    h.textContent=syms2[Math.floor(Math.random()*syms2.length)];
+    hexes.appendChild(h);
+  }
+
+  // Count up stats if fetched
+  const hasData=fetchDone;
+  const elemTarget=hasData?Math.floor(Math.random()*80+20):0;
+  const domTarget=hasData?1:0;
+  const dnaTarget=hasData?Math.floor(elemTarget*0.3):0;
+
+  // Animate stats
+  animCount('statElem',elemTarget,1200);
+  animCount('statDom',domTarget,800);
+  animCount('statProj',0,0);
+
+  // Animate DNA bar
+  setTimeout(()=>{
+    const bar=document.getElementById('dnaBar');
+    const val=document.getElementById('dnaVal');
+    bar.style.width=dnaTarget+'%';
+    let n=0;const end=dnaTarget;
+    const step=end/60;
+    const t=setInterval(()=>{
+      n=Math.min(n+step,end);
+      val.textContent=Math.round(n)+'%';
+      if(n>=end)clearInterval(t);
+    },20);
+
+    // Randomly light some hexes
+    if(hasData){
+      const hexEls=hexes.querySelectorAll('.dna-hex');
+      const litCount=Math.floor(hexEls.length*dnaTarget/100);
+      const indices=[...Array(hexEls.length).keys()].sort(()=>Math.random()-0.5).slice(0,litCount);
+      indices.forEach((idx,i)=>{setTimeout(()=>{hexEls[idx].classList.add('lit')},i*80)});
+    }
+  },400);
+}
+
+function animCount(id,target,duration){
+  const el=document.getElementById(id);
+  if(target===0){el.textContent='0';return}
+  let n=0;const steps=60;const step=target/steps;
+  const interval=duration/steps;
+  const t=setInterval(()=>{n=Math.min(n+step,target);el.textContent=Math.round(n);if(n>=target)clearInterval(t)},interval);
+}
+
+function openLibrary(){
+  // Simulate transition to main app
+  triggerGlitch('low');
+  const overlay=document.createElement('div');
+  overlay.style.cssText='position:fixed;inset:0;z-index:9000;background:rgba(0,8,24,0);transition:background 0.5s;display:flex;align-items:center;justify-content:center;';
+  overlay.innerHTML='<div style="font-family:var(--font-display);font-size:14px;letter-spacing:0.2em;color:var(--blue-bright);text-shadow:var(--glow-text);opacity:0;transition:opacity 0.3s 0.2s">LOADING LIBRARY...</div>';
+  document.body.appendChild(overlay);
+  requestAnimationFrame(()=>{overlay.style.background='rgba(0,8,24,0.95)';overlay.querySelector('div').style.opacity='1'});
+  setTimeout(()=>{overlay.querySelector('div').textContent='✓ Welcome to FectTral';},1200);
+  setTimeout(()=>{overlay.style.opacity='0';overlay.style.transition='opacity 0.4s';setTimeout(()=>overlay.remove(),400)},2500);
+}
+
+// Toggle ollama found (demo) — double-click detect box
+document.getElementById('detectBox').addEventListener('dblclick',()=>{ollamaFound=!ollamaFound;initScreen2()});
+
+window.goTo=goTo;window.nextScreen=nextScreen;window.prevScreen=prevScreen;
+window.selectModel=selectModel;window.runTestGen=runTestGen;
+window.pickSource=pickSource;window.doFetch=doFetch;window.clearPreview=clearPreview;
+</script>
+</body>
+</html>
