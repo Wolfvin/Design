@@ -1,37 +1,39 @@
 /**
- * Next.js (browser) host bridge — main entry point.
+ * Next.js host bridge — main entry point.
  *
  * Usage (call once at app boot, before the OD web app reads `window.__od__`):
  *
  * ```ts
  * import { installNextjsHostBridge } from "@open-design/host-nextjs";
- * installNextjsHostBridge("http://localhost:3847");
+ * installNextjsHostBridge({ daemonBaseUrl: "http://localhost:3210", projectId: "..." });
  * ```
  *
- * If the code is running inside a Tauri WebView the call is a no-op
- * (the Tauri bridge should be used instead), so the same entry point
- * can safely be used in builds that target both web and Tauri.
+ * The bridge is only installed when the project type is detected as
+ * nextjs-standalone or nextjs-pages. For Tauri projects, use the
+ * Tauri bridge instead.
  */
 
-import { OPEN_DESIGN_HOST_GLOBAL } from "@open-design/host";
+import { OPEN_DESIGN_HOST_GLOBAL } from '@open-design/host';
 
-import { createNextjsHostBridge } from "./bridge.js";
-import { isBrowserEnvironment } from "./detection.js";
+import { createNextjsHostBridge, type NextjsHostBridgeConfig } from './bridge.js';
+import { isNextjsEnvironment } from './detection.js';
 
-export { createNextjsHostBridge } from "./bridge.js";
-export { isBrowserEnvironment, detectBrowserPlatform } from "./detection.js";
+export { createNextjsHostBridge } from './bridge.js';
+export { isNextjsEnvironment, detectNextjsPlatform, detectNextjsLocale } from './detection.js';
+export {
+  buildOdInjectionHeaders,
+  generateMiddlewareSnippet,
+  readOdInjectionHeadersFromMeta,
+  type OdMiddlewareConfig,
+} from './middleware.js';
 export type {
   NextjsBrowserClearDataOptions,
-  NextjsCaptureOptions,
-  NextjsCaptureResult,
   NextjsPdfPrintOptions,
-  NextjsPlatform,
-  NextjsProjectImportInit,
-  NextjsProjectImportResult,
-  NextjsProjectImportSuccess,
-  NextjsReplaceWorkingDirResult,
-  NextjsReplaceWorkingDirSuccess,
-} from "./types.js";
+  NextjsCaptureResult,
+  PrismaValidationResult,
+  PrismaMigrationResult,
+  NextjsDevServerStatus,
+} from './types.js';
 
 /**
  * Install the Next.js host bridge onto `globalThis.__od__` and
@@ -39,15 +41,13 @@ export type {
  * `getOpenDesignHost()`.
  *
  * The function is idempotent: if the global already contains a valid
- * host bridge (version match, correct shape) it will **not** be
- * overwritten.
+ * host bridge it will **not** be overwritten.
  *
- * @param daemonBaseUrl - Base URL of the OD daemon REST API (e.g. "http://localhost:3847")
  * @returns `true` if the bridge was installed, `false` if the
- *          environment is not a standard browser or a bridge is already present.
+ *          environment is not suitable or a bridge is already present.
  */
-export function installNextjsHostBridge(daemonBaseUrl: string): boolean {
-  if (!isBrowserEnvironment()) return false;
+export function installNextjsHostBridge(config: NextjsHostBridgeConfig): boolean {
+  if (!isNextjsEnvironment()) return false;
 
   // Avoid overwriting an already-installed bridge
   const globalScope = globalThis as Record<string, unknown>;
@@ -55,9 +55,9 @@ export function installNextjsHostBridge(daemonBaseUrl: string): boolean {
     return false;
   }
 
-  const bridge = createNextjsHostBridge(daemonBaseUrl);
+  const bridge = createNextjsHostBridge(config);
 
-  (globalThis as any).__od__ = bridge;
+  (globalScope as any).__od__ = bridge;
   (window as any).__od__ = bridge;
 
   return true;

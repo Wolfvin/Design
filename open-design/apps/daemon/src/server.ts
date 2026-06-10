@@ -25,10 +25,7 @@ import {
   resolveExclusiveSurface,
   shouldRenderCodexImagegenOverride,
 } from './prompts/system.js';
-import {
-  composeAppDeveloperPrompt,
-  composeAppDeveloperPromptAuto,
-} from './prompts/app-developer-system.js';
+import { composeAppDeveloperPrompt } from './prompts/app-developer-system.js';
 import { expandHomePrefix, resolveProjectRelativePath } from './home-expansion.js';
 import { resolveProjectRoot } from './project-root.js';
 import {
@@ -11082,31 +11079,34 @@ export async function startServer({
       }
     }
 
-    // If this is an app-developer project, use the new stack-aware prompt
-    const projectTypeRow = db.prepare('SELECT project_type FROM projects WHERE id = ?').get(projectId) as { project_type: string | null } | undefined;
-    const projectType = projectTypeRow?.project_type ?? null;
-    const isAppDevProject = projectType && (
-      projectType.startsWith('tauri') ||
-      projectType.startsWith('nextjs') ||
-      projectType.startsWith('vite')
-    );
+    // ── Prompt composition: use App Developer prompt for chat/dev mode ──
+    // When the session mode is 'chat' and the project has been detected
+    // as an app-developer project (tauri-react, nextjs-standalone, etc.),
+    // use the new composeAppDeveloperPrompt() which is stack-aware and
+    // instructs the AI to edit files in-place using <file-edit> blocks.
+    // For design mode or legacy projects, fall back to the classic
+    // composeSystemPrompt() which produces <artifact> blocks.
+    const projectMetadata = project?.metadata ?? {};
+    const projectType = projectMetadata?.projectType ?? projectMetadata?.project_type;
+    const isAppDeveloperProject = sessionMode === 'chat' && projectType;
 
     let prompt: string;
-    if (isAppDevProject) {
-      // App-developer project: use stack-aware prompt that includes file map,
-      // design tokens as CSS, and project-type-specific rules
-      const projectDir = resolveProjectDir(PROJECTS_DIR, projectId, metadata);
-      prompt = await composeAppDeveloperPromptAuto({
-        projectName: project?.name ?? projectId,
-        baseDir: projectDir,
+    if (isAppDeveloperProject) {
+      prompt = composeAppDeveloperPrompt({
+        projectName: project?.name ?? 'Untitled',
+        techStack: projectMetadata?.techStack ?? projectMetadata?.tech_stack ?? '',
+        baseDir: cwd ?? '',
+        fileMap: '', // Will be populated by the agent's file-map-generator
         tokensCss: designSystemTokensCss ?? '',
         designMd: designSystemBody ?? '',
-        ...(skillBody ? { skillBody } : {}),
-        ...(memoryBody ? { memory: memoryBody } : {}),
-        ...(userInstructions || projectInstructions ? { customInstructions: [userInstructions, projectInstructions].filter(Boolean).join('\n\n') } : {}),
+        skillBody: skillBody ?? undefined,
+        memory: memoryBody ?? undefined,
+        customInstructions: userInstructions ?? projectInstructions ?? undefined,
+        vitePort: typeof projectMetadata?.devPort === 'number' ? projectMetadata.devPort : undefined,
+        projectType: typeof projectType === 'string' ? projectType : undefined,
       });
     } else {
-      prompt = composeSystemPrompt({
+    prompt = composeSystemPrompt({
       agentId,
       includeCodexImagegenOverride: false,
       skillBody,
@@ -11152,7 +11152,7 @@ export async function startServer({
       userInstructions,
       projectInstructions,
     });
-    }
+    } // end of else (legacy composeSystemPrompt)
     // The chat handler also needs to know where the active skill lives
     // on disk so it can stage a per-project copy of its side files
     // before spawning the agent. Returning that here avoids a second

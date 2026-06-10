@@ -1,75 +1,91 @@
 ---
 name: nextauth-setup
 description: |
-  Configure NextAuth (Auth.js v5) authentication for Next.js projects.
-  Supports OAuth providers, session strategy, custom pages, and
-  route protection middleware.
+  Configure NextAuth authentication for Next.js projects. Sets up
+  authentication providers, session management, protected routes,
+  and auth-related API routes.
 od:
-  mode: engineering
+  mode: prototype
   surface: web
-  scenario: nextjs
-  category: nextjs
-  taskKind: auth-setup
+  scenario: engineering
+  category: app-development
+  taskKind: nextauth
   outputFormat: file-edit
+  stackCompatibility: nextjs
   design_system:
     requires: false
-  stackCompat:
-    - nextjs-standalone
-    - nextjs-pages
   craft:
     requires:
       - file-conventions
+      - authentication
 ---
 
 # NextAuth Setup
 
-You are configuring NextAuth (Auth.js v5) for a Next.js project.
+You are configuring NextAuth authentication for a Next.js project.
 
-## Files to edit
+## File Structure
 
-| File | Purpose |
-|------|---------|
-| `src/lib/auth.ts` | Auth configuration (Auth.js v5 style) |
-| `app/api/auth/[...nextauth]/route.ts` | NextAuth Route Handler |
-| `middleware.ts` | Route protection middleware |
-| `.env.local` | Environment variables (OAuth secrets) |
+- Auth config: `src/app/api/auth/[...nextauth]/route.ts`
+- Auth options: `src/lib/auth.ts`
+- Middleware: `middleware.ts` (for protected routes)
+- Types: `src/types/next-auth.d.ts`
 
-## Auth.js v5 conventions
+## Output Format
 
-1. **Configuration** — Use `auth.ts` export pattern from Auth.js v5.
-2. **Route Handler** — Export GET and POST handlers from the catch-all route.
-3. **Middleware** — Use `auth()` from Auth.js for route protection.
-4. **Session** — Access session via `auth()` in Server Components or `useSession()` in Client Components.
+Use `<file-edit>` blocks for every file:
 
-## Safety rules
+```
+<file-edit path="src/lib/auth.ts">
+// auth configuration here
+</file-edit>
+```
 
-- **NEVER delete or modify existing `NEXTAUTH_SECRET`** in `.env.local`.
-- **NEVER commit OAuth client secrets** to source code.
-- **Always use `.env.local`** for sensitive configuration.
-- **Changes to `middleware.ts` may require a dev server restart.**
-- Use `next-auth` v5 (Auth.js) API conventions for Next.js 16.
+## Key Patterns
 
-## Example auth config
-
+### Auth Configuration (src/lib/auth.ts)
 ```typescript
-// src/lib/auth.ts
-import NextAuth from 'next-auth';
-import Google from 'next-auth/providers/google';
+import { NextAuthOptions } from 'next-auth';
+import CredentialsProvider from 'next-auth/providers/credentials';
 import { PrismaAdapter } from '@auth/prisma-adapter';
 import { prisma } from '@/lib/prisma';
 
-export const { handlers, auth, signIn, signOut } = NextAuth({
+export const authOptions: NextAuthOptions = {
   adapter: PrismaAdapter(prisma),
   providers: [
-    Google({
-      clientId: process.env.GOOGLE_CLIENT_ID!,
-      clientSecret: process.env.GOOGLE_CLIENT_SECRET!,
+    CredentialsProvider({
+      credentials: {
+        email: { label: 'Email', type: 'email' },
+        password: { label: 'Password', type: 'password' },
+      },
+      async authorize(credentials) {
+        // Validate credentials
+        return null;
+      },
     }),
   ],
   session: { strategy: 'jwt' },
-});
+  pages: {
+    signIn: '/login',
+    error: '/auth/error',
+  },
+};
 ```
 
-## Output
+### Route Handler (src/app/api/auth/[...nextauth]/route.ts)
+```typescript
+import NextAuth from 'next-auth';
+import { authOptions } from '@/lib/auth';
 
-Use `<file-edit>` blocks for every file change.
+const handler = NextAuth(authOptions);
+export { handler as GET, handler as POST };
+```
+
+## Security Best Practices
+
+- Never store plaintext passwords — use bcrypt or argon2
+- Use environment variables for secrets (NEXTAUTH_SECRET)
+- Implement CSRF protection (built into NextAuth)
+- Use JWT strategy for serverless compatibility
+- Add rate limiting for login attempts
+- Validate session on protected routes via middleware

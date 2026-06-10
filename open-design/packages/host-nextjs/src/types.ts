@@ -1,104 +1,73 @@
 /**
- * Next.js (browser) specific types for the host bridge.
+ * Next.js Host Bridge — type definitions.
  *
- * These types describe the request/response shapes that flow through
- * the daemon REST API when running in browser/Next.js mode.
+ * These types extend the generic host bridge types with Next.js-specific
+ * options and results. Unlike the Tauri bridge (which uses native IPC),
+ * the Next.js bridge communicates via daemon API routes and Web APIs.
  */
 
-// ---------------------------------------------------------------------------
-// Platform
-// ---------------------------------------------------------------------------
-
-export type NextjsPlatform = 'windows' | 'macos' | 'linux' | 'unknown';
-
-// ---------------------------------------------------------------------------
-// Project commands (via daemon REST API)
-// ---------------------------------------------------------------------------
-
-/** Init options for importing a project via the daemon API. */
-export type NextjsProjectImportInit = {
-  designSystemId?: string | null;
-  name?: string;
-  skillId?: string | null;
-};
-
-/** Successful response from daemon project import. */
-export type NextjsProjectImportSuccess = {
-  conversationId: string;
-  entryFile: string | null;
-  projectId: string;
-};
-
-/** Full result from project import — success, cancel, or error. */
-export type NextjsProjectImportResult =
-  | ({ ok: true } & NextjsProjectImportSuccess)
-  | { canceled: true; ok: false }
-  | { ok: false; reason: string; details?: unknown };
-
-/** Successful response from replace working dir. */
-export type NextjsReplaceWorkingDirSuccess = {
-  baseDir: string;
-  entryFile: string | null;
-};
-
-/** Full result from replace working dir. */
-export type NextjsReplaceWorkingDirResult =
-  | ({ ok: true } & NextjsReplaceWorkingDirSuccess)
-  | { canceled: true; ok: false }
-  | { ok: false; reason: string; details?: unknown };
-
-// ---------------------------------------------------------------------------
-// Capture (via daemon API)
-// ---------------------------------------------------------------------------
-
-/** Options for screenshot capture via daemon API. */
-export type NextjsCaptureOptions = {
-  url?: string;
-  clip?: { x: number; y: number; width: number; height: number };
-};
-
-/** Capture result — base64 encoded image. */
-export type NextjsCaptureResult = {
-  dataUrl: string;
-  h: number;
-  ok: true;
-  w: number;
-} | { ok: false; reason: string; details?: unknown };
-
-// ---------------------------------------------------------------------------
-// Browser data management
-// ---------------------------------------------------------------------------
-
-/** Options for clearing browser data via the host bridge. */
-export type NextjsBrowserClearDataOptions = {
-  /** Clear Cache API data. */
+/** Options for browser data clearing in a Next.js context. */
+export interface NextjsBrowserClearDataOptions {
+  /** Clear the Cache Storage API entries used by the preview iframe. */
   cache?: boolean;
-  /** Clear localStorage data. */
-  localStorage?: boolean;
-  /** Clear sessionStorage data. */
-  sessionStorage?: boolean;
-  /** Clear service workers. */
+  /** Clear service worker registrations for the preview origin. */
   serviceWorkers?: boolean;
-  /** Clear IndexedDB databases. */
-  indexedDB?: boolean;
-  /** Clear all data (overrides individual flags). */
-  all?: boolean;
-};
+  /** Clear localStorage for the preview origin. */
+  localStorage?: boolean;
+}
 
-// ---------------------------------------------------------------------------
-// PDF printing
-// ---------------------------------------------------------------------------
+/** Options for page capture (screenshot) via the Next.js bridge. */
+export interface NextjsPdfPrintOptions {
+  /** URL to capture. Defaults to the project preview URL. */
+  url?: string;
+  /** Output format. */
+  format?: 'png' | 'pdf';
+  /** Viewport width in pixels. */
+  width?: number;
+  /** Viewport height in pixels. */
+  height?: number;
+}
 
-/** Options for PDF printing in browser/Next.js context. */
-export type NextjsPdfPrintOptions = {
-  /** The URL to print. */
+/** Result of a page capture operation. */
+export interface NextjsCaptureResult {
+  /** Base64-encoded image/png data. */
+  base64: string;
+  /** MIME type of the captured data. */
+  mimeType: string;
+  /** Width of the captured image in pixels. */
+  width: number;
+  /** Height of the captured image in pixels. */
+  height: number;
+}
+
+/** Result of a Prisma schema validation. */
+export interface PrismaValidationResult {
+  /** Whether the schema is valid. */
+  valid: boolean;
+  /** Error messages if invalid. */
+  errors: string[];
+  /** Warning messages. */
+  warnings: string[];
+}
+
+/** Result of a Prisma migration operation. */
+export interface PrismaMigrationResult {
+  /** Whether the migration succeeded. */
+  success: boolean;
+  /** SQL that was applied (or would be applied in dry-run). */
+  sql?: string;
+  /** Error message if the migration failed. */
+  error?: string;
+}
+
+/** Next.js dev server status. */
+export interface NextjsDevServerStatus {
+  /** Whether the dev server is running and reachable. */
+  running: boolean;
+  /** The port the dev server is listening on. */
+  port: number;
+  /** URL of the dev server. */
   url: string;
-  /** Paper size (e.g., 'A4', 'Letter'). */
-  paperSize?: 'A4' | 'Letter' | 'Legal' | 'Tabloid';
-  /** Whether to print in landscape orientation. */
-  landscape?: boolean;
-  /** Whether to include background graphics. */
-  printBackground?: boolean;
-  /** Margin in mm (top, right, bottom, left). */
-  margins?: { top: number; right: number; bottom: number; left: number };
-};
+  /** Whether the dev server requires a restart (after middleware/config change). */
+  requiresRestart: boolean;
+}

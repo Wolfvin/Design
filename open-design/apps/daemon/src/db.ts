@@ -11,9 +11,10 @@ import { randomUUID } from 'node:crypto';
 import type { ProjectBrowserWorkspaceTab, ProjectTabsState } from '@open-design/contracts';
 import { migrateCritique } from './critique/persistence.js';
 import { migrateDesignTokenSyncLog } from './design-token-sync.js';
-import { migrateFileEditHistory, migrateNextjsMode } from './file-edit-persistence.js';
+import { migrateFileEditHistory } from './file-edit-persistence.js';
 import { migrateMediaTasks } from './media-tasks.js';
 import { migratePlugins } from './plugins/persistence.js';
+import { migrateNextjsMode } from './migrations/nextjs-mode-migration.js';
 
 type SqliteDb = Database.Database;
 type DbRow = Record<string, any>;

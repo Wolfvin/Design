@@ -1,72 +1,47 @@
 /**
- * Unified dev server preview provider.
+ * Unified Dev Server Preview — supports Vite HMR and Next.js Fast Refresh.
  *
- * Provides a single interface for preview that automatically selects
- * the appropriate mechanism based on project type:
- * - Vite HMR for Tauri / plain Vite projects
- * - Next.js Fast Refresh for Next.js projects
- * - Legacy iframe srcdoc for design-mode skills
+ * This is the main preview hook that automatically selects the correct
+ * preview mechanism based on the project type:
+ *   - Tauri/Vite projects → Vite HMR via useVitePreview()
+ *   - Next.js projects → Next.js Fast Refresh via useNextjsPreview()
  *
- * This replaces the old `useVitePreview()` hook as the primary
- * preview entry point for app-developer mode.
+ * The hook also falls back to the legacy iframe preview for design
+ * mode skills.
  */
 
-import { useState, useEffect, useCallback } from 'react';
-import { useVitePreview } from './vite-preview.js';
-import { useNextjsPreview, type NextjsPreviewState } from './nextjs-preview.js';
+import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useVitePreview, type VitePreviewState } from './vite-preview';
 import {
-  autoDetectDevPort,
-  type PortDetectionResult,
-} from './dev-port-detector.js';
+  useDevPortDetector,
+  devServerTypeFromProjectType,
+  type DevServerType,
+} from './dev-port-detector';
 
 // ---------------------------------------------------------------------------
 // Types
 // ---------------------------------------------------------------------------
 
-export type DevServerType = 'vite' | 'nextjs' | 'legacy';
+export type PreviewMode = 'vite' | 'nextjs' | 'legacy';
 
 export interface DevServerPreviewState {
-  /** Which preview mechanism is active. */
-  serverType: DevServerType;
-  /** Whether the dev server is online. */
+  /** Current preview mode. */
+  mode: PreviewMode;
+  /** Preview URL (Vite HMR or Next.js Fast Refresh). */
+  previewUrl: string | null;
+  /** Whether the dev server is online and reachable. */
   serverOnline: boolean;
-  /** The URL for the preview. */
-  previewUrl: string;
-  /** The detected port. */
-  port: number;
-  /** Whether the preview is loading. */
-  loading: boolean;
-  /** Last error message. */
-  error: string | null;
-  /** Project type string from detection. */
-  projectType: string;
-  /** Whether a restart is needed (Next.js specific). */
-  restartNeeded?: boolean;
+  /** Dev server type. */
+  serverType: DevServerType;
+  /** Detected dev port. */
+  devPort: number;
+  /** Vite preview state (when mode is 'vite'). */
+  viteState: VitePreviewState | null;
+  /** Whether the server is being checked. */
+  checking: boolean;
+  /** Refresh the server status check. */
+  refresh: () => void;
 }
-
-export interface DevServerPreviewOptions {
-  /** Project ID. */
-  projectId: string;
-  /** Project type (auto-detected if not provided). */
-  projectType?: string;
-  /** Override dev port. */
-  port?: number;
-  /** Daemon base URL. */
-  daemonBaseUrl?: string;
-}
-
-// ---------------------------------------------------------------------------
-// Constants
-// ---------------------------------------------------------------------------
-
-const DEFAULT_PORTS: Record<string, number> = {
-  'tauri-react': 5173,
-  'vite-react': 5173,
-  'vite-vue': 5173,
-  'nextjs-standalone': 3000,
-  'nextjs-pages': 3000,
-  'nextjs': 3000,
-};
 
 // ---------------------------------------------------------------------------
 // Hook
@@ -75,104 +50,87 @@ const DEFAULT_PORTS: Record<string, number> = {
 /**
  * Unified dev server preview hook.
  *
- * Automatically selects the appropriate preview mechanism based on
- * project type and provides a consistent interface.
+ * Automatically detects the project type and selects the appropriate
+ * preview mechanism (Vite HMR or Next.js Fast Refresh).
  */
-export function useDevServerPreview(options: DevServerPreviewOptions): DevServerPreviewState {
-  const { projectId, projectType: initialProjectType, port: initialPort, daemonBaseUrl } = options;
+export function useDevServerPreview(
+  projectId: string,
+  projectType?: string,
+): DevServerPreviewState {
+  const serverType = devServerTypeFromProjectType(projectType);
+  const mode: PreviewMode = serverType === 'nextjs' ? 'nextjs' : 'vite';
 
-  const [projectType, setProjectType] = useState(initialProjectType ?? 'vite-react');
-  const [detectedPort, setDetectedPort] = useState(initialPort ?? 5173);
-
-  // Auto-detect project type and port on mount
-  useEffect(() => {
-    if (initialProjectType && initialPort) return;
-
-    async function detect() {
-      try {
-        // Try daemon API first
-        const base = daemonBaseUrl ?? '';
-        const typeResp = await fetch(
-          `${base}/api/projects/${encodeURIComponent(projectId)}/detect-type`,
-          { method: 'POST' },
-        );
-        if (typeResp.ok) {
-          const typeData = await typeResp.json();
-          if (typeData.projectType) {
-            setProjectType(typeData.projectType);
-          }
-        }
-
-        const portResp = await fetch(
-          `${base}/api/projects/${encodeURIComponent(projectId)}/detect-dev-port`,
-          { method: 'POST' },
-        );
-        if (portResp.ok) {
-          const portData = await portResp.json();
-          if (portData.devPort) {
-            setDetectedPort(portData.devPort);
-          }
-        }
-      } catch {
-        // Fall back to defaults
-        setDetectedPort(DEFAULT_PORTS[projectType] ?? 5173);
-      }
-    }
-
-    detect();
-  }, [projectId, initialProjectType, initialPort, daemonBaseUrl, projectType]);
-
-  // Determine server type from project type
-  const isNextjs = projectType.startsWith('nextjs');
-
-  // Use the appropriate sub-provider for each type
-  const viteState = useVitePreview(projectId, {
-    enabled: !isNextjs,
-  });
-
-  const nextjsState = useNextjsPreview({
+  // Port detection
+  const { port: devPort, detect: redetectPort } = useDevPortDetector(
     projectId,
-    port: isNextjs ? detectedPort : undefined,
-    daemonBaseUrl,
+    projectType,
+  );
+
+  // Vite preview (for Tauri/Vite projects)
+  const viteState: VitePreviewState = useVitePreview(projectId, {
+    enabled: mode === 'vite',
   });
 
-  // Build unified state based on project type
-  if (isNextjs) {
-    return {
-      serverType: 'nextjs',
-      serverOnline: nextjsState.serverOnline,
-      previewUrl: nextjsState.previewUrl,
-      port: nextjsState.port,
-      loading: nextjsState.loading,
-      error: nextjsState.error,
-      projectType,
-      restartNeeded: nextjsState.restartNeeded,
-    };
-  }
+  // Next.js preview state
+  const [nextjsOnline, setNextjsOnline] = useState(false);
+  const [nextjsChecking, setNextjsChecking] = useState(false);
 
-  // Vite / Tauri projects — delegate to useVitePreview for health checking
+  // Check Next.js dev server reachability
+  const checkNextjsServer = useCallback(async () => {
+    if (mode !== 'nextjs') return;
+    setNextjsChecking(true);
+    try {
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 3000);
+      const res = await fetch(`http://localhost:${devPort}`, {
+        mode: 'no-cors',
+        signal: controller.signal,
+      });
+      clearTimeout(timeoutId);
+      setNextjsOnline(true);
+    } catch {
+      setNextjsOnline(false);
+    } finally {
+      setNextjsChecking(false);
+    }
+  }, [mode, devPort]);
+
+  useEffect(() => {
+    if (mode === 'nextjs') {
+      checkNextjsServer();
+      // Re-check every 5 seconds
+      const interval = setInterval(checkNextjsServer, 5000);
+      return () => clearInterval(interval);
+    }
+  }, [mode, checkNextjsServer]);
+
+  // Build preview URL
+  const previewUrl = useMemo(() => {
+    if (mode === 'nextjs' && nextjsOnline) {
+      return `http://localhost:${devPort}`;
+    }
+    if (mode === 'vite' && viteState.serverOnline) {
+      return viteState.previewUrl;
+    }
+    return null;
+  }, [mode, devPort, nextjsOnline, viteState.serverOnline, viteState.previewUrl]);
+
+  // Refresh function
+  const refresh = useCallback(() => {
+    redetectPort();
+    if (mode === 'nextjs') {
+      checkNextjsServer();
+    }
+  }, [mode, redetectPort, checkNextjsServer]);
+
   return {
-    serverType: 'vite',
-    serverOnline: viteState.serverOnline,
-    previewUrl: viteState.previewUrl,
-    port: viteState.port,
-    loading: viteState.loading,
-    error: viteState.error,
-    projectType,
+    mode,
+    previewUrl,
+    serverOnline: mode === 'nextjs' ? nextjsOnline : viteState.serverOnline,
+    serverType,
+    devPort,
+    viteState: mode === 'vite' ? viteState : null,
+    checking: mode === 'nextjs' ? nextjsChecking : viteState.checking,
+    refresh,
   };
-}
-
-/**
- * Determine the default port for a project type.
- */
-export function getDefaultPort(projectType: string): number {
-  return DEFAULT_PORTS[projectType] ?? 5173;
-}
-
-/**
- * Determine the dev server type for a project type.
- */
-export function getDevServerType(projectType: string): DevServerType {
-  if (projectType.startsWith('nextjs')) return 'nextjs';
-  return 'vite';
 }

@@ -1,0 +1,43 @@
+.badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 2px 8px;
+  border-radius: 10px;
+  font-size: 11px;
+  font-weight: 600;
+  line-height: 1.4;
+  white-space: nowrap;
+}
+
+.icon {
+  font-size: 10px;
+}
+
+.label {
+  letter-spacing: 0.02em;
+}
+
+.tauri {
+  background: rgba(255, 165, 0, 0.15);
+  color: #ffa500;
+  border: 1px solid rgba(255, 165, 0, 0.25);
+}
+
+.vite {
+  background: rgba(189, 52, 254, 0.15);
+  color: #bd34fe;
+  border: 1px solid rgba(189, 52, 254, 0.25);
+}
+
+.nextjs {
+  background: rgba(255, 255, 255, 0.1);
+  color: #e8e8ed;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.default {
+  background: rgba(100, 100, 120, 0.15);
+  color: #a0a0b0;
+  border: 1px solid rgba(100, 100, 120, 0.25);
+}

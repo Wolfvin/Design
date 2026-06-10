@@ -198,17 +198,18 @@ export async function syncDesignTokensToProject(
   };
 }
 
-
-// ─── Next.js globals.css injection ────────────────────────────────────
+// ─── Next.js Token Sync ────────────────────────────────────────────
 
 /**
- * Next.js-specific design token sync.
+ * Sync design tokens to a Next.js project.
  *
- * In addition to writing tokens.css and tailwind-theme.css to
- * src/styles/, this function also injects an @import for tokens.css
- * into the project's globals.css (or app/globals.css) so that
- * design tokens are available throughout the Next.js app without
- * manual imports.
+ * In addition to writing `src/styles/tokens.css` and
+ * `src/styles/tailwind-theme.css` (same as Tauri/Vite), this also
+ * injects the design tokens into the Next.js `app/globals.css` or
+ * `src/app/globals.css` file by adding an `@import` directive.
+ *
+ * This ensures that Next.js App Router projects pick up the tokens
+ * via their global CSS import chain.
  */
 export async function syncDesignTokensToNextjsProject(
   projectId: string,
@@ -218,96 +219,79 @@ export async function syncDesignTokensToNextjsProject(
     designSystemsDir: string;
     userDesignSystemsDir: string;
   },
-): Promise<TokenSyncResult & { globalsUpdated: boolean }> {
-  // 1. Run standard token sync first
+): Promise<TokenSyncResult> {
+  // Run the standard sync first (writes tokens.css + tailwind-theme.css)
   const result = await syncDesignTokensToProject(projectId, projectsRoot, options);
 
-  // 2. If no update happened, skip globals injection
-  if (!result.wasUpdated) {
-    return { ...result, globalsUpdated: false };
-  }
+  // If nothing changed, skip the globals.css injection
+  if (!result.wasUpdated) return result;
 
-  // 3. Resolve project directory
-  const project = getProject(options.db, projectId);
-  if (!project) return { ...result, globalsUpdated: false };
+  const { db, designSystemsDir, userDesignSystemsDir } = options;
+  const project = getProject(db, projectId);
+  if (!project) return result;
+
   const metadata = project.metadata ?? undefined;
   const projectDir = resolveProjectDir(projectsRoot, projectId, metadata);
 
-  // 4. Find globals.css
-  const globalsPath = await findGlobalsCss(projectDir);
-  if (!globalsPath) {
-    return { ...result, globalsUpdated: false };
-  }
-
-  // 5. Inject @import for tokens.css into globals.css
-  let globalsContent = await readFile(globalsPath, 'utf8').catch(() => '');
-  if (!globalsContent) {
-    return { ...result, globalsUpdated: false };
-  }
-
-  // Remove existing OD token import if present
-  globalsContent = globalsContent.replace(
-    /\/\* OD TOKEN_SCHEMA - start \*\/[\s\S]*?\/\* OD TOKEN_SCHEMA - end \*\//g,
-    '',
-  );
-
-  // Build the token import block
-  // Determine relative path from globals.css to tokens.css
-  const globalsDir = path.dirname(globalsPath);
-  const tokensAbs = path.join(projectDir, TOKENS_REL);
-  const relTokensPath = path.relative(globalsDir, tokensAbs).replace(/\\/g, '/');
-  const tokenBlock = `/* OD TOKEN_SCHEMA - start */\n@import '${relTokensPath}';\n/* OD TOKEN_SCHEMA - end */`;
-
-  // Add after @tailwind directives if present
-  if (globalsContent.includes('@tailwind')) {
-    globalsContent = globalsContent.replace(
-      /(@tailwind\s+utilities;)/,
-      `$1\n\n${tokenBlock}`,
-    );
-  } else if (globalsContent.includes('@import')) {
-    // Add after the last @import
-    const lastImportIdx = globalsContent.lastIndexOf('@import');
-    const endOfImport = globalsContent.indexOf(';', lastImportIdx);
-    if (endOfImport !== -1) {
-      globalsContent =
-        globalsContent.slice(0, endOfImport + 1) +
-        '\n\n' + tokenBlock +
-        globalsContent.slice(endOfImport + 1);
-    } else {
-      globalsContent = `${tokenBlock}\n\n${globalsContent}`;
-    }
-  } else {
-    // Prepend
-    globalsContent = `${tokenBlock}\n\n${globalsContent}`;
-  }
-
-  await writeFile(globalsPath, globalsContent, 'utf8');
-
-  return { ...result, globalsUpdated: true };
-}
-
-/**
- * Find the globals.css file in a Next.js project.
- * Checks common locations: app/globals.css, src/app/globals.css, styles/globals.css
- */
-async function findGlobalsCss(projectDir: string): Promise<string | null> {
-  const candidates = [
-    path.join(projectDir, 'app', 'globals.css'),
+  // Determine the globals.css location (Next.js App Router convention)
+  const globalsCandidates = [
     path.join(projectDir, 'src', 'app', 'globals.css'),
-    path.join(projectDir, 'styles', 'globals.css'),
-    path.join(projectDir, 'src', 'styles', 'globals.css'),
+    path.join(projectDir, 'app', 'globals.css'),
+    path.join(projectDir, 'src', 'app', 'global.css'),
+    path.join(projectDir, 'app', 'global.css'),
   ];
 
-  for (const candidate of candidates) {
+  for (const globalsPath of globalsCandidates) {
     try {
-      const s = await stat(candidate);
-      if (s.isFile()) return candidate;
+      const content = await readFile(globalsPath, 'utf8');
+
+      // Check if tokens import already exists
+      const tokensImportLine = '@import "../styles/tokens.css";';
+      const tokensImportAlt = '@import "../../styles/tokens.css";';
+      const tailwindImportLine = '@import "../styles/tailwind-theme.css";';
+      const tailwindImportAlt = '@import "../../styles/tailwind-theme.css";';
+
+      if (content.includes(tokensImportLine) || content.includes(tokensImportAlt)) {
+        // Already imported — skip
+        continue;
+      }
+
+      // Determine the correct relative import path
+      const globalsDir = path.dirname(globalsPath);
+      const stylesDir = path.join(projectDir, 'src', 'styles');
+      const relPath = path.relative(globalsDir, stylesDir).replace(/\\/g, '/');
+      const importLine = `@import "${relPath}/tokens.css";`;
+      const tailwindLine = `@import "${relPath}/tailwind-theme.css";`;
+
+      // Insert imports at the top of globals.css (after any existing @import or @tailwind directives)
+      const lines = content.split('\n');
+      let insertIndex = 0;
+
+      // Find the position after all @import and @tailwind directives
+      for (let i = 0; i < lines.length; i++) {
+        const trimmed = lines[i].trim();
+        if (trimmed.startsWith('@import') || trimmed.startsWith('@tailwind') || trimmed.startsWith('@theme') || trimmed === '') {
+          insertIndex = i + 1;
+        } else {
+          break;
+        }
+      }
+
+      // Insert the design token imports
+      lines.splice(insertIndex, 0, importLine, tailwindLine);
+
+      // Backup and write
+      await backupIfDifferent(globalsPath, content);
+      await writeFile(globalsPath, lines.join('\n'), 'utf8');
+
+      // Only inject into the first found globals.css
+      break;
     } catch {
-      // File doesn't exist, try next
+      // File doesn't exist — try next candidate
     }
   }
 
-  return null;
+  return result;
 }
 
 // ─── Watcher ───────────────────────────────────────────────────────────

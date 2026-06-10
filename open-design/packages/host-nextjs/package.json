@@ -2,27 +2,23 @@
   "name": "@open-design/host-nextjs",
   "version": "0.1.0",
   "type": "module",
-  "description": "Next.js (browser) host bridge for Open Design — provides web-based capabilities for Next.js projects.",
-  "main": "./dist/index.js",
-  "types": "./dist/index.d.ts",
-  "files": [
-    "dist"
-  ],
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
   "exports": {
     ".": {
-      "types": "./dist/index.d.ts",
       "import": "./dist/index.js",
-      "default": "./dist/index.js"
+      "types": "./dist/index.d.ts"
     }
   },
-  "peerDependencies": {
+  "files": ["dist"],
+  "scripts": {
+    "build": "tsc",
+    "dev": "tsc --watch"
+  },
+  "dependencies": {
     "@open-design/host": "workspace:*"
   },
   "devDependencies": {
-    "typescript": "^5.0.0"
-  },
-  "scripts": {
-    "build": "tsc -p tsconfig.json",
-    "typecheck": "tsc -p tsconfig.json --noEmit"
+    "typescript": "^5.7.0"
   }
 }

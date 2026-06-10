@@ -2,21 +2,12 @@
  * Project type detector.
  *
  * Inspects the project directory for configuration files to determine
- * the project type (tauri-react, nextjs-standalone, nextjs-pages, nextjs,
- * vite-react, vite-vue, etc.) and auto-detect the dev server port.
- *
- * Next.js sub-types:
- *   - `nextjs-standalone` – App Router (app/ or src/app/ directory)
- *   - `nextjs-pages`      – Pages Router (pages/ or src/pages/ directory)
- *
- * Dev server type (`devServerType`) is also detected:
- *   - `vite`   for Vite / Tauri projects
- *   - `nextjs` for Next.js projects
- *   - `custom` for anything else
+ * the project type (tauri-react, nextjs, vite-react, vite-vue, etc.)
+ * and auto-detect the Vite dev server port.
  *
  * Detection priority:
  *   1. `src-tauri/tauri.conf.json` → tauri-react
- *   2. `next.config.*` → nextjs-standalone or nextjs-pages
+ *   2. `next.config.*` → nextjs
  *   3. `vite.config.*` + `package.json` deps → vite-react or vite-vue
  *   4. Fallback → unknown
  */
@@ -29,13 +20,8 @@ import { join } from 'node:path';
 // ---------------------------------------------------------------------------
 
 export interface ProjectTypeDetection {
-  type: 'tauri-react' | 'nextjs-standalone' | 'nextjs-pages' | 'nextjs' | 'vite-react' | 'vite-vue' | 'unknown';
+  type: 'tauri-react' | 'nextjs' | 'vite-react' | 'vite-vue' | 'unknown';
   techStack: string;
-  /** Dev server port (auto-detected). For Vite: 5173, for Next.js: 3000. */
-  devPort?: number | undefined;
-  /** Dev server type: vite for Vite/Tauri projects, nextjs for Next.js projects. */
-  devServerType?: 'vite' | 'nextjs' | 'custom' | undefined;
-  /** @deprecated Use devPort instead. Kept for backward compatibility. */
   vitePort?: number | undefined;
 }
 
@@ -202,20 +188,10 @@ function buildTechStack(
   }
 
   // Build tool
-  if (type === 'nextjs-standalone' || type === 'nextjs-pages' || type === 'nextjs') {
+  if (type === 'nextjs') {
     parts.push('Next.js');
   } else if ('vite' in deps) {
     parts.push('Vite');
-  }
-
-  // Next.js ecosystem (only for nextjs types)
-  if (type === 'nextjs-standalone' || type === 'nextjs-pages' || type === 'nextjs') {
-    if ('next-auth' in deps || '@auth/core' in deps) parts.push('NextAuth');
-    if ('next-intl' in deps) parts.push('next-intl');
-    if ('@prisma/client' in deps) parts.push('Prisma');
-    if ('@radix-ui/react-slot' in deps || '@radix-ui/react-dialog' in deps) parts.push('Radix UI');
-    if ('class-variance-authority' in deps) parts.push('CVA');
-    if ('zod' in deps) parts.push('Zod');
   }
 
   // Router
@@ -285,8 +261,6 @@ export async function detectProjectType(baseDir: string): Promise<ProjectTypeDet
     return {
       type: framework === 'vue' ? 'unknown' : 'tauri-react',
       techStack: buildTechStack('tauri-react', framework, pkgJson),
-      devPort: vitePort,
-      devServerType: 'vite',
       vitePort,
     };
   }
@@ -294,30 +268,9 @@ export async function detectProjectType(baseDir: string): Promise<ProjectTypeDet
   // --- Next.js ---
   for (const candidate of NEXT_CONFIG_CANDIDATES) {
     if (await fileExists(join(baseDir, candidate))) {
-      // Detect App Router vs Pages Router
-      const hasAppDir = await fileExists(join(baseDir, 'app'));
-      const hasPagesDir = await fileExists(join(baseDir, 'pages'));
-      const hasSrcAppDir = await fileExists(join(baseDir, 'src', 'app'));
-      const hasSrcPagesDir = await fileExists(join(baseDir, 'src', 'pages'));
-
-      let nextjsType: 'nextjs-standalone' | 'nextjs-pages';
-      if (hasAppDir || hasSrcAppDir) {
-        nextjsType = 'nextjs-standalone'; // App Router (default for Next.js 16)
-      } else if (hasPagesDir || hasSrcPagesDir) {
-        nextjsType = 'nextjs-pages'; // Pages Router
-      } else {
-        nextjsType = 'nextjs-standalone'; // Default to App Router for modern Next.js
-      }
-
-      // Detect Next.js dev server port
-      const nextjsPort = await detectNextjsPort(baseDir, pkgJson);
-
       return {
-        type: nextjsType,
-        techStack: buildTechStack(nextjsType, 'react', pkgJson),
-        devPort: nextjsPort,
-        devServerType: 'nextjs',
-        vitePort: undefined, // Not a Vite project
+        type: 'nextjs',
+        techStack: buildTechStack('nextjs', 'react', pkgJson),
       };
     }
   }
@@ -337,8 +290,6 @@ export async function detectProjectType(baseDir: string): Promise<ProjectTypeDet
       return {
         type,
         techStack: buildTechStack(type, framework, pkgJson),
-        devPort: vitePort,
-        devServerType: 'vite',
         vitePort,
       };
     }
@@ -349,50 +300,7 @@ export async function detectProjectType(baseDir: string): Promise<ProjectTypeDet
   return {
     type: 'unknown',
     techStack: buildTechStack('unknown', framework, pkgJson),
-    devServerType: undefined,
   };
-}
-
-/**
- * Try to detect the Next.js dev server port from config files and package.json.
- */
-async function detectNextjsPort(baseDir: string, pkgJson: Record<string, unknown> | undefined): Promise<number> {
-  // 1. Check next.config.* for devServer.port
-  for (const candidate of NEXT_CONFIG_CANDIDATES) {
-    const configPath = join(baseDir, candidate);
-    const content = await readTextFile(configPath);
-    if (content) {
-      const portMatch = content.match(/devServer\s*:\s*\{[^}]*port\s*:\s*(\d+)/);
-      if (portMatch?.[1]) {
-        const port = parseInt(portMatch[1], 10);
-        if (port > 0 && port < 65536) return port;
-      }
-    }
-  }
-
-  // 2. Check package.json scripts for --port or -p flag
-  if (pkgJson) {
-    const scripts = pkgJson['scripts'] as Record<string, string> | undefined;
-    if (scripts) {
-      for (const scriptBody of Object.values(scripts)) {
-        if (typeof scriptBody !== 'string') continue;
-        // Match --port <number> or -p <number>
-        const portMatch = scriptBody.match(/--port[=\s]+(\d+)/);
-        if (portMatch?.[1]) {
-          const port = parseInt(portMatch[1], 10);
-          if (port > 0 && port < 65536) return port;
-        }
-        const pMatch = scriptBody.match(/-p\s+(\d+)/);
-        if (pMatch?.[1]) {
-          const port = parseInt(pMatch[1], 10);
-          if (port > 0 && port < 65536) return port;
-        }
-      }
-    }
-  }
-
-  // 3. Fallback to 3000 (Next.js default)
-  return 3000;
 }
 
 /**

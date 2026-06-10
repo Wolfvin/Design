@@ -1,181 +1,96 @@
 /**
- * Next.js middleware injection helper for the host bridge.
+ * Next.js Host Bridge — middleware injection.
  *
- * When running in Next.js mode, the OD daemon may need to inject
- * middleware into the user's Next.js project to:
- * - Install the `window.__od__` bridge script on every page
- * - Provide auth session context to the OD bridge
- * - Rewrite API requests to the daemon when appropriate
+ * Provides utilities for injecting the OD bridge script into a Next.js
+ * project's middleware chain. This allows the OD daemon to communicate
+ * with the running Next.js app via middleware-injected headers and
+ * cookies.
  *
- * This module provides utilities to detect, validate, and (with user
- * consent) modify the project's `middleware.ts` file.
- *
- * IMPORTANT: Middleware injection is opt-in and always requires user
- * confirmation. OD never silently modifies the user's middleware.
+ * In the Tauri bridge, native IPC handles communication. In the Next.js
+ * bridge, we use a combination of:
+ *   1. Daemon API routes for command/control (REST)
+ *   2. SSE for real-time events (file changes, run status)
+ *   3. Middleware injection for OD context headers
  */
 
-import type { NextjsPlatform } from './types.js';
-
-// ---------------------------------------------------------------------------
-// Types
-// ---------------------------------------------------------------------------
-
-/** Result of scanning a Next.js project for existing middleware. */
-export interface MiddlewareScanResult {
-  /** Whether a middleware.ts/js file exists at the project root. */
-  exists: boolean;
-  /** The file extension found ('.ts', '.js', '.mjs', or null). */
-  extension: '.ts' | '.js' | '.mjs' | null;
-  /** Whether the OD bridge import is already present. */
-  hasOdBridgeImport: boolean;
-  /** Whether the OD matcher config is already present. */
-  hasOdMatcher: boolean;
-}
-
-/** Options for injecting the OD middleware snippet. */
-export interface MiddlewareInjectionOptions {
-  /** The daemon base URL (e.g., "http://localhost:3847"). */
+/** Configuration for OD middleware injection. */
+export interface OdMiddlewareConfig {
+  /** The daemon's base URL (e.g., http://localhost:3210). */
   daemonBaseUrl: string;
-  /** The project root directory. */
-  projectRoot: string;
-  /** Whether to create middleware.ts if it doesn't exist. */
-  createIfMissing?: boolean;
-  /** The detected platform (affects path separators). */
-  platform?: NextjsPlatform;
+  /** The OD project ID for the current project. */
+  projectId: string;
+  /** Optional session token for authenticated requests. */
+  sessionToken?: string;
 }
-
-/** Result of a middleware injection attempt. */
-export interface MiddlewareInjectionResult {
-  /** Whether the injection was successful. */
-  ok: boolean;
-  /** Human-readable description of what happened. */
-  message: string;
-  /** The file path that was created or modified. */
-  filePath: string | null;
-  /** Whether a backup was created before modification. */
-  backupCreated: boolean;
-}
-
-// ---------------------------------------------------------------------------
-// Constants
-// ---------------------------------------------------------------------------
-
-/** Marker comment used to identify OD-injected middleware code. */
-const OD_MIDDLEWARE_MARKER = '/* @od-bridge-inject */';
-
-/** The OD middleware snippet template. */
-const OD_MIDDLEWARE_SNIPPET = `${OD_MIDDLEWARE_MARKER}
-import { installNextjsHostBridge } from '@open-design/host-nextjs';
-// Initialize the OD host bridge so window.__od__ is available in the browser.
-// This runs once when the middleware module is loaded.
-if (typeof globalThis !== 'undefined' && !globalThis.__od) {
-  installNextjsHostBridge(process.env.OD_DAEMON_URL || 'http://localhost:3847');
-}`;
-
-// ---------------------------------------------------------------------------
-// Scanning
-// ---------------------------------------------------------------------------
 
 /**
- * Scan a Next.js project directory for existing middleware.
+ * Build the headers that the OD middleware should inject into responses.
  *
- * Checks for `middleware.ts`, `middleware.js`, and `middleware.mjs`
- * at the project root (or `src/` if using the src directory layout).
+ * These headers allow the Next.js app's client-side code to discover
+ * the OD daemon and communicate with it.
  */
-export function scanMiddlewareFiles(files: string[]): MiddlewareScanResult {
-  const middlewareFiles = ['middleware.ts', 'middleware.js', 'middleware.mjs'];
-  const srcMiddlewareFiles = ['src/middleware.ts', 'src/middleware.js', 'src/middleware.mjs'];
-
-  const allCandidates = [...middlewareFiles, ...srcMiddlewareFiles];
-
-  let found: string | null = null;
-  for (const candidate of allCandidates) {
-    if (files.some((f) => f === candidate)) {
-      found = candidate;
-      break;
-    }
-  }
-
-  if (!found) {
-    return {
-      exists: false,
-      extension: null,
-      hasOdBridgeImport: false,
-      hasOdMatcher: false,
-    };
-  }
-
-  const ext = found.endsWith('.ts')
-    ? '.ts' as const
-    : found.endsWith('.mjs')
-      ? '.mjs' as const
-      : '.js' as const;
-
-  return {
-    exists: true,
-    extension: ext,
-    hasOdBridgeImport: false,
-    hasOdMatcher: false,
+export function buildOdInjectionHeaders(config: OdMiddlewareConfig): Record<string, string> {
+  const headers: Record<string, string> = {
+    'X-OD-Daemon-Url': config.daemonBaseUrl,
+    'X-OD-Project-Id': config.projectId,
   };
+
+  if (config.sessionToken) {
+    headers['X-OD-Session-Token'] = config.sessionToken;
+  }
+
+  return headers;
 }
 
-// ---------------------------------------------------------------------------
-// Template generation
-// ---------------------------------------------------------------------------
-
 /**
- * Generate the middleware file content for a Next.js project that
- * doesn't already have one.
+ * Generate a snippet of Next.js middleware code that injects OD headers.
+ *
+ * This can be used by the daemon to auto-generate or modify a Next.js
+ * project's `middleware.ts` file to include OD context headers in every
+ * response. The user can also manually add this code.
  */
-export function generateMiddlewareTemplate(daemonBaseUrl: string): string {
+export function generateMiddlewareSnippet(config: OdMiddlewareConfig): string {
   return `import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
 
-${OD_MIDDLEWARE_SNIPPET.replace('http://localhost:3847', daemonBaseUrl)}
-
+// Open Design middleware — injects OD context headers into responses.
+// Auto-generated by @open-design/host-nextjs
 export function middleware(request: NextRequest) {
-  // OD does not intercept any requests — all routes pass through.
-  // The middleware file exists solely to initialize window.__od__
-  // when the Next.js server process starts.
-  return NextResponse.next();
+  const response = NextResponse.next();
+
+  // OD daemon connection headers
+  response.headers.set('X-OD-Daemon-Url', '${config.daemonBaseUrl}');
+  response.headers.set('X-OD-Project-Id', '${config.projectId}');
+  ${config.sessionToken ? `response.headers.set('X-OD-Session-Token', '${config.sessionToken}');` : '// No session token configured'}
+
+  return response;
 }
 
 export const config = {
-  matcher: [
-    // OD bridge: inject on all page routes (does not block API routes)
-    '/((?!api|_next/static|_next/image|favicon.ico).*)',
-  ],
+  // Apply to all routes except static assets and Next.js internals
+  matcher: ['/((?!_next/static|_next/image|favicon.ico).*)'],
 };
 `;
 }
 
 /**
- * Generate the import snippet to inject into an existing middleware file.
+ * Read OD injection headers from the current page's response headers.
+ *
+ * This is used client-side to discover the OD daemon URL and project ID
+ * that were injected by the Next.js middleware.
  */
-export function generateBridgeImportSnippet(daemonBaseUrl: string): string {
-  return OD_MIDDLEWARE_SNIPPET.replace('http://localhost:3847', daemonBaseUrl);
-}
+export function readOdInjectionHeadersFromMeta(): OdMiddlewareConfig | null {
+  if (typeof document === 'undefined') return null;
 
-// ---------------------------------------------------------------------------
-// Validation
-// ---------------------------------------------------------------------------
+  const daemonUrl = document.querySelector('meta[name="x-od-daemon-url"]')?.getAttribute('content');
+  const projectId = document.querySelector('meta[name="x-od-project-id"]')?.getAttribute('content');
+  const sessionToken = document.querySelector('meta[name="x-od-session-token"]')?.getAttribute('content');
 
-/**
- * Check whether a middleware file content already contains the OD bridge.
- */
-export function middlewareHasOdBridge(content: string): boolean {
-  return content.includes(OD_MIDDLEWARE_MARKER) ||
-    content.includes('@open-design/host-nextjs') ||
-    content.includes('installNextjsHostBridge');
-}
+  if (!daemonUrl || !projectId) return null;
 
-/**
- * Validate that a middleware file is safe to modify.
- */
-export function isMiddlewareSafeToModify(content: string): boolean {
-  if (middlewareHasOdBridge(content)) return true;
-  if (content.includes('NextResponse.next()') && !content.includes('rewrite') && !content.includes('redirect')) {
-    return true;
-  }
-  return false;
+  return {
+    daemonBaseUrl: daemonUrl,
+    projectId,
+    ...(sessionToken ? { sessionToken } : {}),
+  };
 }

@@ -1,25 +1,20 @@
 /**
- * Prisma Schema Helper.
+ * Prisma Schema Helper — validate, generate, and migrate Prisma schemas.
  *
- * Validates, generates, and applies Prisma schema changes for
- * Next.js projects. This module is only active when the project
- * type is `nextjs-standalone` or `nextjs-pages`.
+ * This helper is used by the file-edit pipeline when AI edits a
+ * `prisma/schema.prisma` file. It ensures that:
+ *   1. Schema changes are validated before applying
+ *   2. `npx prisma generate` runs after schema edits
+ *   3. Database migrations are applied safely
+ *   4. Schema changes are logged for audit
  *
- * Flow:
- *   1. AI edits `prisma/schema.prisma` via `<file-edit>` block
- *   2. Before writing: `validateSchema()` checks syntax
- *   3. After writing: `generateClient()` updates TypeScript types
- *   4. Optionally: `pushToDatabase()` applies changes to DB
- *   5. All actions are logged to `prisma_migrations_log` table
+ * Only used for Next.js projects (project type starts with 'nextjs').
  */
 
 import { execFile } from 'node:child_process';
-import { copyFile, mkdir, readFile, stat, unlink, writeFile } from 'node:fs/promises';
-import os from 'node:os';
 import path from 'node:path';
-import { promisify } from 'node:util';
-
-const execAsync = promisify(execFile);
+import fs from 'node:fs';
+import { randomUUID } from 'node:crypto';
 
 // ---------------------------------------------------------------------------
 // Types
@@ -27,274 +22,228 @@ const execAsync = promisify(execFile);
 
 export interface PrismaValidationResult {
   valid: boolean;
-  errors: PrismaError[];
-  warnings: PrismaWarning[];
-}
-
-export interface PrismaError {
-  line?: number;
-  column?: number;
-  message: string;
-}
-
-export interface PrismaWarning {
-  message: string;
+  errors: string[];
+  warnings: string[];
 }
 
 export interface PrismaGenerateResult {
   success: boolean;
   output: string;
-  durationMs: number;
-}
-
-export interface PrismaPushResult {
-  success: boolean;
-  output: string;
-  warnings: string[];
-  durationMs: number;
+  error?: string;
 }
 
 export interface PrismaMigrateResult {
   success: boolean;
+  sql?: string;
   output: string;
-  migrationName?: string;
-  durationMs: number;
+  error?: string;
+}
+
+export interface PrismaSchemaChange {
+  id: string;
+  projectId: string;
+  schemaBefore: string;
+  schemaAfter: string;
+  migrationSql?: string;
+  status: 'pending' | 'applied' | 'failed';
+  createdAt: number;
 }
 
 // ---------------------------------------------------------------------------
-// PrismaSchemaHelper class
+// Validation
 // ---------------------------------------------------------------------------
 
-export class PrismaSchemaHelper {
-  private readonly projectDir: string;
+/**
+ * Validate a Prisma schema string.
+ *
+ * Runs `npx prisma validate` in the project directory with the given
+ * schema content written to a temporary file.
+ */
+export async function validatePrismaSchema(
+  projectDir: string,
+  schemaContent: string,
+): Promise<PrismaValidationResult> {
+  const schemaPath = path.join(projectDir, 'prisma', 'schema.prisma');
 
-  constructor(projectDir: string) {
-    this.projectDir = projectDir;
+  // Write the schema to disk first (prisma validate reads from file)
+  const originalContent = await safeReadFile(schemaPath);
+  try {
+    await fs.promises.mkdir(path.dirname(schemaPath), { recursive: true });
+    await fs.promises.writeFile(schemaPath, schemaContent, 'utf-8');
+
+    const result = await runPrismaCommand(projectDir, ['validate']);
+    return {
+      valid: result.exitCode === 0,
+      errors: result.exitCode !== 0 ? [result.stderr || result.stdout] : [],
+      warnings: [],
+    };
+  } catch (err) {
+    return {
+      valid: false,
+      errors: [err instanceof Error ? err.message : String(err)],
+      warnings: [],
+    };
+  } finally {
+    // Restore original content if it existed
+    if (originalContent !== null) {
+      await fs.promises.writeFile(schemaPath, originalContent, 'utf-8');
+    }
+  }
+}
+
+// ---------------------------------------------------------------------------
+// Generate
+// ---------------------------------------------------------------------------
+
+/**
+ * Run `npx prisma generate` in the project directory.
+ *
+ * This should be called after every schema.prisma edit to update the
+ * generated Prisma Client.
+ */
+export async function runPrismaGenerate(
+  projectDir: string,
+): Promise<PrismaGenerateResult> {
+  const result = await runPrismaCommand(projectDir, ['generate']);
+  return {
+    success: result.exitCode === 0,
+    output: result.stdout,
+    ...(result.exitCode !== 0 ? { error: result.stderr } : {}),
+  };
+}
+
+// ---------------------------------------------------------------------------
+// Migrate
+// ---------------------------------------------------------------------------
+
+/**
+ * Run `npx prisma db push` for development mode.
+ *
+ * This applies schema changes directly without creating migration files.
+ * Use this for rapid prototyping in development.
+ */
+export async function runPrismaDbPush(
+  projectDir: string,
+): Promise<PrismaMigrateResult> {
+  const result = await runPrismaCommand(projectDir, ['db', 'push', '--accept-data-loss']);
+  return {
+    success: result.exitCode === 0,
+    output: result.stdout,
+    ...(result.exitCode !== 0 ? { error: result.stderr } : {}),
+  };
+}
+
+/**
+ * Run `npx prisma migrate dev` for creating a named migration.
+ *
+ * This creates a new migration file and applies it. Use this for
+ * production-ready schema changes.
+ */
+export async function runPrismaMigrateDev(
+  projectDir: string,
+  migrationName: string,
+): Promise<PrismaMigrateResult> {
+  const result = await runPrismaCommand(projectDir, [
+    'migrate',
+    'dev',
+    '--name',
+    migrationName,
+    '--create-only',
+  ]);
+
+  if (result.exitCode !== 0) {
+    return {
+      success: false,
+      output: result.stdout,
+      error: result.stderr,
+    };
   }
 
-  /**
-   * Validate Prisma schema syntax without running generate.
-   * Called BEFORE file is written to disk to catch syntax errors.
-   */
-  async validateSchema(schemaContent: string): Promise<PrismaValidationResult> {
-    // 1. Write schema to a temporary file
-    const tmpPath = path.join(os.tmpdir(), `prisma-validate-${Date.now()}.prisma`);
-    try {
-      await writeFile(tmpPath, schemaContent, 'utf-8');
+  // Now apply the migration
+  const applyResult = await runPrismaCommand(projectDir, ['migrate', 'dev']);
+  return {
+    success: applyResult.exitCode === 0,
+    output: applyResult.stdout,
+    ...(applyResult.exitCode !== 0 ? { error: applyResult.stderr } : {}),
+  };
+}
 
-      // 2. Run prisma validate
-      const { stdout, stderr } = await execAsync(
-        'npx',
-        ['prisma', 'validate', `--schema=${tmpPath}`],
-        {
-          cwd: this.projectDir,
-          timeout: 15000,
-        },
-      );
+// ---------------------------------------------------------------------------
+// Schema diff
+// ---------------------------------------------------------------------------
 
-      return {
-        valid: true,
-        errors: [],
-        warnings: parsePrismaWarnings(stderr || stdout),
-      };
-    } catch (error: any) {
-      const stderr = error.stderr || error.message || '';
-      return {
-        valid: false,
-        errors: parsePrismaErrors(stderr),
-        warnings: [],
-      };
-    } finally {
-      // 3. Clean up temp file
-      await unlink(tmpPath).catch(() => {});
+/**
+ * Compute a simple diff between two schema versions.
+ *
+ * Returns an array of lines that changed (added or removed).
+ */
+export function computeSchemaDiff(
+  schemaBefore: string,
+  schemaAfter: string,
+): string[] {
+  const beforeLines = schemaBefore.split('\n');
+  const afterLines = schemaAfter.split('\n');
+  const diff: string[] = [];
+
+  const maxLen = Math.max(beforeLines.length, afterLines.length);
+  for (let i = 0; i < maxLen; i++) {
+    const before = beforeLines[i] ?? '';
+    const after = afterLines[i] ?? '';
+    if (before !== after) {
+      if (before) diff.push(`- ${before}`);
+      if (after) diff.push(`+ ${after}`);
     }
   }
 
-  /**
-   * After schema is written to disk, generate Prisma Client.
-   * This updates the TypeScript types in node_modules/.prisma/client.
-   */
-  async generateClient(): Promise<PrismaGenerateResult> {
-    const start = Date.now();
-    try {
-      const { stdout, stderr } = await execAsync(
-        'npx',
-        ['prisma', 'generate'],
-        {
-          cwd: this.projectDir,
-          timeout: 30000,
-        },
-      );
+  return diff;
+}
 
-      return {
-        success: true,
-        output: stdout || stderr || 'Prisma Client generated successfully',
-        durationMs: Date.now() - start,
-      };
-    } catch (error: any) {
-      return {
-        success: false,
-        output: error.stderr || error.message || 'Prisma generate failed',
-        durationMs: Date.now() - start,
-      };
-    }
-  }
-
-  /**
-   * Push schema changes to the database (development mode).
-   * Uses `prisma db push` which applies changes without creating migration files.
-   * Only runs if user confirms via UI.
-   */
-  async pushToDatabase(): Promise<PrismaPushResult> {
-    const start = Date.now();
-    try {
-      const { stdout, stderr } = await execAsync(
-        'npx',
-        ['prisma', 'db', 'push', '--accept-data-loss'],
-        {
-          cwd: this.projectDir,
-          timeout: 60000,
-        },
-      );
-
-      return {
-        success: true,
-        output: stdout || stderr || 'Database schema pushed successfully',
-        warnings: parsePrismaWarnings(stderr || stdout).map(w => w.message),
-        durationMs: Date.now() - start,
-      };
-    } catch (error: any) {
-      return {
-        success: false,
-        output: error.stderr || error.message || 'Prisma db push failed',
-        warnings: [],
-        durationMs: Date.now() - start,
-      };
-    }
-  }
-
-  /**
-   * Create a named migration (production-safe approach).
-   * Uses `prisma migrate dev --name <name>`.
-   */
-  async createMigration(name: string): Promise<PrismaMigrateResult> {
-    const start = Date.now();
-    try {
-      const { stdout, stderr } = await execAsync(
-        'npx',
-        ['prisma', 'migrate', 'dev', '--name', name],
-        {
-          cwd: this.projectDir,
-          timeout: 120000,
-        },
-      );
-
-      return {
-        success: true,
-        output: stdout || stderr || 'Migration created successfully',
-        migrationName: name,
-        durationMs: Date.now() - start,
-      };
-    } catch (error: any) {
-      return {
-        success: false,
-        output: error.stderr || error.message || 'Migration failed',
-        durationMs: Date.now() - start,
-      };
-    }
-  }
-
-  /**
-   * Check whether the project has a Prisma schema file.
-   */
-  async hasPrismaSchema(): Promise<boolean> {
-    const schemaPath = path.join(this.projectDir, 'prisma', 'schema.prisma');
-    try {
-      const s = await stat(schemaPath);
-      return s.isFile();
-    } catch {
-      return false;
-    }
-  }
-
-  /**
-   * Read the current Prisma schema content.
-   */
-  async readSchema(): Promise<string | null> {
-    const schemaPath = path.join(this.projectDir, 'prisma', 'schema.prisma');
-    try {
-      return await readFile(schemaPath, 'utf-8');
-    } catch {
-      return null;
-    }
-  }
-
-  /**
-   * Backup the Prisma schema before editing.
-   */
-  async backupSchema(): Promise<string | null> {
-    const schemaPath = path.join(this.projectDir, 'prisma', 'schema.prisma');
-    const backupPath = schemaPath + '.bak';
-    try {
-      const s = await stat(schemaPath);
-      if (s.isFile()) {
-        await copyFile(schemaPath, backupPath);
-        return backupPath;
-      }
-    } catch {
-      // File doesn't exist
-    }
-    return null;
-  }
+/**
+ * Check if a file path is a Prisma schema file.
+ */
+export function isPrismaSchemaFile(filePath: string): boolean {
+  const normalized = filePath.replace(/\\/g, '/');
+  return normalized === 'prisma/schema.prisma' || normalized.endsWith('/prisma/schema.prisma');
 }
 
 // ---------------------------------------------------------------------------
 // Internal helpers
 // ---------------------------------------------------------------------------
 
-/**
- * Parse Prisma error messages from stderr.
- */
-function parsePrismaErrors(stderr: string): PrismaError[] {
-  const errors: PrismaError[] = [];
-
-  // Prisma validation errors typically look like:
-  // Error: The model "User" does not have an id field.
-  // or:
-  // error: Error validating: The argument "provider" is required...
-  const lines = stderr.split('\n');
-  for (const line of lines) {
-    const trimmed = line.trim();
-    if (!trimmed) continue;
-    if (trimmed.startsWith('Error:') || trimmed.startsWith('error:')) {
-      const message = trimmed.replace(/^(Error|error):\s*/, '');
-      errors.push({ message });
-    }
-  }
-
-  // If no structured errors found, treat the whole stderr as one error
-  if (errors.length === 0 && stderr.trim()) {
-    errors.push({ message: stderr.trim() });
-  }
-
-  return errors;
+interface CommandResult {
+  exitCode: number;
+  stdout: string;
+  stderr: string;
 }
 
-/**
- * Parse Prisma warning messages from output.
- */
-function parsePrismaWarnings(output: string): PrismaWarning[] {
-  const warnings: PrismaWarning[] = [];
+function runPrismaCommand(
+  projectDir: string,
+  args: string[],
+): Promise<CommandResult> {
+  return new Promise((resolve) => {
+    execFile(
+      'npx',
+      ['prisma', ...args],
+      {
+        cwd: projectDir,
+        timeout: 60_000, // 60 seconds timeout
+        maxBuffer: 1024 * 1024, // 1MB buffer
+      },
+      (error, stdout, stderr) => {
+        resolve({
+          exitCode: error ? (error as any).code ?? 1 : 0,
+          stdout: stdout ?? '',
+          stderr: stderr ?? '',
+        });
+      },
+    );
+  });
+}
 
-  const lines = output.split('\n');
-  for (const line of lines) {
-    const trimmed = line.trim();
-    if (!trimmed) continue;
-    if (trimmed.startsWith('Warn:') || trimmed.startsWith('warn:')) {
-      const message = trimmed.replace(/^(Warn|warn):\s*/, '');
-      warnings.push({ message });
-    }
+async function safeReadFile(filePath: string): Promise<string | null> {
+  try {
+    return await fs.promises.readFile(filePath, 'utf-8');
+  } catch {
+    return null;
   }
-
-  return warnings;
 }

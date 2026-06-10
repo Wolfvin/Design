@@ -1,66 +1,75 @@
 ---
 name: nextjs-api-route
 description: |
-  Create and modify Next.js Route Handlers (API routes) following
-  App Router conventions. Supports GET, POST, PUT, DELETE methods.
+  Build Next.js Route Handlers (API routes) using App Router conventions.
+  Creates GET, POST, PUT, DELETE handlers with proper TypeScript types,
+  request validation, and error handling.
 od:
-  mode: engineering
+  mode: prototype
   surface: web
-  scenario: nextjs
-  category: nextjs
-  taskKind: api-route
+  scenario: engineering
+  category: app-development
+  taskKind: nextjs-api
   outputFormat: file-edit
+  stackCompatibility: nextjs
   design_system:
     requires: false
-  stackCompat:
-    - nextjs-standalone
-    - nextjs-pages
   craft:
     requires:
       - file-conventions
+      - rest-api
 ---
 
-# Next.js API Route Handler
+# Next.js API Route Builder
 
-You are creating or modifying Next.js Route Handlers.
+You are building API routes for a Next.js App Router project.
 
-## Route Handler conventions
+## Route Handler Conventions
 
-1. **File location** — API routes live at `app/api/{route}/route.ts`.
-2. **Named exports** — Export named functions for HTTP methods: `GET`, `POST`, `PUT`, `DELETE`, `PATCH`.
-3. **Request/Response** — Use the Web `Request` and `Response` APIs.
-4. **Error handling** — Return appropriate HTTP status codes.
-5. **Validation** — Use Zod for request body validation.
+- Route handlers go in `app/api/` directory
+- Each route gets its own directory: `app/api/users/route.ts`
+- Dynamic routes: `app/api/users/[id]/route.ts`
+- Export named functions: `GET`, `POST`, `PUT`, `DELETE`, `PATCH`
 
-## Example
+## Output Format
+
+Use `<file-edit>` blocks for every file:
+
+```
+<file-edit path="app/api/users/route.ts">
+// route handler content here
+</file-edit>
+```
+
+## Key Patterns
 
 ```typescript
-// app/api/users/route.ts
-import { NextResponse } from 'next/server';
-import { prisma } from '@/lib/prisma';
-import { z } from 'zod';
+import { NextRequest, NextResponse } from 'next/server';
 
-const CreateUserSchema = z.object({
-  name: z.string().min(1),
-  email: z.string().email(),
-});
-
-export async function GET() {
-  const users = await prisma.user.findMany();
-  return NextResponse.json(users);
+export async function GET(request: NextRequest) {
+  try {
+    // Fetch data
+    return NextResponse.json({ data: [] });
+  } catch (error) {
+    return NextResponse.json({ error: 'Internal Server Error' }, { status: 500 });
+  }
 }
 
-export async function POST(request: Request) {
-  const body = await request.json();
-  const parsed = CreateUserSchema.safeParse(body);
-  if (!parsed.success) {
-    return NextResponse.json({ error: parsed.error }, { status: 400 });
+export async function POST(request: NextRequest) {
+  try {
+    const body = await request.json();
+    // Validate and process
+    return NextResponse.json({ success: true }, { status: 201 });
+  } catch (error) {
+    return NextResponse.json({ error: 'Bad Request' }, { status: 400 });
   }
-  const user = await prisma.user.create({ data: parsed.data });
-  return NextResponse.json(user, { status: 201 });
 }
 ```
 
-## Output
+## Best Practices
 
-Use `<file-edit>` blocks for every file change.
+- Always validate request body with Zod or type guards
+- Return proper HTTP status codes (200, 201, 400, 401, 404, 500)
+- Use `NextRequest` for type-safe request access
+- Handle edge cases: missing fields, invalid types, unauthorized access
+- For database access, use Prisma Client (import from `@/lib/prisma`)

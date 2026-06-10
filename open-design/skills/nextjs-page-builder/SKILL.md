@@ -1,64 +1,61 @@
 ---
 name: nextjs-page-builder
 description: |
-  Build Next.js App Router pages with Server Components, Client Components,
-  loading states, and error boundaries. Follows Next.js 16 conventions.
+  Create Next.js App Router pages and layouts with proper file conventions.
+  Builds page.tsx, layout.tsx, loading.tsx, error.tsx files following
+  Next.js 16 App Router patterns with React Server Components.
 od:
-  mode: engineering
+  mode: prototype
   surface: web
-  scenario: nextjs
-  category: nextjs
-  taskKind: page-builder
+  scenario: engineering
+  category: app-development
+  taskKind: nextjs-page
   outputFormat: file-edit
+  stackCompatibility: nextjs
   design_system:
     requires: true
-  stackCompat:
-    - nextjs-standalone
-    - nextjs-pages
   craft:
     requires:
       - file-conventions
-      - editing-rules
+      - nextjs-app-router
 ---
 
 # Next.js Page Builder
 
-You are building pages in a Next.js App Router project. Follow these conventions:
+You are building pages and layouts for a Next.js App Router project. Follow these conventions:
 
-## Page conventions
+## Next.js App Router Structure
 
-1. **Server Components by default** — Components in `app/` are Server Components unless they have `"use client"`.
-2. **Client Components when needed** — Add `"use client"` only when the component uses hooks, event handlers, or browser APIs.
-3. **File structure** — Create pages as `app/{route}/page.tsx`.
-4. **Loading states** — Create `app/{route}/loading.tsx` for streaming loading UI.
-5. **Error boundaries** — Create `app/{route}/error.tsx` for error handling (must be Client Component).
+- Pages go in `app/` directory: `app/page.tsx`, `app/about/page.tsx`
+- Layouts wrap pages: `app/layout.tsx`, `app/about/layout.tsx`
+- Loading states: `app/loading.tsx`
+- Error boundaries: `app/error.tsx`
+- Not found: `app/not-found.tsx`
 
-## Design tokens
+## Server vs Client Components
 
-Use design tokens from `tokens.css` for all visual styling:
-- Colors: `var(--bg)`, `var(--fg)`, `var(--accent)`, etc.
-- Typography: `var(--text-sm)`, `var(--text-lg)`, etc.
-- Spacing: `var(--space-2)`, `var(--space-4)`, etc.
-- In Tailwind classes: `bg-[var(--bg)] text-[var(--fg)]`
+- **Default = Server Component** (no `"use client"` directive)
+- Use `"use client"` only when you need:
+  - useState, useEffect, useContext
+  - Event handlers (onClick, onChange)
+  - Browser APIs (localStorage, window)
+  - React hooks that require client-side rendering
 
-## Data fetching
-
-Use Server Components for data fetching:
-```tsx
-// app/dashboard/page.tsx (Server Component)
-import { prisma } from '@/lib/prisma';
-
-export default async function DashboardPage() {
-  const users = await prisma.user.findMany();
-  return <UserList users={users} />;
-}
-```
-
-## Output format
+## Output Format
 
 Use `<file-edit>` blocks for every file:
+
 ```
 <file-edit path="app/dashboard/page.tsx">
-// content
+// page content here
 </file-edit>
 ```
+
+## Key Patterns
+
+- Use `export default function PageName()` for pages
+- Use `export default function LayoutName({ children })` for layouts
+- Import design tokens: `import '@/styles/tokens.css'`
+- Use Tailwind classes with CSS variables: `className="bg-[var(--bg)] text-[var(--fg)]"`
+- For data fetching, use async Server Components directly
+- For forms, use Server Actions with `"use server"`

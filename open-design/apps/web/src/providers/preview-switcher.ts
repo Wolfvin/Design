@@ -1,23 +1,21 @@
 /**
- * Preview Switcher — Vite HMR / Next.js Fast Refresh / Legacy iframe preview.
+ * Preview Switcher — Vite HMR vs Legacy iframe preview mode.
  *
- * Provides a `usePreview()` hook that automatically switches between
- * the Vite HMR live preview, Next.js Fast Refresh preview, and the
- * legacy iframe srcdoc preview, based on the active skill's
- * frontmatter configuration and the project type.
+ * Provides a `usePreview()` hook that automatically switches between the
+ * Vite HMR live preview and the legacy iframe srcdoc preview, based on
+ * the active skill's frontmatter configuration.
  *
  * Mode selection logic:
  *   - `od.mode: design` or `od.outputFormat: artifact` → legacy mode
  *     (design-centric skills that produce HTML artifacts)
- *   - `od.outputFormat: file-edit` or no active skill → auto-detect
- *     based on project type: Next.js projects → nextjs mode,
- *     Vite/Tauri projects → vite mode
+ *   - `od.outputFormat: file-edit` or no active skill → Vite mode
+ *     (app developer skills that write files to disk)
  *
  * Mode preference is persisted to localStorage so it survives page reloads.
  * The user can also manually override the mode via `switchToVite()` /
- * `switchToNextjs()` / `switchToLegacy()`.
+ * `switchToLegacy()`.
  *
- * Part of the Open Design App Developer migration (Phase 5 — Next.js mode).
+ * Part of the Open Design App Developer migration (Phase 7.3, GAP 4).
  */
 
 import { useCallback, useEffect, useRef, useState } from 'react';
@@ -29,31 +27,23 @@ import {
   useNextjsPreview,
   type NextjsPreviewState,
 } from './nextjs-preview';
-import {
-  autoDetectDevPort,
-  type PortDetectionResult,
-} from './dev-port-detector';
 
 // ---------------------------------------------------------------------------
 // Types
 // ---------------------------------------------------------------------------
-
-/** Preview mode — extended with 'nextjs' for Next.js Fast Refresh. */
-export type PreviewMode = 'vite' | 'nextjs' | 'legacy';
 
 /** Skill frontmatter shape used for mode auto-detection. */
 export interface SkillFrontmatter {
   od?: {
     mode?: string;
     outputFormat?: string;
-    stackCompat?: string[];
   };
 }
 
 /** State returned by `usePreview`. */
 export interface PreviewSwitcherState {
   /** Current preview mode. */
-  mode: PreviewMode;
+  mode: 'vite' | 'nextjs' | 'legacy';
   /** Vite preview state (non-null when mode is 'vite'). */
   viteState: VitePreviewState | null;
   /** Next.js preview state (non-null when mode is 'nextjs'). */
@@ -66,7 +56,7 @@ export interface PreviewSwitcherState {
   switchToNextjs: () => void;
   /** Switch to legacy iframe mode. */
   switchToLegacy: () => void;
-  /** Auto-detect the best mode based on the active skill's frontmatter and project type. */
+  /** Auto-detect the best mode based on the active skill's frontmatter. */
   autoDetect: (skillFrontmatter?: SkillFrontmatter, projectType?: string) => void;
 }
 
@@ -86,7 +76,7 @@ function storageKey(projectId: string): string {
 /**
  * Read the persisted mode preference from localStorage.
  */
-function readPersistedMode(projectId: string): PreviewMode | null {
+function readPersistedMode(projectId: string): 'vite' | 'nextjs' | 'legacy' | null {
   if (typeof window === 'undefined') return null;
   try {
     const raw = window.localStorage.getItem(storageKey(projectId));
@@ -100,7 +90,7 @@ function readPersistedMode(projectId: string): PreviewMode | null {
 /**
  * Persist the mode preference to localStorage.
  */
-function persistMode(projectId: string, mode: PreviewMode): void {
+function persistMode(projectId: string, mode: 'vite' | 'nextjs' | 'legacy'): void {
   if (typeof window === 'undefined') return;
   try {
     window.localStorage.setItem(storageKey(projectId), mode);
@@ -110,22 +100,20 @@ function persistMode(projectId: string, mode: PreviewMode): void {
 }
 
 /**
- * Determine the appropriate preview mode from a skill's frontmatter
- * and the project type.
+ * Determine the appropriate preview mode from a skill's frontmatter.
  *
- * Returns 'legacy' for design/artifact skills, 'nextjs' for Next.js
- * file-edit skills, and 'vite' for Vite/Tauri file-edit skills.
+ * Returns 'legacy' for design/artifact skills, 'vite' for file-edit / no skill.
  */
 function detectModeFromFrontmatter(
   fm?: SkillFrontmatter,
   projectType?: string,
-): PreviewMode {
+): 'vite' | 'nextjs' | 'legacy' {
   if (!fm?.od) {
-    // No skill frontmatter — choose based on project type
+    // No skill frontmatter — determine by project type
     return projectType?.startsWith('nextjs') ? 'nextjs' : 'vite';
   }
 
-  const { mode, outputFormat, stackCompat } = fm.od;
+  const { mode, outputFormat } = fm.od;
 
   // Design mode → always legacy (produces HTML artifacts)
   if (mode === 'design') return 'legacy';
@@ -138,13 +126,7 @@ function detectModeFromFrontmatter(
     return projectType?.startsWith('nextjs') ? 'nextjs' : 'vite';
   }
 
-  // Stack compatibility hint
-  if (Array.isArray(stackCompat)) {
-    if (stackCompat.some((s) => s.startsWith('nextjs'))) return 'nextjs';
-    if (stackCompat.some((s) => s.startsWith('tauri'))) return 'vite';
-  }
-
-  // Default: auto-detect from project type
+  // Default: choose based on project type
   return projectType?.startsWith('nextjs') ? 'nextjs' : 'vite';
 }
 
@@ -154,6 +136,9 @@ function detectModeFromFrontmatter(
 
 /**
  * Build the legacy preview URL for a project.
+ *
+ * The legacy preview uses the daemon's existing artifact preview endpoint,
+ * which renders the project's current artifact via iframe srcdoc.
  */
 function buildLegacyPreviewUrl(projectId: string): string {
   return `/api/projects/${encodeURIComponent(projectId)}/preview`;
@@ -164,23 +149,37 @@ function buildLegacyPreviewUrl(projectId: string): string {
 // ---------------------------------------------------------------------------
 
 /**
- * Switch between Vite HMR, Next.js Fast Refresh, and legacy iframe preview.
+ * Switch between Vite HMR preview and legacy iframe preview.
  *
  * Auto-detects the appropriate mode from the active skill's frontmatter
- * and project type, and persists the user's manual preference to localStorage.
+ * and persists the user's manual preference to localStorage.
  *
  * @param projectId - The OD project ID.
- * @param options - Optional configuration (daemonBaseUrl, etc.)
  * @returns A `PreviewSwitcherState` object for driving the preview UI.
+ *
+ * @example
+ * ```tsx
+ * function MyPreviewArea({ projectId, activeSkill }) {
+ *   const { mode, viteState, legacyPreviewUrl, switchToVite, switchToLegacy } = usePreview(projectId);
+ *
+ *   // Auto-detect when skill changes
+ *   useEffect(() => {
+ *     autoDetect(activeSkill?.frontmatter);
+ *   }, [activeSkill]);
+ *
+ *   if (mode === 'vite' && viteState?.serverOnline) {
+ *     return <iframe src={viteState.previewUrl} />;
+ *   }
+ *   if (mode === 'legacy' && legacyPreviewUrl) {
+ *     return <iframe src={legacyPreviewUrl} />;
+ *   }
+ *   return <div>No preview available</div>;
+ * }
+ * ```
  */
-export function usePreview(
-  projectId: string,
-  options?: { daemonBaseUrl?: string },
-): PreviewSwitcherState {
-  const { daemonBaseUrl } = options ?? {};
-
+export function usePreview(projectId: string): PreviewSwitcherState {
   // ---- Mode state ----
-  const [mode, setMode] = useState<PreviewMode>(() => {
+  const [mode, setMode] = useState<'vite' | 'nextjs' | 'legacy'>(() => {
     const persisted = readPersistedMode(projectId);
     return persisted ?? 'vite';
   });
@@ -194,9 +193,8 @@ export function usePreview(
   });
 
   // ---- Next.js preview state ----
-  const nextjsState: NextjsPreviewState = useNextjsPreview({
-    projectId,
-    daemonBaseUrl,
+  const nextjsState: NextjsPreviewState = useNextjsPreview(projectId, {
+    enabled: mode === 'nextjs',
   });
 
   // ---- Legacy preview URL ----
@@ -247,6 +245,13 @@ export function usePreview(
     },
     [],
   );
+
+  // ---- Smooth transition ----
+  // When switching modes, we need to ensure no layout shift occurs.
+  // The consumer is responsible for using the same container dimensions
+  // for both Vite, Next.js, and legacy iframes. We provide a stable
+  // interface so the consumer can use `key={mode}` to force a clean
+  // remount without flicker.
 
   return {
     mode,

@@ -1,72 +1,81 @@
 ---
 name: prisma-schema
 description: |
-  Create and modify Prisma schema definitions for Next.js projects.
-  Handles model creation, field additions, relation changes, and
-  triggers prisma generate after edits.
+  Edit Prisma schema files and manage database migrations. Creates and
+  modifies models, relations, enums, and indexes in schema.prisma with
+  proper validation and migration support.
 od:
-  mode: engineering
+  mode: prototype
   surface: web
-  scenario: nextjs
-  category: nextjs
+  scenario: engineering
+  category: app-development
   taskKind: prisma-schema
   outputFormat: file-edit
+  stackCompatibility: nextjs
   design_system:
     requires: false
-  stackCompat:
-    - nextjs-standalone
-    - nextjs-pages
   craft:
     requires:
       - file-conventions
+      - database-design
 ---
 
-# Prisma Schema Builder
+# Prisma Schema Editor
 
-You are editing Prisma schema files in a Next.js project.
+You are editing Prisma schema for a Next.js project's database layer.
 
-## Schema conventions
+## Schema File Location
 
-1. **File location** — `prisma/schema.prisma`.
-2. **Prisma Client** — Import from `@/lib/prisma` (singleton pattern).
-3. **IDs** — Use `@default(autoincrement())` for SQLite, `@default(uuid())` for PostgreSQL.
-4. **Timestamps** — Add `createdAt DateTime @default(now())` and `updatedAt DateTime @updatedAt`.
-5. **Relations** — Always define both sides of a relation.
-6. **Enums** — Use Prisma enums for status fields.
+- Schema file: `prisma/schema.prisma`
+- Always read the existing schema before editing
 
-## Safety rules
-
-- **Always read the existing schema first** before editing.
-- **Never delete a model** unless the user explicitly asks — data loss risk.
-- **Never rename a field** without creating a migration — use `prisma migrate dev`.
-- The system will automatically run `npx prisma generate` after schema edits.
-- Do NOT run `prisma db push` or `prisma migrate` yourself — the system handles it with user confirmation.
-
-## Example model
+## Prisma Schema Conventions
 
 ```prisma
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql" // or "sqlite", "mysql"
+  url      = env("DATABASE_URL")
+}
+
 model User {
-  id        String   @id @default(uuid())
+  id        String   @id @default(cuid())
   email     String   @unique
   name      String?
-  avatar    String?
-  role      Role     @default(USER)
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
-  posts     Post[]
-}
 
-enum Role {
-  USER
-  ADMIN
+  posts Post[]
 }
 ```
 
-## Output
+## Output Format
 
 Use `<file-edit>` blocks for schema changes:
+
 ```
 <file-edit path="prisma/schema.prisma">
-// full schema content
+// full schema content here
 </file-edit>
 ```
+
+## Best Practices
+
+- Always include `id`, `createdAt`, `updatedAt` fields
+- Use `@id @default(cuid())` or `@id @default(uuid())` for IDs
+- Use `@updatedAt` for automatic timestamp updates
+- Add `@unique` for fields that should be unique (email, slug)
+- Add `@@index` for frequently queried fields
+- Use enums for fixed value sets: `enum Role { USER ADMIN }`
+- Define relations with both sides: `User posts Post[]` and `Post author User @relation(fields: [authorId])`
+- Add `@@map("table_name")` if the model name differs from table name
+
+## After Schema Edits
+
+After editing schema.prisma, the system will automatically:
+1. Validate the schema syntax
+2. Run `npx prisma generate` to update the Prisma Client
+3. Optionally run `npx prisma db push` to apply changes to the database
