@@ -12,6 +12,7 @@ od:
   mode: image
   category: 3d-shaders
   upstream: "https://github.com/fal-ai-community/skills"
+  stackCompatibility: both
 ---
 
 # fal-3d

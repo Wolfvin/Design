@@ -21,6 +21,7 @@ od:
   speaker_notes: true
   animations: true
   example_prompt: "帮我用 html-ppt-xhs-post 模板做一组 9 张小红书图文（3:4 竖版，810×1080）。先告诉我主题，然后帮我把封面 + 7 页内容 + 结尾 CTA 排好，每页一句标题 + 一段正文 + 关键词 sticker。"
+  stackCompatibility: both
 ---
 # HTML PPT · 小红书 图文
 

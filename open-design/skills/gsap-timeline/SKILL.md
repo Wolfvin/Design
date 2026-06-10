@@ -12,6 +12,7 @@ od:
   mode: prototype
   category: animation-motion
   upstream: "https://github.com/greensock/gsap-skills"
+  stackCompatibility: both
 ---
 
 # GSAP Timeline

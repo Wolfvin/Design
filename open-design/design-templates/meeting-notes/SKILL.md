@@ -22,6 +22,7 @@ od:
     requires: true
     sections: [color, typography, layout, components]
   example_prompt: "Write up notes from a 60-minute Growth squad weekly — agenda, decisions, action items with owners, next meeting."
+  stackCompatibility: both
 ---
 
 # Meeting Notes Skill

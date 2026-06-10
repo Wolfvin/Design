@@ -12,6 +12,7 @@ od:
   mode: prototype
   category: 3d-shaders
   upstream: "https://github.com/CloudAI-X/threejs-skills"
+  stackCompatibility: both
 ---
 
 # threejs

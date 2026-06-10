@@ -12,6 +12,7 @@ od:
   mode: prototype
   category: documents
   upstream: "https://github.com/anthropics/skills/tree/main/skills/pdf"
+  stackCompatibility: both
 ---
 
 # pdf

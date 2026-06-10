@@ -12,6 +12,7 @@ od:
   mode: image
   category: image-generation
   upstream: "https://github.com/pixelbin-dev/skills"
+  stackCompatibility: both
 ---
 
 # pixelbin-media

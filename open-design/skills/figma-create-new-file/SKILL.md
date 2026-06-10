@@ -10,6 +10,7 @@ od:
   mode: design-system
   category: figma
   upstream: "https://github.com/figma/skills"
+  stackCompatibility: both
 ---
 
 # figma-create-new-file

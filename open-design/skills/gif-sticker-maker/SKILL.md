@@ -12,6 +12,7 @@ od:
   mode: image
   category: image-generation
   upstream: "https://github.com/MiniMax-AI/skills"
+  stackCompatibility: both
 ---
 
 # gif-sticker-maker

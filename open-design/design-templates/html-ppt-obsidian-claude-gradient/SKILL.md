@@ -20,6 +20,7 @@ od:
   speaker_notes: true
   animations: true
   example_prompt: "用 html-ppt-obsidian-claude-gradient 模板做一份开发者教程 PPT。GitHub 暗紫渐变 + 居中布局 + 紫色 pill + 三色渐变标题 + 配置/步骤代码块。先确认：教什么、目标受众、要不要 MCP/Agent 配置示例。"
+  stackCompatibility: both
 ---
 # HTML PPT · GitHub 暗紫渐变
 

@@ -21,6 +21,7 @@ od:
   speaker_notes: true
   animations: true
   example_prompt: "用 html-ppt-xhs-pastel-card 模板做一份慢生活主题图文。奶油底 + 马卡龙圆角卡片 + Playfair 斜体序号 + donut 图。先告诉我主题（休息 / 暂停 / 自我照顾…）和 5-7 个想说的点。"
+  stackCompatibility: both
 ---
 # HTML PPT · 柔和马卡龙慢生活
 

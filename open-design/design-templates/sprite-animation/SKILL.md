@@ -31,6 +31,7 @@ od:
     requires: true
     sections: [color, typography, layout, components]
   example_prompt: "Create a sprite-based animation introducing trivia about Nintendo's history. Combine pixel mascots, animated text, and a Hanafuda accent. Use color and type that feel like the Nintendo brand."
+  stackCompatibility: both
 ---
 # Sprite Animation Skill
 

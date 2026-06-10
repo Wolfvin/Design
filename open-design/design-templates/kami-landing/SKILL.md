@@ -36,6 +36,7 @@ od:
     requires:
       - typographic-rhythm
       - pixel-discipline
+  stackCompatibility: both
 inputs:
   - id: brand
     label: Brand identity

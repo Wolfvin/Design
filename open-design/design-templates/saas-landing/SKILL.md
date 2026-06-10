@@ -49,6 +49,7 @@ od:
     primary: index.html
   capabilities_required:
     - file_write
+  stackCompatibility: both
 ---
 
 # SaaS Landing Skill

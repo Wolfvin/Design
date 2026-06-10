@@ -20,6 +20,7 @@ od:
   speaker_notes: true
   animations: true
   example_prompt: "用 html-ppt-graphify-dark-graph 模板做一份 dev-tool 发布会 PPT。深夜渐变背景 + 力导向图谱封面 + 彩虹标题 + JetBrains Mono 命令行。先确认：工具名、核心能力、demo 步骤；要不要现场敲 CLI。"
+  stackCompatibility: both
 ---
 # HTML PPT · 暗底知识图谱
 

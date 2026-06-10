@@ -29,6 +29,7 @@ od:
     requires: true
     sections: [color, typography, layout, components]
   example_prompt: "Design an editorial magazine-style poster — ‘You don't need a designer to ship your first draft anymore.’ Newsprint paper, six numbered sections."
+  stackCompatibility: both
 ---
 
 # Magazine Poster Skill

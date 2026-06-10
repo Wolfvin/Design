@@ -26,6 +26,7 @@ od:
     requires: true
     sections: [color, typography, layout, components]
   example_prompt: "Design a launch email for a sporty running shoe brand — masthead, hero, big headline lockup, specs grid, CTA."
+  stackCompatibility: both
 ---
 
 # Email Marketing Skill

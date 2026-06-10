@@ -12,6 +12,7 @@ od:
   mode: design-system
   category: marketing-creative
   upstream: "https://github.com/coreyhaines31/marketingskills"
+  stackCompatibility: both
 ---
 
 # copywriting

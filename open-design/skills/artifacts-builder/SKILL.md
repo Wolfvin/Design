@@ -14,6 +14,7 @@ od:
   category: web-artifacts
   upstream: https://github.com/ComposioHQ/awesome-claude-skills/tree/master/artifacts-builder
   outputFormat: file-edit
+  stackCompatibility: both
 ---
 
 

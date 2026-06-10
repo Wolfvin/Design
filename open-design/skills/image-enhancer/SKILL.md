@@ -12,6 +12,7 @@ od:
   mode: image
   category: image-generation
   upstream: "https://github.com/ComposioHQ/awesome-claude-skills/tree/master/image-enhancer"
+  stackCompatibility: both
 ---
 
 # image-enhancer

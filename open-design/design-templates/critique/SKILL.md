@@ -30,6 +30,7 @@ od:
   design_system:
     requires: false
   example_prompt: "Run a 5-dimension critique on the magazine-web-ppt deck I just generated — score philosophy / hierarchy / detail / function / innovation, give me Keep / Fix / Quick-wins."
+  stackCompatibility: both
 ---
 
 # Critique Skill · 5 维度专家评审

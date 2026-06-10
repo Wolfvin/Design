@@ -15,6 +15,7 @@ od:
   category: slides
   upstream: https://github.com/zarazhangrui/frontend-slides
   outputFormat: artifact
+  stackCompatibility: both
 ---
 
 

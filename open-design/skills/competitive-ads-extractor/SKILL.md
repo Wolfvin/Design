@@ -11,6 +11,7 @@ od:
   mode: design-system
   category: marketing-creative
   upstream: "https://github.com/ComposioHQ/awesome-claude-skills/tree/master/competitive-ads-extractor"
+  stackCompatibility: both
 ---
 
 # competitive-ads-extractor

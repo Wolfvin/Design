@@ -27,6 +27,7 @@ od:
     requires: false
   speaker_notes: false
   animations: false
+  stackCompatibility: both
 ---
 
 # People's Platform (Block & Bold)

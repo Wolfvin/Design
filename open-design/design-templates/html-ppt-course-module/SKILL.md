@@ -21,6 +21,7 @@ od:
   speaker_notes: true
   animations: true
   example_prompt: "Use the html-ppt-course-module template to build a 7-slide module deck. Confirm: module title, 3-5 learning objectives (these stick on the left rail), and the MCQ self-check question. Then assemble the deck with serif headings on warm paper."
+  stackCompatibility: both
 ---
 # HTML PPT · Course Module
 

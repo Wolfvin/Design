@@ -14,6 +14,7 @@ od:
   category: slides
   upstream: https://github.com/openai/skills
   outputFormat: artifact
+  stackCompatibility: both
 ---
 
 

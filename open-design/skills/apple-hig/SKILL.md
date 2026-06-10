@@ -12,6 +12,7 @@ od:
   mode: design-system
   category: design-systems
   upstream: "https://github.com/raintree-technology/apple-hig-skills"
+  stackCompatibility: both
 ---
 
 # apple-hig

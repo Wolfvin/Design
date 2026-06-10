@@ -23,6 +23,7 @@ od:
     requires: true
     sections: [color, typography, layout, components]
   example_prompt: "Write a runbook for our auth service — alerts, dashboards, common procedures, on-call rotation."
+  stackCompatibility: both
 ---
 
 # Engineering Runbook Skill

@@ -26,6 +26,7 @@ od:
       - animation-discipline
   example_prompt: |
     Create a polished marketing page using design-taste-frontend-v1 with strong typography, spacing, motion, and anti-slop guardrails.
+  stackCompatibility: both
 ---
 
 

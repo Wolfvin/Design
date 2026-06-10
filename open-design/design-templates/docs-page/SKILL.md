@@ -23,6 +23,7 @@ od:
     sections: [color, typography, layout, components]
   craft:
     requires: [typography, typography-hierarchy, typography-hierarchy-editorial, rtl-and-bidi]
+  stackCompatibility: both
 ---
 
 # Docs Page Skill

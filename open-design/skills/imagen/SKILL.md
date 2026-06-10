@@ -12,6 +12,7 @@ od:
   mode: image
   category: image-generation
   upstream: "https://github.com/sanjay3290/imagen"
+  stackCompatibility: both
 ---
 
 # imagen

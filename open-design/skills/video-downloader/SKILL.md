@@ -11,6 +11,7 @@ od:
   mode: video
   category: video-generation
   upstream: "https://github.com/ComposioHQ/awesome-claude-skills/tree/master/video-downloader"
+  stackCompatibility: both
 ---
 
 # video-downloader

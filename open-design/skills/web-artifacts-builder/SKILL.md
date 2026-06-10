@@ -14,6 +14,7 @@ od:
   category: web-artifacts
   upstream: https://github.com/anthropics/skills/tree/main/skills/web-artifacts-builder
   outputFormat: file-edit
+  stackCompatibility: both
 ---
 
 

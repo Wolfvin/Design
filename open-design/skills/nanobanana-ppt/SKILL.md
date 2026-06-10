@@ -15,6 +15,7 @@ od:
   category: image-generation
   upstream: https://github.com/op7418/NanoBanana-PPT-Skills
   outputFormat: artifact
+  stackCompatibility: both
 ---
 
 

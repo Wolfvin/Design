@@ -23,6 +23,7 @@ od:
   design_system:
     requires: true
     sections: [color, typography, layout, components]
+  stackCompatibility: both
 ---
 
 <!-- MIGRATED: output changed from <artifact> to <file-edit> -->

@@ -86,6 +86,7 @@ od:
     - file_write
     - surgical_edit
   example_prompt: "Build me a Notion-style team dashboard for Acme Studio. KPIs: total tasks, done this week, active members, docs in review. Wire it to the Notion connector and let it refresh on demand."
+  stackCompatibility: both
 ---
 
 <!-- MIGRATED: output changed from <artifact> to <file-edit> -->

@@ -28,6 +28,7 @@ od:
     A 30-second upbeat indie-pop jingle for a coffee shop launch — warm
     electric piano lead, brushed drums, gentle bass, a single sun-soaked
     "ahhh" choir on the chorus. No vocals. Loop-friendly tail.
+  stackCompatibility: both
 ---
 
 # Audio Jingle Skill

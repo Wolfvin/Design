@@ -33,6 +33,7 @@ od:
     secondary: brief-preview.html
   capabilities_required:
     - file_write
+  stackCompatibility: both
 ---
 
 # Design Brief Skill

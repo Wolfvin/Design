@@ -34,6 +34,7 @@ od:
     implement a responsive website as React component files that matches the reference
     direction closely.'
   outputFormat: file-edit
+  stackCompatibility: both
 ---
 
 

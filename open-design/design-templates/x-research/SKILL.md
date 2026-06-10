@@ -24,6 +24,7 @@ od:
     primary: research/x-research/<safe-topic-slug>.md
   capabilities_required:
     - file_write
+  stackCompatibility: both
 ---
 
 # X Research Skill

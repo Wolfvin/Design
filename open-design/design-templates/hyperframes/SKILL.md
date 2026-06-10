@@ -27,6 +27,7 @@ od:
     A 5-second product reveal: a minimal high-end product on a clean cream
     surface, soft side light, slow camera push-in, restrained motion, no
     text overlays.
+  stackCompatibility: both
 ---
 
 # HyperFrames

@@ -50,6 +50,7 @@ od:
   outputs:
     primary: example.html
   example_prompt: "Create a contact widget for my portfolio site. Primary color #4F7CFF, agent name 'Alex', greeting 'Hey! How can I help you today?', show Telegram and WhatsApp links."
+  stackCompatibility: both
 ---
 
 # Contact Widget

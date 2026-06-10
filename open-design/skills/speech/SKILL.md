@@ -11,6 +11,7 @@ od:
   mode: audio
   category: audio-music
   upstream: "https://github.com/openai/skills"
+  stackCompatibility: both
 ---
 
 # speech

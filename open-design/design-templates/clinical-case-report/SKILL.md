@@ -24,6 +24,7 @@ od:
     entry: index.html
   fidelity: high-fidelity
   example_prompt: "58-year-old male with 2 hours of substernal chest pain radiating to the left arm, diaphoresis, and ST elevation in leads II, III, aVF. Generate a full emergency cardiology case presentation."
+  stackCompatibility: both
 ---
 
 # Clinical Case Report Skill

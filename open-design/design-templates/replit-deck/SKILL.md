@@ -47,6 +47,7 @@ od:
       # 6 is a board-update baseline. Memos and campaign decks usually land
       # at 3–4 (see example-holm / example-bluehouse). Long-form chapters
       # (atlas) can run 8–12. Don't pad to hit the default.
+  stackCompatibility: both
 ---
 
 # Replit Deck Skill

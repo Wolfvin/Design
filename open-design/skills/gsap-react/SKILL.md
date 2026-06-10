@@ -18,6 +18,7 @@ od:
   category: animation-motion
   upstream: https://github.com/greensock/gsap-skills
   outputFormat: file-edit
+  stackCompatibility: both
 ---
 
 

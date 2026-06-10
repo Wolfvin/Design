@@ -32,6 +32,7 @@ od:
     photo into a compact ecommerce image set: one main packshot, one feature
     highlight image, and one lifestyle scene. Preserve the exact product
     identity, color, material, logo placement, structure, and proportions.
+  stackCompatibility: both
 ---
 
 # Ecommerce Image Workflow

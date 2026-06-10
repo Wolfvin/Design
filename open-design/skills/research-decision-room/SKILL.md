@@ -42,6 +42,7 @@ od:
   example_prompt: "Synthesize 8 interview notes, 24 support tickets, and recent activation metrics into a research decision room for whether a project-management app should add an onboarding checklist or contextual inline tips."
   capabilities_required:
     - file_write
+  stackCompatibility: both
 ---
 
 # Research Decision Room Skill

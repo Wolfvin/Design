@@ -22,6 +22,7 @@ od:
   design_system:
     requires: true
     sections: [color, typography, layout, components]
+  stackCompatibility: both
 ---
 
 # Simple Deck Skill

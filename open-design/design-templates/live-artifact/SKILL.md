@@ -31,6 +31,7 @@ od:
   capabilities_required:
     - shell
     - file_write
+  stackCompatibility: both
 ---
 
 # Live Artifact Skill

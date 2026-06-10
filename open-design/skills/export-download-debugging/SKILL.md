@@ -14,6 +14,7 @@ triggers:
 od:
   mode: utility
   category: web-artifacts
+  stackCompatibility: both
 ---
 
 # Export Download Debugging

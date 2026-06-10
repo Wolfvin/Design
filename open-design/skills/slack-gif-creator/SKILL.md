@@ -11,6 +11,7 @@ od:
   mode: image
   category: image-generation
   upstream: "https://github.com/anthropics/skills/tree/main/skills/slack-gif-creator"
+  stackCompatibility: both
 ---
 
 # slack-gif-creator

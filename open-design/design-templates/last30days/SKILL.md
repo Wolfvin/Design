@@ -22,6 +22,7 @@ od:
     primary: research/last30days/<safe-topic-slug>.md
   capabilities_required:
     - file_write
+  stackCompatibility: both
 ---
 
 # Last30Days Research Skill

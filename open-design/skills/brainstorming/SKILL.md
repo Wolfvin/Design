@@ -12,6 +12,7 @@ od:
   mode: design-system
   category: creative-direction
   upstream: "https://github.com/obra/superpowers"
+  stackCompatibility: both
 ---
 
 # brainstorming

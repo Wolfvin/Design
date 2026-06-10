@@ -31,6 +31,7 @@ od:
       - accessibility-baseline
   example_prompt: |
     Use impeccable-design-polish on the current HTML artifact: audit visual hierarchy, remove AI tells, tighten copy, add restrained motion, and harden responsive/accessibility issues.
+  stackCompatibility: both
 ---
 
 # Impeccable Design Polish

@@ -15,6 +15,7 @@ od:
   upstream: https://github.com/flutter/skills
   deprecated: true
   deprecatedReason: Flutter/Dart is not compatible with Tauri + React web stack
+  stackCompatibility: both
 ---
 
 

@@ -31,6 +31,7 @@ od:
   craft:
     requires: [state-coverage, animation-discipline]
   example_prompt: "Design a gamified life-management app — multi-screen mobile prototype: cover poster, today's quests with XP, and a quest detail. ‘Daily quests for becoming a better human.’"
+  stackCompatibility: both
 ---
 
 # Gamified App Skill

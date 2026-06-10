@@ -24,6 +24,7 @@ od:
     sections: [color, typography, layout, components]
   craft:
     requires: [laws-of-ux]
+  stackCompatibility: both
 ---
 
 # Pricing Page Skill

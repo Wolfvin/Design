@@ -13,6 +13,7 @@ od:
   mode: image
   category: image-generation
   upstream: "https://github.com/openai/skills"
+  stackCompatibility: both
 ---
 
 # imagegen

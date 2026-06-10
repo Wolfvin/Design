@@ -12,6 +12,7 @@ od:
   mode: prototype
   category: documents
   upstream: "https://github.com/MiniMax-AI/skills"
+  stackCompatibility: both
 ---
 
 # minimax-pdf

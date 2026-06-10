@@ -22,6 +22,7 @@ od:
     requires: true
     sections: [color, typography, layout, components]
   example_prompt: "Build an OKR tracker for Q4 — three objectives, three key results each, progress bars, owners, status pills."
+  stackCompatibility: both
 ---
 
 # Team OKRs Skill

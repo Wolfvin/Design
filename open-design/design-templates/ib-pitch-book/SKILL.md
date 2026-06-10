@@ -36,6 +36,7 @@ od:
     NorthPeak Industries (NYSE: NPK). Include trading comps, precedent
     transactions, valuation football field, DCF sensitivity, and a
     recommended process timeline.
+  stackCompatibility: both
 ---
 
 # IB Pitch Book

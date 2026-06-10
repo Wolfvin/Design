@@ -22,6 +22,7 @@ od:
   mode: design
   scenario: engineering
   outputFormat: artifact
+  stackCompatibility: both
 ---
 
 

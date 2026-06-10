@@ -11,6 +11,7 @@ od:
   mode: video
   category: video-generation
   upstream: "https://github.com/fal-ai-community/skills"
+  stackCompatibility: both
 ---
 
 # fal-kling-o3

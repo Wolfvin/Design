@@ -27,6 +27,7 @@ od:
     5-second product reveal — ceramic coffee mug rotating on a soft
     paper backdrop, warm side-light from camera-left, micro dust motes
     drifting through the beam. Cinematic, 16:9, slow drift on the camera.
+  stackCompatibility: both
 ---
 
 # Video Shortform Skill

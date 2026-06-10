@@ -36,6 +36,7 @@ od:
     visual direction.
   upstream: https://github.com/anthropics/skills/tree/main/skills/frontend-design
   outputFormat: file-edit
+  stackCompatibility: both
 ---
 
 

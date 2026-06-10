@@ -5,6 +5,7 @@ od:
   mode: prototype
   platform: mobile
   outputFormat: file-edit
+  stackCompatibility: both
 triggers:
   - login
   - sign in

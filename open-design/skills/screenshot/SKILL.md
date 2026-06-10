@@ -11,6 +11,7 @@ od:
   mode: image
   category: screenshots
   upstream: "https://github.com/openai/skills"
+  stackCompatibility: both
 ---
 
 # screenshot

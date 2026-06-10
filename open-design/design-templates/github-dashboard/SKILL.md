@@ -35,6 +35,7 @@ od:
     - shell
     - file_write
   example_prompt: "Build a GitHub dashboard for nexu-io/open-design — stars, forks, contributors, issues, PRs, recent activity, and top contributors."
+  stackCompatibility: both
 ---
 
 # GitHub Dashboard Skill

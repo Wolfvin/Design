@@ -18,6 +18,7 @@ od:
   deprecated: true
   deprecatedReason: SwiftUI is Apple-native, not compatible with Tauri + React web
     stack
+  stackCompatibility: both
 ---
 
 

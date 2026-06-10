@@ -31,6 +31,7 @@ od:
   craft:
     requires: [typography, typography-hierarchy, typography-hierarchy-editorial, rtl-and-bidi]
   example_prompt: "Design 'The Creator's Style & Format Guide' — cover page and one inside spread, lifestyle creator brand."
+  stackCompatibility: both
 ---
 
 # Digital E-Guide Skill

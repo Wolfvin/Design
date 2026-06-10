@@ -49,6 +49,7 @@ od:
     zh-CN: 用「Kami 羊皮纸文档」模板把我的内容做成一份「暖羊皮纸底 (#f5f4ed) + 墨蓝单色 accent (#1B365D) + 单一衬线字体,
       编辑级排印」。保持模板的视觉签名，使用真实内容和数据，避免 lorem ipsum 和占位图片。
   outputFormat: artifact
+  stackCompatibility: both
 ---
 
 

@@ -6,10 +6,12 @@ import {
   localizeSkillPrompt,
 } from '../i18n/content';
 import type { Dict } from '../i18n/types';
+import { useAppDeveloper } from '../providers/app-developer-provider';
 import { fetchSkillExample } from '../providers/registry';
 import { exportAsHtml, exportAsPdf, exportAsZip } from '../runtime/exports';
 import { buildSrcdoc } from '../runtime/srcdoc';
 import type { SkillSummary, Surface } from '../types';
+import { filterSkillsByStack, stackFromProjectType } from '../utils/skill-stack-filter';
 import { Icon } from './Icon';
 import { PreviewModal } from './PreviewModal';
 import { AnimatePresence } from 'motion/react';
@@ -19,6 +21,8 @@ type TranslateFn = (key: keyof Dict, vars?: Record<string, string | number>) => 
 interface Props {
   skills: SkillSummary[];
   onUsePrompt: (skill: SkillSummary) => void;
+  /** Optional project type override; when omitted, reads from AppDeveloperContext */
+  projectType?: string;
 }
 
 type ModeFilter =
@@ -31,6 +35,13 @@ type ModeFilter =
   | 'live';
 type SurfaceFilter = 'all' | Surface;
 type ScenarioFilter = string;
+type StackFilter = 'all' | 'nextjs' | 'tauri';
+
+const STACK_PILLS: { value: StackFilter; label: string }[] = [
+  { value: 'all', label: 'All' },
+  { value: 'tauri', label: 'Tauri' },
+  { value: 'nextjs', label: 'Next.js' },
+];
 
 const SURFACE_PILLS: { value: SurfaceFilter; labelKey: keyof Dict }[] = [
   { value: 'all', labelKey: 'examples.modeAll' },
@@ -120,8 +131,11 @@ function quotePrompt(locale: string, text: string): string {
   return locale === 'de' ? `„${text}“` : `“${text}”`;
 }
 
-export function ExamplesTab({ skills: rawSkills, onUsePrompt }: Props) {
+export function ExamplesTab({ skills: rawSkills, onUsePrompt, projectType: projectTypeProp }: Props) {
   const { locale, t } = useI18n();
+  const { projectType: contextProjectType } = useAppDeveloper();
+  const activeProjectType = projectTypeProp ?? contextProjectType;
+
   // Skills tagged `aggregatesExamples: true` are containers whose preview
   // would just duplicate one of their derived `<parent>:<child>` cards
   // (e.g. live-artifact ships a sample gallery under `examples/`). Drop
@@ -129,16 +143,19 @@ export function ExamplesTab({ skills: rawSkills, onUsePrompt }: Props) {
   // sees only the user-facing entries. The full listing is still passed
   // through for `findSkillById` lookups elsewhere in the app.
   // Deduplicate by skill.id to prevent duplicate cards (issue #2889).
+  // Apply stack-compatibility filtering so only skills compatible with
+  // the current project's stack appear in the gallery.
   const skills = useMemo(() => {
-    const filtered = rawSkills.filter((s) => !s.aggregatesExamples);
+    const stackFiltered = filterSkillsByStack(rawSkills, activeProjectType);
+    const deduped = stackFiltered.filter((s) => !s.aggregatesExamples);
     const seen = new Map<string, SkillSummary>();
-    for (const skill of filtered) {
+    for (const skill of deduped) {
       if (!seen.has(skill.id)) {
         seen.set(skill.id, skill);
       }
     }
     return Array.from(seen.values());
-  }, [rawSkills]);
+  }, [rawSkills, activeProjectType]);
   // Hold preview HTML per skill across re-renders so cards never re-flicker.
   const [previews, setPreviews] = useState<Record<string, string | null>>({});
   // Track per-skill fetch failures separately so the preview modal can show
@@ -162,6 +179,7 @@ export function ExamplesTab({ skills: rawSkills, onUsePrompt }: Props) {
   const [surfaceFilter, setSurfaceFilter] = useState<SurfaceFilter>('all');
   const [modeFilter, setModeFilter] = useState<ModeFilter>('all');
   const [scenarioFilter, setScenarioFilter] = useState<ScenarioFilter>('all');
+  const [stackFilter, setStackFilter] = useState<StackFilter>('all');
   // Free-text search filters by skill name + description + prompt so users
   // can find a known example by typing any associated word ("airbnb",
   // "wireframe", "deck") without having to click through filter pills first.
@@ -321,9 +339,33 @@ export function ExamplesTab({ skills: rawSkills, onUsePrompt }: Props) {
     [scenarioCounts],
   );
 
+  const stackCounts = useMemo(() => {
+    const counts: Record<StackFilter, number> = { all: skills.length, tauri: 0, nextjs: 0 };
+    for (const s of skills) {
+      const compat = s.stackCompatibility;
+      if (compat === 'both' || compat === null || compat === undefined) {
+        counts.tauri++;
+        counts.nextjs++;
+      } else if (compat === 'tauri') {
+        counts.tauri++;
+      } else if (compat === 'nextjs') {
+        counts.nextjs++;
+      }
+    }
+    return counts;
+  }, [skills]);
+
+  function matchesStackFilter(skill: SkillSummary, filter: StackFilter): boolean {
+    if (filter === 'all') return true;
+    const compat = skill.stackCompatibility;
+    if (compat === null || compat === undefined || compat === 'both') return true;
+    return compat === filter;
+  }
+
   const filtered = useMemo(() => {
     const q = search.trim().toLowerCase();
     const matched = skills.filter((s) => {
+      if (!matchesStackFilter(s, stackFilter)) return false;
       if (!matchesSurface(s, surfaceFilter) || !matchesMode(s, modeFilter)) return false;
       if (scenarioFilter !== 'all' && (s.scenario || 'general') !== scenarioFilter) return false;
       if (!q) return true;
@@ -345,7 +387,7 @@ export function ExamplesTab({ skills: rawSkills, onUsePrompt }: Props) {
         return a.idx - b.idx;
       })
       .map(({ s }) => s);
-  }, [skills, surfaceFilter, modeFilter, scenarioFilter, search, locale]);
+  }, [skills, stackFilter, surfaceFilter, modeFilter, scenarioFilter, search, locale]);
 
   if (skills.length === 0) {
     return <div className="tab-empty">{t('examples.emptyNoSkills')}</div>;
@@ -365,6 +407,31 @@ export function ExamplesTab({ skills: rawSkills, onUsePrompt }: Props) {
             placeholder={t('examples.searchPlaceholder')}
             aria-label={t('examples.searchAria')}
           />
+        </div>
+        <div
+          className="examples-filter-row"
+          role="tablist"
+          aria-label="Stack"
+        >
+          <span className="examples-filter-label">Stack</span>
+          {STACK_PILLS.map((p) => (
+            <button
+              key={p.value}
+              type="button"
+              role="tab"
+              aria-selected={stackFilter === p.value}
+              className={`filter-pill ${stackFilter === p.value ? 'active' : ''}`}
+              onClick={() => {
+                setStackFilter(p.value);
+                setSurfaceFilter('all');
+                setModeFilter('all');
+                setScenarioFilter('all');
+              }}
+            >
+              {p.label}
+              <span className="filter-pill-count">{stackCounts[p.value]}</span>
+            </button>
+          ))}
         </div>
         <div
           className="examples-filter-row"

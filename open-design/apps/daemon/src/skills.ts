@@ -48,6 +48,8 @@ interface SkillFrontmatter extends JsonRecord {
     design_system?: JsonRecord;
     critique?: JsonRecord;
     category?: unknown;
+    outputFormat?: unknown;
+    stackCompatibility?: unknown;
   };
 }
 
@@ -56,6 +58,8 @@ interface SkillFrontmatter extends JsonRecord {
 // UI uses this to render an origin pill and to gate destructive actions:
 // only `user` skills can be deleted via /api/skills/:id.
 export type SkillSource = "user" | "built-in";
+
+export type StackCompatibility = 'both' | 'nextjs' | 'tauri';
 
 export interface SkillInfo {
   id: string;
@@ -98,6 +102,20 @@ export interface SkillInfo {
    * tiers (project override, env override, phase default) decide.
    */
   critiquePolicy: SkillCritiquePolicy;
+  /**
+   * Stack compatibility tag from `od.stackCompatibility` in the skill's
+   * SKILL.md frontmatter. Determines which project stacks the skill is
+   * compatible with:
+   *   - `'both'` — works on both Tauri/Vite and Next.js projects
+   *   - `'nextjs'` — specific to Next.js projects only
+   *   - `'tauri'` — specific to Tauri/Vite projects only
+   *   - `null` — not tagged; treated as compatible with all stacks
+   *     (backward-compatible default for legacy skills)
+   *
+   * Used by the frontend skill picker to filter out incompatible skills
+   * and by the daemon to compose stack-appropriate system prompts.
+   */
+  stackCompatibility: StackCompatibility | null;
   body: string;
   dir: string;
 }
@@ -252,6 +270,7 @@ export async function listSkills(
           ...(examplePromptI18n ? { examplePromptI18n } : {}),
           aggregatesExamples,
           critiquePolicy: normalizeCritiquePolicy(data.od?.critique?.policy),
+          stackCompatibility: normalizeStackCompatibility(data.od?.stackCompatibility),
           body: parentBody,
           dir,
         });
@@ -297,6 +316,10 @@ export async function listSkills(
             // single SKILL.md that opts in (or out) applies the same
             // gate to every example in its gallery.
             critiquePolicy: normalizeCritiquePolicy(data.od?.critique?.policy),
+            // Derived cards inherit the parent's stack compatibility so
+            // filtering by project stack keeps derived examples in sync
+            // with their parent skill.
+            stackCompatibility: normalizeStackCompatibility(data.od?.stackCompatibility),
             // Inherit the parent's full SKILL.md body so 'Use this prompt'
             // on a derived card seeds the agent with the same workflow
             // the parent describes. Without this, picking a derived card
@@ -561,6 +584,55 @@ export function normalizeCritiquePolicy(value: unknown): SkillCritiquePolicy {
   const v = value.trim().toLowerCase();
   if (v === "required" || v === "opt-in" || v === "opt-out") return v;
   return null;
+}
+
+/**
+ * Coerce `od.stackCompatibility` from SKILL.md frontmatter into the
+ * three-value union. Anything unrecognised resolves to `null` (compatible
+ * with all stacks), which is the backward-compatible default for legacy
+ * skills that predate the stack compatibility feature.
+ *
+ * Values:
+ *   - `'both'`   — works on both Tauri/Vite and Next.js projects
+ *   - `'nextjs'` — specific to Next.js projects only
+ *   - `'tauri'`  — specific to Tauri/Vite projects only
+ *   - `null`     — not tagged; treated as compatible with all stacks
+ */
+export function normalizeStackCompatibility(value: unknown): StackCompatibility | null {
+  if (typeof value !== "string") return null;
+  const v = value.trim().toLowerCase();
+  if (v === "both" || v === "nextjs" || v === "tauri") return v;
+  return null;
+}
+
+/**
+ * Filter a list of skills by stack compatibility.
+ *
+ * A skill is compatible with a project when:
+ *   - `stackCompatibility === 'both'` (works everywhere)
+ *   - `stackCompatibility === null` (legacy skill, assumed compatible)
+ *   - `stackCompatibility` matches the project's stack
+ *
+ * The `projectType` is the raw project type string (e.g. `'nextjs'`,
+ * `'tauri-react'`, `'vite-react'`). It is normalised internally:
+ *   - any type starting with `'nextjs'` → `'nextjs'`
+ *   - any other type → `'tauri'` (covers `tauri-react`, `vite-react`, etc.)
+ *
+ * @param skills - Full skill list from `listSkills()`
+ * @param projectType - The current project's detected type
+ * @returns Filtered skill list containing only compatible skills
+ */
+export function filterSkillsByStack(
+  skills: SkillInfo[],
+  projectType: string | null | undefined,
+): SkillInfo[] {
+  if (!projectType) return skills;
+  const stack: StackCompatibility = projectType.startsWith('nextjs') ? 'nextjs' : 'tauri';
+  return skills.filter((skill) => {
+    const compat = skill.stackCompatibility;
+    if (compat === null || compat === 'both') return true;
+    return compat === stack;
+  });
 }
 
 // Coerce `od.featured` into a numeric priority. Lower numbers float to the

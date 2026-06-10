@@ -11,6 +11,7 @@ od:
   mode: image
   category: image-generation
   upstream: "https://github.com/replicate/skills"
+  stackCompatibility: both
 ---
 
 # replicate

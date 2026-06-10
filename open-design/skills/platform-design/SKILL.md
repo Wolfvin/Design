@@ -12,6 +12,7 @@ od:
   mode: design-system
   category: design-systems
   upstream: "https://github.com/ehmo/platform-design-skills"
+  stackCompatibility: both
 ---
 
 # platform-design

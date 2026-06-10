@@ -26,6 +26,7 @@ od:
       - qa/contact-sheet.png
   example_prompt: "Hatch me a tiny pixel-art shiba pet — friendly, sitting upright, with a small pomegranate prop. Use the hatch-pet skill end-to-end."
   upstream: "https://github.com/openai/skills/tree/main/skills/.curated/hatch-pet"
+  stackCompatibility: both
 ---
 
 # Hatch Pet

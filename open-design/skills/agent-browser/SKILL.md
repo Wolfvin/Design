@@ -41,6 +41,7 @@ od:
   upstream: "https://github.com/vercel-labs/agent-browser/blob/main/skills/agent-browser/SKILL.md"
   capabilities_required:
     - file_write
+  stackCompatibility: both
 ---
 
 # Agent Browser

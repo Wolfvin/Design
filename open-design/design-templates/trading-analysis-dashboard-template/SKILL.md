@@ -33,6 +33,7 @@ od:
   example_prompt: "Create a Wall-Street-grade trading analysis dashboard template with a left rail, risk cockpit, market charts, live/demo mode, and realistic dense data. Keep it single-file HTML."
   capabilities_required:
     - file_write
+  stackCompatibility: both
 ---
 
 # Trading Analysis Dashboard Template

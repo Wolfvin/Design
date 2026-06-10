@@ -21,6 +21,7 @@ od:
     requires: true
     sections: [color, typography, layout, components]
   example_prompt: "Make a weekly update deck for the Growth squad — what shipped, in flight, blocked, metrics, asks for next week."
+  stackCompatibility: both
 ---
 
 # Weekly Update Deck Skill

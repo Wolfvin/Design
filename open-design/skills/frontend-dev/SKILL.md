@@ -13,6 +13,7 @@ od:
   category: web-artifacts
   outputFormat: file-edit
   upstream: "https://github.com/MiniMax-AI/skills"
+  stackCompatibility: both
 ---
 
 <!-- MIGRATED: output changed from <artifact> to <file-edit> -->

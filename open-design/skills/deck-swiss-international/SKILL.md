@@ -48,6 +48,7 @@ od:
     zh-CN: 用「瑞士国际主义 Deck」模板把我的内容做成一套「16 列网格 + 单一饱和 accent + 22 个锁死版面 (Klein Blue /
       Lemon / Mint / Safety Orange)」。保持模板的视觉签名，使用真实内容和数据，避免 lorem ipsum 和占位图片。
   outputFormat: artifact
+  stackCompatibility: both
 ---
 
 

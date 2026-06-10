@@ -12,6 +12,7 @@ od:
   mode: design-system
   category: marketing-creative
   upstream: "https://github.com/ComposioHQ/awesome-claude-skills/tree/master/domain-name-brainstormer"
+  stackCompatibility: both
 ---
 
 # domain-name-brainstormer

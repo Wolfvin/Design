@@ -22,6 +22,7 @@ od:
     requires: true
     sections: [color, typography, layout, components]
   example_prompt: "Write me a PRD for adding two-factor auth to our SaaS app — problem, scope, milestones, open questions."
+  stackCompatibility: both
 ---
 
 # Product Spec Skill

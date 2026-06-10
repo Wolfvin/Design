@@ -24,6 +24,7 @@ od:
       - color
   example_prompt: |
     Create a premium brand-kit overview image for this product: logo direction, palette, typography, applications, and a coherent visual world.
+  stackCompatibility: both
 ---
 
 

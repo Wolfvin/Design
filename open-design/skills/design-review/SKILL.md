@@ -11,6 +11,7 @@ od:
   mode: design-system
   category: creative-direction
   upstream: "https://github.com/garrytan/gstack"
+  stackCompatibility: both
 ---
 
 # design-review

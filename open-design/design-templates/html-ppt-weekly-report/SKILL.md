@@ -20,6 +20,7 @@ od:
   speaker_notes: true
   animations: true
   example_prompt: "用 html-ppt-weekly-report 模板生成一份周报（7 页）。先问我四件事：本周时间范围、3-5 个核心 KPI 数字、本周已发布 / 已完成的事项、下周计划与风险。然后用模板填好 8 周柱状图和下周表格。"
+  stackCompatibility: both
 ---
 # HTML PPT · Weekly Report
 

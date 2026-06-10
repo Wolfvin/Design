@@ -27,6 +27,7 @@ od:
     requires: true
     sections: [color, typography, layout, components]
   example_prompt: "Design ‘mutuals’ — a dating site for X posters. Daily digest dashboard with stats, mutual-matches bar chart, and a community ticker."
+  stackCompatibility: both
 ---
 
 # Dating Web Skill

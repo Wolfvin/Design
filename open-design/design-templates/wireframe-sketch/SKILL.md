@@ -29,6 +29,7 @@ od:
     requires: false
     sections: [color, typography, layout, components]
   example_prompt: "Sketch a hand-drawn wireframe v0.1 for a portal — four tabbed variants on graph paper, marker headlines, sticky-note annotations, hatched chart placeholders."
+  stackCompatibility: both
 ---
 
 # Wireframe Sketch Skill

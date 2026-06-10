@@ -11,6 +11,7 @@ od:
   mode: design-system
   category: design-systems
   upstream: "https://github.com/WordPress/skills"
+  stackCompatibility: both
 ---
 
 # wpds

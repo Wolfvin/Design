@@ -33,6 +33,7 @@ od:
   capabilities_required:
   - file_write
   outputFormat: artifact
+  stackCompatibility: both
 ---
 
 

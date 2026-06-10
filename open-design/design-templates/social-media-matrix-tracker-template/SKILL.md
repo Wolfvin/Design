@@ -43,6 +43,7 @@ od:
   example_prompt: "Create a social media matrix tracker dashboard template using my DESIGN.md. Keep the cinematic glassmorphism style, multi-chart analytics sections, hover tooltips, pin/drag range analysis, and light/dark switching."
   capabilities_required:
     - file_write
+  stackCompatibility: both
 ---
 
 # Social Media Matrix Tracker Template

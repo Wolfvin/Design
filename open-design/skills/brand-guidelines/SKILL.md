@@ -11,6 +11,7 @@ od:
   mode: design-system
   category: design-systems
   upstream: "https://github.com/anthropics/skills/tree/main/skills/brand-guidelines"
+  stackCompatibility: both
 ---
 
 # brand-guidelines

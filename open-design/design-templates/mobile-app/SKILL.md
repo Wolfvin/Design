@@ -26,6 +26,7 @@ od:
     sections: [color, typography, layout, components]
   craft:
     requires: [state-coverage, animation-discipline]
+  stackCompatibility: both
 ---
 
 # Mobile App Skill

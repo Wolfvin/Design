@@ -184,6 +184,15 @@ export interface SkillSummary {
   // prompt" fast-create on a derived card still composes the parent's
   // SKILL.md body.
   aggregatesExamples: boolean;
+  // Stack compatibility tag from `od.stackCompatibility` in the skill's
+  // SKILL.md frontmatter. The frontend skill picker uses this to filter
+  // out skills that are incompatible with the current project's stack:
+  //   - `'both'`   — works on both Tauri/Vite and Next.js projects
+  //   - `'nextjs'` — specific to Next.js projects only
+  //   - `'tauri'`  — specific to Tauri/Vite projects only
+  //   - `null`     — not tagged; treated as compatible with all stacks
+  //     (backward-compatible default for legacy skills)
+  stackCompatibility?: 'both' | 'nextjs' | 'tauri' | null;
 }
 
 // Body shape for POST /api/skills/import. The daemon turns this into a

@@ -11,6 +11,7 @@ od:
   mode: design-system
   category: design-systems
   upstream: "https://github.com/vercel-labs/skills"
+  stackCompatibility: both
 ---
 
 # web-design-guidelines

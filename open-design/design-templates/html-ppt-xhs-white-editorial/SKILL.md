@@ -20,6 +20,7 @@ od:
   speaker_notes: true
   animations: true
   example_prompt: "用 html-ppt-xhs-white-editorial 模板做一份白底杂志风 PPT，中文优先。要点：80-110px display 大标题、彩虹顶部 bar、马卡龙软卡片、黑底白字 .focus pill。先告诉我主题和受众，再写 8-12 页。"
+  stackCompatibility: both
 ---
 # HTML PPT · 白底杂志风
 

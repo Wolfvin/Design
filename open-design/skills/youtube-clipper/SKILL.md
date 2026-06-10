@@ -11,6 +11,7 @@ od:
   mode: video
   category: video-generation
   upstream: "https://github.com/op7418/Youtube-clipper-skill"
+  stackCompatibility: both
 ---
 
 # youtube-clipper

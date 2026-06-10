@@ -20,6 +20,7 @@ od:
   speaker_notes: true
   animations: true
   example_prompt: "用 html-ppt-dir-key-nav-minimal 模板做一份 8 页极简 keynote。每页一个单色背景 + 一句 160px 大标题 + 几条箭头列表。先告诉我演讲主题，然后帮我把 8 个核心观点拍成 8 页（每页一个 idea）。"
+  stackCompatibility: both
 ---
 # HTML PPT · 8 色极简方向键
 

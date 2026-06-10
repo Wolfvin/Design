@@ -20,6 +20,7 @@ od:
   speaker_notes: true
   animations: true
   example_prompt: "Make a product-launch keynote deck in HTML using the html-ppt-product-launch full-deck template (dark hero, warm orange accent, feature cards, pricing tiers). Confirm: product name + tagline, the 3 key features, and pricing tiers — then write the deck."
+  stackCompatibility: both
 ---
 # HTML PPT · Product Launch
 

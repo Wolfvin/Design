@@ -28,6 +28,7 @@ od:
     requires: true
     sections: [color, typography, layout, components]
   example_prompt: "Design a 3-card cinematic social carousel — ‘onwards.’, ‘to the next one.’, ‘looking ahead.’. 1080×1080 squares, drop-into-Instagram ready."
+  stackCompatibility: both
 ---
 
 # Social Carousel Skill

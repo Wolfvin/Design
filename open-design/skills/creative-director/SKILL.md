@@ -12,6 +12,7 @@ od:
   mode: design-system
   category: creative-direction
   upstream: "https://github.com/smixs/creative-director-skill"
+  stackCompatibility: both
 ---
 
 # creative-director

@@ -21,6 +21,7 @@ od:
   speaker_notes: true
   animations: true
   example_prompt: "用 html-ppt-presenter-mode 模板做一份带逐字稿的演讲 PPT。先确认：演讲主题、时长（每页 2-3 分钟）、目标听众。然后帮我每页写 150-300 字的口语化逐字稿（不是讲稿，是提示信号），按 S 能打开 presenter 弹窗。"
+  stackCompatibility: both
 ---
 # HTML PPT · Presenter Mode (演讲者模式)
 

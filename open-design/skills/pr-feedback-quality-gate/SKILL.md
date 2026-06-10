@@ -11,6 +11,7 @@ triggers:
   - "monitor PR"
 od:
   mode: utility
+  stackCompatibility: both
 ---
 
 # PR Feedback Quality Gate

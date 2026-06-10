@@ -11,6 +11,7 @@ od:
   mode: design-system
   category: design-systems
   upstream: "https://github.com/google-labs-code/skills"
+  stackCompatibility: both
 ---
 
 # design-md

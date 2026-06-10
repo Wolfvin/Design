@@ -11,6 +11,7 @@ od:
   mode: prototype
   category: documents
   upstream: "https://github.com/openai/skills"
+  stackCompatibility: both
 ---
 
 # doc

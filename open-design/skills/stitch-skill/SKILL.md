@@ -25,6 +25,7 @@ od:
       - anti-ai-slop
   example_prompt: |
     Generate an agent-friendly DESIGN.md for this product with premium anti-generic UI standards, typography, color, layout, motion, and prompt guidance.
+  stackCompatibility: both
 ---
 
 

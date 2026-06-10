@@ -22,6 +22,7 @@ od:
     requires: true
     sections: [color, typography, layout, components]
   example_prompt: "Write release notes for v2.3.1 with Added, Fixed, Breaking changes, Known issues, and an Upgrade note."
+  stackCompatibility: both
 ---
 
 # Release Notes One-Pager Skill

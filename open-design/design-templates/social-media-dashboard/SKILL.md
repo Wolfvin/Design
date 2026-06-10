@@ -29,6 +29,7 @@ od:
     requires: true
     sections: [color, typography, layout, components]
   example_prompt: "Create a social media analytics dashboard using my Design System. Show X, LinkedIn, YouTube, Instagram with follower counts, engagement rate, likes, reposts, trending topics, and top comments."
+  stackCompatibility: both
 ---
 
 # Social Media Dashboard Skill

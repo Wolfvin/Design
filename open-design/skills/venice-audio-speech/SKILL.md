@@ -12,6 +12,7 @@ od:
   mode: audio
   category: audio-music
   upstream: "https://github.com/veniceai/skills"
+  stackCompatibility: both
 ---
 
 # venice-audio-speech

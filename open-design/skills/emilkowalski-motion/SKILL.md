@@ -30,6 +30,7 @@ od:
     micro-interactions, state transitions, and reduced-motion fallbacks without changing
     the core layout.'
   outputFormat: file-edit
+  stackCompatibility: both
 ---
 
 

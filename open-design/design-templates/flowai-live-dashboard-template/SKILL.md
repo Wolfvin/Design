@@ -30,6 +30,7 @@ od:
   craft:
     requires: [state-coverage, accessibility-baseline]
   example_prompt: "Create a FlowAI-style team management dashboard with Team Members, Team Details and Activity Log tabs, KPI cards, a member table with status badges, a role-distribution bar chart, an online-presence sparkline, top contributors, light/dark mode, and CSV export."
+  stackCompatibility: both
 ---
 
 # FlowAI Dashboard Skill

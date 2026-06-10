@@ -12,6 +12,7 @@ od:
   mode: audio
   category: audio-music
   upstream: "https://github.com/bitwize-music-studio/claude-ai-music-skills"
+  stackCompatibility: both
 ---
 
 # ai-music-album

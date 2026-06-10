@@ -46,6 +46,7 @@ od:
     zh-CN: 用「1920 画布自由 Deck」模板把我的内容做成一套「锁死 1920×1080 画布, React 组件级自由组合, 不绑模板」。保持模板的视觉签名，使用真实内容和数据，避免
       lorem ipsum 和占位图片。
   outputFormat: artifact
+  stackCompatibility: both
 ---
 
 

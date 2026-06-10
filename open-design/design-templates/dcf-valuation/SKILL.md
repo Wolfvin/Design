@@ -23,6 +23,7 @@ od:
     primary: finance/<safe-company-or-ticker>-dcf.md
   capabilities_required:
     - file_write
+  stackCompatibility: both
 ---
 
 # DCF Valuation Skill

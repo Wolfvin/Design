@@ -15,6 +15,7 @@ od:
   category: slides
   upstream: https://github.com/anthropics/skills/tree/main/skills/pptx
   outputFormat: artifact
+  stackCompatibility: both
 ---
 
 

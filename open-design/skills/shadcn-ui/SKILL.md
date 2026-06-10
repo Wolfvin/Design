@@ -12,6 +12,7 @@ od:
   category: design-systems
   outputFormat: file-edit
   upstream: "https://github.com/google-labs-code/skills"
+  stackCompatibility: both
 ---
 
 <!-- MIGRATED: output changed from <artifact> to <file-edit> -->

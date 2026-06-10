@@ -11,6 +11,7 @@ od:
   mode: design-system
   category: design-systems
   upstream: "https://github.com/nextlevelbuilder/ui-ux-pro-max-skill"
+  stackCompatibility: both
 ---
 
 # ui-ux-pro-max

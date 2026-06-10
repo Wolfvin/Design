@@ -10,6 +10,7 @@ od:
   mode: video
   category: video-generation
   upstream: "https://github.com/veniceai/skills"
+  stackCompatibility: both
 ---
 
 # venice-video

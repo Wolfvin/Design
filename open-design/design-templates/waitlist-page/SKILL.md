@@ -104,6 +104,7 @@ od:
   capabilities_required:
     - file_write
   example_prompt: "Make a waitlist page for a design tool — clean, minimal, with a custom logo and one call-to-action."
+  stackCompatibility: both
 ---
 
 # Waitlist Page Skill

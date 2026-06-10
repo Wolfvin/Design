@@ -11,6 +11,7 @@ od:
   mode: prototype
   category: diagrams
   upstream: "https://github.com/muthuishere/hand-drawn-diagrams"
+  stackCompatibility: both
 ---
 
 # hand-drawn-diagrams

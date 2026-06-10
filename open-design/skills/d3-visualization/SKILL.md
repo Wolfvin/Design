@@ -23,6 +23,7 @@ od:
   mode: prototype
   category: diagrams
   upstream: "https://github.com/jiannanya/snow-d3/"
+  stackCompatibility: both
 ---
 
 # d3-visualization

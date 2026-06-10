@@ -24,6 +24,7 @@ od:
   craft:
     requires: [accessibility-baseline]
   example_prompt: "Build a 30-day onboarding plan for a new product designer joining a 40-person startup."
+  stackCompatibility: both
 ---
 
 # HR Onboarding Skill

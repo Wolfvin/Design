@@ -27,6 +27,7 @@ od:
   design_system:
     requires: false
   example_prompt: "帮我做一份杂志风的 PPT —— 关于'一人公司 · 被 AI 折叠的组织'，25 分钟分享会，目标受众是设计师 + 创业者。先推荐一个方向（Monocle / WIRED / Kinfolk / Domus / Lab）让我选。"
+  stackCompatibility: both
 ---
 
 # Magazine Web Ppt

@@ -26,6 +26,7 @@ od:
       - state-coverage
   example_prompt: |
     Audit the existing UI first, then redesign it to premium quality without breaking functionality, preserving useful product structure.
+  stackCompatibility: both
 ---
 
 

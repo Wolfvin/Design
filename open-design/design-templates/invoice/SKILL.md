@@ -21,6 +21,7 @@ od:
     requires: true
     sections: [color, typography, layout, components]
   example_prompt: "Create an invoice from a freelance design studio billing a client for a brand identity project — three line items, 10% retainer, 9% sales tax."
+  stackCompatibility: both
 ---
 
 # Invoice Skill

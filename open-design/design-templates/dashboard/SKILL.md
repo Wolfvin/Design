@@ -24,6 +24,7 @@ od:
     sections: [color, typography, layout, components]
   craft:
     requires: [state-coverage, accessibility-baseline, laws-of-ux]
+  stackCompatibility: both
 ---
 
 # Dashboard Skill

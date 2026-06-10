@@ -49,6 +49,7 @@ od:
   example_prompt: "Create a reference design contract for a developer-notes app. The direction should feel editorial, calm, tactile, and serious, but not copy any specific product. Produce DESIGN.md and an implementation handoff."
   example_prompt_i18n:
     zh-CN: "为一个开发者笔记应用创建「参考转设计合约」。方向要有编辑感、安静、触感强、认真，但不要照抄任何具体产品。输出 DESIGN.md 和实现交接说明。"
+  stackCompatibility: both
 ---
 
 # Reference Design Contract

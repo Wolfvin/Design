@@ -11,6 +11,7 @@ od:
   mode: design-system
   category: design-systems
   upstream: "https://github.com/ibelick/ui-skills"
+  stackCompatibility: both
 ---
 
 # ui-skills

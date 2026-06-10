@@ -21,6 +21,7 @@ od:
   speaker_notes: true
   animations: true
   example_prompt: "用 html-ppt-testing-safety-alert 模板做一份事故复盘 / 安全评审 PPT。红黑 hazard 条 + 红色删除线 + L1/L2/L3 tier 卡片 + policy-yaml 代码块。先告诉我事件时间线、根因、影响范围。"
+  stackCompatibility: both
 ---
 # HTML PPT · 红琥珀警示
 

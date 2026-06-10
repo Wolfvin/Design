@@ -21,6 +21,7 @@ od:
   speaker_notes: true
   animations: true
   example_prompt: "Build a 10-slide pitch deck in HTML for my seed round. Use the html-ppt-pitch-deck full-deck template (white + blue→purple gradient, traction bars, $X.XM ask). Confirm three things first: (1) name + one-line pitch, (2) key traction numbers, (3) ask + use of funds."
+  stackCompatibility: both
 ---
 # HTML PPT · Pitch Deck
 

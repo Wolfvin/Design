@@ -28,6 +28,7 @@ od:
     silhouette over a warm, slightly grainy paper background; hand-set
     sans serif title at the top, festival dates and venue at the bottom
     in monospace. Muted ochre + ink palette.
+  stackCompatibility: both
 ---
 
 # Image Poster Skill

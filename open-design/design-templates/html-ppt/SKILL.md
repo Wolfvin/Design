@@ -28,6 +28,7 @@ od:
   speaker_notes: true
   animations: true
   example_prompt: "用 html-ppt 做一份 12 页的 HTML PPT。先帮我确认三件事：内容/页数/受众、主题（从 36 套里推荐 2-3 个）、起点全 deck 模板（pitch-deck / tech-sharing / weekly-report / xhs-post / presenter-mode-reveal 任选一个），对齐之后再开始写 slides。"
+  stackCompatibility: both
 ---
 
 # html-ppt — HTML PPT Studio

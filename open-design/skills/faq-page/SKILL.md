@@ -36,6 +36,7 @@ od:
     - accessibility-baseline
     - state-coverage
   outputFormat: file-edit
+  stackCompatibility: both
 ---
 
 

@@ -29,6 +29,7 @@ od:
     requires: true
     sections: [color, typography, layout, components]
   example_prompt: "Design an animated hero — a rotating type ring around a wireframe globe, with the headline ‘Reach every country.’ Loop at 12s, ready for HyperFrames export."
+  stackCompatibility: both
 ---
 
 # Motion Frames Skill

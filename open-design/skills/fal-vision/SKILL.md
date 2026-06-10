@@ -13,6 +13,7 @@ od:
   mode: image
   category: image-generation
   upstream: "https://github.com/fal-ai-community/skills"
+  stackCompatibility: both
 ---
 
 # fal-vision

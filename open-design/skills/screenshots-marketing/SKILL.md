@@ -11,6 +11,7 @@ od:
   mode: image
   category: screenshots
   upstream: "https://github.com/Shpigford/screenshots"
+  stackCompatibility: both
 ---
 
 # screenshots-marketing

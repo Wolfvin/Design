@@ -25,6 +25,7 @@ od:
       - anti-ai-slop
   example_prompt: |
     Generate separate premium website reference images for each landing-page section, keeping one coherent palette and varied composition.
+  stackCompatibility: both
 ---
 
 

@@ -26,6 +26,7 @@ od:
       - animation-discipline
   example_prompt: |
     Build a high-variance landing page with gpt-taste: editorial typography, non-generic layout, calibrated color, and tasteful GSAP-style motion where the stack supports it.
+  stackCompatibility: both
 ---
 
 

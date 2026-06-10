@@ -11,6 +11,7 @@ od:
   mode: image
   category: screenshots
   upstream: "https://github.com/LewisLiu007/full-page-screenshot"
+  stackCompatibility: both
 ---
 
 # full-page-screenshot
