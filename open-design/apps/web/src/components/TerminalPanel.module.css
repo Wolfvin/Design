@@ -1,0 +1,517 @@
+/* TerminalPanel: Upgraded multi-session terminal with tabs, split, and quick actions.
+   Wraps the existing TerminalViewer component. Uses CSS custom properties from the
+   design token system (--bg, --text, --accent, --border, etc.) and follows the
+   TerminalViewer.module.css dark theme pattern with :global([data-theme='dark']). */
+
+.root {
+  --panel-bg: #fbfaf8;
+  --panel-fg: #1f2328;
+  --panel-muted: rgba(31, 35, 40, 0.55);
+  --panel-border: rgba(15, 23, 42, 0.09);
+  --panel-tab-bg: rgba(15, 23, 42, 0.04);
+  --panel-tab-active-bg: #ffffff;
+  --panel-tab-hover-bg: rgba(15, 23, 42, 0.07);
+  --panel-tab-active-border: var(--accent, #6366f1);
+  --panel-btn-bg: rgba(15, 23, 42, 0.06);
+  --panel-btn-bg-hover: rgba(15, 23, 42, 0.11);
+  --panel-btn-border: rgba(15, 23, 42, 0.12);
+  --panel-btn-border-hover: rgba(15, 23, 42, 0.2);
+  --panel-dropdown-bg: #ffffff;
+  --panel-dropdown-shadow: 0 4px 24px rgba(0, 0, 0, 0.12), 0 1px 4px rgba(0, 0, 0, 0.06);
+  --panel-split-handle: rgba(15, 23, 42, 0.12);
+  --panel-split-handle-hover: rgba(15, 23, 42, 0.22);
+  --panel-breadcrumb-fg: var(--panel-muted);
+  --panel-quick-action-bg: rgba(15, 23, 42, 0.04);
+  --panel-quick-action-hover: rgba(15, 23, 42, 0.09);
+
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  min-height: 0;
+  overflow: hidden;
+  color-scheme: light;
+  background: var(--panel-bg);
+  color: var(--panel-fg);
+  font-family:
+    ui-monospace,
+    SFMono-Regular,
+    'SF Mono',
+    Menlo,
+    Consolas,
+    'Liberation Mono',
+    monospace;
+}
+
+:global([data-theme='dark']) .root {
+  --panel-bg: #1e1e1e;
+  --panel-fg: #e6e1d9;
+  --panel-muted: rgba(230, 225, 217, 0.55);
+  --panel-border: rgba(255, 255, 255, 0.1);
+  --panel-tab-bg: rgba(255, 255, 255, 0.04);
+  --panel-tab-active-bg: #2a2a2a;
+  --panel-tab-hover-bg: rgba(255, 255, 255, 0.08);
+  --panel-tab-active-border: var(--accent, #818cf8);
+  --panel-btn-bg: rgba(255, 255, 255, 0.1);
+  --panel-btn-bg-hover: rgba(255, 255, 255, 0.18);
+  --panel-btn-border: rgba(255, 255, 255, 0.14);
+  --panel-btn-border-hover: rgba(255, 255, 255, 0.26);
+  --panel-dropdown-bg: #2a2a2a;
+  --panel-dropdown-shadow: 0 4px 24px rgba(0, 0, 0, 0.4), 0 1px 4px rgba(0, 0, 0, 0.2);
+  --panel-split-handle: rgba(255, 255, 255, 0.14);
+  --panel-split-handle-hover: rgba(255, 255, 255, 0.28);
+  --panel-breadcrumb-fg: var(--panel-muted);
+  --panel-quick-action-bg: rgba(255, 255, 255, 0.06);
+  --panel-quick-action-hover: rgba(255, 255, 255, 0.12);
+  color-scheme: dark;
+}
+
+@media (prefers-color-scheme: dark) {
+  :global(html:not([data-theme])) .root {
+    --panel-bg: #1e1e1e;
+    --panel-fg: #e6e1d9;
+    --panel-muted: rgba(230, 225, 217, 0.55);
+    --panel-border: rgba(255, 255, 255, 0.1);
+    --panel-tab-bg: rgba(255, 255, 255, 0.04);
+    --panel-tab-active-bg: #2a2a2a;
+    --panel-tab-hover-bg: rgba(255, 255, 255, 0.08);
+    --panel-tab-active-border: var(--accent, #818cf8);
+    --panel-btn-bg: rgba(255, 255, 255, 0.1);
+    --panel-btn-bg-hover: rgba(255, 255, 255, 0.18);
+    --panel-btn-border: rgba(255, 255, 255, 0.14);
+    --panel-btn-border-hover: rgba(255, 255, 255, 0.26);
+    --panel-dropdown-bg: #2a2a2a;
+    --panel-dropdown-shadow: 0 4px 24px rgba(0, 0, 0, 0.4), 0 1px 4px rgba(0, 0, 0, 0.2);
+    --panel-split-handle: rgba(255, 255, 255, 0.14);
+    --panel-split-handle-hover: rgba(255, 255, 255, 0.28);
+    --panel-breadcrumb-fg: var(--panel-muted);
+    --panel-quick-action-bg: rgba(255, 255, 255, 0.06);
+    --panel-quick-action-hover: rgba(255, 255, 255, 0.12);
+    color-scheme: dark;
+  }
+}
+
+/* ---- Tab Bar ---- */
+
+.tabBar {
+  flex: 0 0 auto;
+  display: flex;
+  align-items: center;
+  gap: 0;
+  padding: 0 4px;
+  height: 38px;
+  min-height: 38px;
+  background: var(--panel-tab-bg);
+  border-bottom: 1px solid var(--panel-border);
+  overflow-x: auto;
+  overflow-y: hidden;
+  scrollbar-width: none;
+}
+
+.tabBar::-webkit-scrollbar {
+  display: none;
+}
+
+.tabItem {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 0 12px;
+  height: 100%;
+  font-size: 12px;
+  color: var(--panel-muted);
+  background: transparent;
+  border: none;
+  border-radius: 0;
+  cursor: pointer;
+  white-space: nowrap;
+  transition:
+    background 150ms cubic-bezier(0.23, 1, 0.32, 1),
+    color 150ms cubic-bezier(0.23, 1, 0.32, 1);
+}
+
+.tabItem:hover {
+  background: var(--panel-tab-hover-bg);
+  color: var(--panel-fg);
+}
+
+.tabItemActive {
+  color: var(--panel-fg);
+  background: var(--panel-tab-active-bg);
+}
+
+.tabItemActive::after {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background: var(--panel-tab-active-border);
+  border-radius: 1px 1px 0 0;
+  content: '';
+}
+
+.tabLabel {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.tabClose {
+  flex: 0 0 auto;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 18px;
+  height: 18px;
+  padding: 0;
+  font-size: 14px;
+  line-height: 1;
+  color: var(--panel-muted);
+  background: transparent;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  opacity: 0;
+  transition:
+    opacity 150ms cubic-bezier(0.23, 1, 0.32, 1),
+    background 150ms cubic-bezier(0.23, 1, 0.32, 1),
+    color 150ms cubic-bezier(0.23, 1, 0.32, 1);
+}
+
+.tabItem:hover .tabClose {
+  opacity: 1;
+}
+
+.tabClose:hover {
+  color: var(--panel-fg);
+  background: var(--panel-btn-bg);
+}
+
+.addTab {
+  flex: 0 0 auto;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  margin: 0 2px;
+  padding: 0;
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--panel-muted);
+  background: transparent;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  transition:
+    background 150ms cubic-bezier(0.23, 1, 0.32, 1),
+    color 150ms cubic-bezier(0.23, 1, 0.32, 1);
+}
+
+.addTab:hover {
+  background: var(--panel-btn-bg);
+  color: var(--panel-fg);
+}
+
+/* ---- Tab Bar Spacer + Actions ---- */
+
+.tabSpacer {
+  flex: 1 1 auto;
+  min-width: 8px;
+}
+
+.tabActions {
+  flex: 0 0 auto;
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  padding-right: 4px;
+}
+
+.iconBtn {
+  flex: 0 0 auto;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  padding: 0;
+  color: var(--panel-muted);
+  background: transparent;
+  border: 1px solid transparent;
+  border-radius: 6px;
+  cursor: pointer;
+  transition:
+    background 150ms cubic-bezier(0.23, 1, 0.32, 1),
+    color 150ms cubic-bezier(0.23, 1, 0.32, 1),
+    border-color 150ms cubic-bezier(0.23, 1, 0.32, 1);
+}
+
+.iconBtn:hover {
+  background: var(--panel-btn-bg);
+  color: var(--panel-fg);
+  border-color: var(--panel-btn-border);
+}
+
+.iconBtnActive {
+  color: var(--panel-fg);
+  background: var(--panel-btn-bg);
+  border-color: var(--panel-btn-border);
+}
+
+/* ---- Breadcrumb ---- */
+
+.breadcrumb {
+  flex: 0 0 auto;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 4px 12px;
+  font-size: 11px;
+  color: var(--panel-breadcrumb-fg);
+  background: var(--panel-tab-bg);
+  border-bottom: 1px solid var(--panel-border);
+  white-space: nowrap;
+  overflow: hidden;
+}
+
+.breadcrumbSep {
+  color: var(--panel-muted);
+  opacity: 0.5;
+}
+
+.breadcrumbSegment {
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* ---- Terminal Content Area ---- */
+
+.content {
+  flex: 1 1 auto;
+  display: flex;
+  min-height: 0;
+  overflow: hidden;
+}
+
+.contentSingle {
+  flex: 1 1 auto;
+  min-width: 0;
+  min-height: 0;
+}
+
+.contentSplit {
+  display: flex;
+  flex-direction: row;
+  flex: 1 1 auto;
+  min-height: 0;
+}
+
+.splitPane {
+  flex: 1 1 0;
+  min-width: 0;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.splitHandle {
+  flex: 0 0 4px;
+  position: relative;
+  background: var(--panel-split-handle);
+  cursor: col-resize;
+  transition: background 150ms cubic-bezier(0.23, 1, 0.32, 1);
+}
+
+.splitHandle:hover,
+.splitHandleDragging {
+  background: var(--panel-split-handle-hover);
+}
+
+.splitHandle::after {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 2px;
+  height: 24px;
+  transform: translate(-50%, -50%);
+  background: var(--panel-muted);
+  border-radius: 1px;
+  opacity: 0;
+  content: '';
+  transition: opacity 150ms cubic-bezier(0.23, 1, 0.32, 1);
+}
+
+.splitHandle:hover::after,
+.splitHandleDragging::after {
+  opacity: 0.6;
+}
+
+/* ---- Quick Actions Dropdown ---- */
+
+.quickActionsDropdown {
+  position: absolute;
+  top: 100%;
+  right: 0;
+  z-index: 100;
+  min-width: 200px;
+  padding: 4px;
+  background: var(--panel-dropdown-bg);
+  border: 1px solid var(--panel-border);
+  border-radius: 8px;
+  box-shadow: var(--panel-dropdown-shadow);
+}
+
+.quickActionItem {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  padding: 7px 10px;
+  font-size: 12px;
+  font-family: inherit;
+  color: var(--panel-fg);
+  background: transparent;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  text-align: left;
+  white-space: nowrap;
+  transition:
+    background 150ms cubic-bezier(0.23, 1, 0.32, 1);
+}
+
+.quickActionItem:hover {
+  background: var(--panel-quick-action-hover);
+}
+
+.quickActionLabel {
+  flex: 1 1 auto;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.quickActionShortcut {
+  flex: 0 0 auto;
+  font-size: 10px;
+  color: var(--panel-muted);
+}
+
+.quickActionDivider {
+  height: 1px;
+  margin: 4px 0;
+  background: var(--panel-border);
+}
+
+.customCommandInput {
+  width: 100%;
+  padding: 6px 10px;
+  font-size: 12px;
+  font-family: inherit;
+  color: var(--panel-fg);
+  background: var(--panel-quick-action-bg);
+  border: 1px solid var(--panel-border);
+  border-radius: 5px;
+  outline: none;
+  transition: border-color 150ms cubic-bezier(0.23, 1, 0.32, 1);
+}
+
+.customCommandInput:focus {
+  border-color: var(--panel-tab-active-border);
+}
+
+.customCommandInput::placeholder {
+  color: var(--panel-muted);
+}
+
+/* ---- Empty State ---- */
+
+.emptyState {
+  flex: 1 1 auto;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  padding: 24px;
+  color: var(--panel-muted);
+}
+
+.emptyIcon {
+  font-size: 24px;
+  opacity: 0.5;
+}
+
+.emptyText {
+  font-size: 13px;
+  text-align: center;
+  line-height: 1.5;
+}
+
+.emptyAction {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 14px;
+  font-size: 12px;
+  font-family: inherit;
+  color: var(--panel-fg);
+  background: var(--panel-btn-bg);
+  border: 1px solid var(--panel-btn-border);
+  border-radius: 6px;
+  cursor: pointer;
+  transition:
+    background 150ms cubic-bezier(0.23, 1, 0.32, 1),
+    border-color 150ms cubic-bezier(0.23, 1, 0.32, 1);
+}
+
+.emptyAction:hover {
+  background: var(--panel-btn-bg-hover);
+  border-color: var(--panel-btn-border-hover);
+}
+
+/* ---- Responsive ---- */
+
+@media (max-width: 640px) {
+  .tabBar {
+    height: 34px;
+    min-height: 34px;
+  }
+
+  .tabItem {
+    padding: 0 8px;
+    font-size: 11px;
+  }
+
+  .breadcrumb {
+    padding: 3px 8px;
+    font-size: 10px;
+  }
+
+  .contentSplit {
+    flex-direction: column;
+  }
+
+  .splitHandle {
+    flex: 0 0 4px;
+    width: auto;
+    cursor: row-resize;
+  }
+}
+
+/* ---- Reduced Motion ---- */
+
+@media (prefers-reduced-motion: reduce) {
+  .tabItem,
+  .tabClose,
+  .addTab,
+  .iconBtn,
+  .quickActionItem,
+  .emptyAction,
+  .splitHandle,
+  .customCommandInput {
+    transition: none;
+  }
+}
