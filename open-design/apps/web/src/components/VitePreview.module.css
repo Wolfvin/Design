@@ -1,0 +1,521 @@
+/* ============================================================
+   VitePreview — Vite HMR preview component styles
+   ============================================================
+   Uses existing design token CSS variables from tokens.css.
+   Follows the same CSS Modules pattern as TerminalViewer.module.css.
+   ============================================================ */
+
+.root {
+  --preview-toolbar-bg: var(--bg-panel);
+  --preview-toolbar-border: var(--border);
+  --preview-viewport-bg: var(--bg-muted);
+  --preview-status-online: var(--green);
+  --preview-status-offline: var(--red);
+  --preview-btn-bg: var(--bg-fill-tertiary);
+  --preview-btn-bg-hover: var(--bg-fill-secondary);
+  --preview-btn-border: var(--border-soft);
+  --preview-btn-border-hover: var(--border);
+  --preview-btn-active-bg: var(--accent-tint);
+  --preview-btn-active-border: color-mix(in srgb, var(--accent) 32%, var(--border));
+  --preview-btn-active-color: var(--accent);
+  --preview-url-bg: var(--bg-fill-tertiary);
+  --preview-url-border: var(--border-soft);
+  --preview-url-text: var(--text-muted);
+
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  min-height: 0;
+  overflow: hidden;
+  background: var(--preview-viewport-bg);
+}
+
+:global([data-theme='dark']) .root {
+  --preview-toolbar-bg: var(--bg-panel);
+  --preview-toolbar-border: var(--border);
+  --preview-viewport-bg: var(--bg-subtle);
+  --preview-btn-bg: var(--bg-fill-secondary);
+  --preview-btn-bg-hover: var(--bg-fill);
+  --preview-btn-border: var(--border);
+  --preview-btn-border-hover: var(--border-strong);
+  --preview-url-bg: var(--bg-fill-tertiary);
+  --preview-url-border: var(--border);
+  --preview-url-text: var(--text-muted);
+}
+
+/* ---- Toolbar ---- */
+
+.toolbar {
+  flex: 0 0 auto;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 10px;
+  background: var(--preview-toolbar-bg);
+  border-bottom: 1px solid var(--preview-toolbar-border);
+  z-index: 1;
+}
+
+.toolbarLeft {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.toolbarCenter {
+  flex: 1 1 auto;
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+}
+
+.toolbarRight {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+/* ---- Status indicator ---- */
+
+.statusDot {
+  flex: 0 0 auto;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--preview-status-offline);
+  transition: background 200ms var(--ease-out);
+}
+
+.statusDot[data-online='true'] {
+  background: var(--preview-status-online);
+}
+
+.statusDot[data-detecting='true'] {
+  background: var(--amber);
+  animation: statusPulse 1.4s ease-in-out infinite;
+}
+
+@keyframes statusPulse {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.4;
+  }
+}
+
+/* ---- Toolbar buttons (icon buttons) ---- */
+
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 30px;
+  height: 30px;
+  border: 1px solid var(--preview-btn-border);
+  border-radius: var(--radius-sm);
+  background: var(--preview-btn-bg);
+  color: var(--text-muted);
+  cursor: pointer;
+  transition:
+    background 140ms var(--ease-out),
+    border-color 140ms var(--ease-out),
+    color 140ms var(--ease-out);
+}
+
+.btn:hover {
+  background: var(--preview-btn-bg-hover);
+  border-color: var(--preview-btn-border-hover);
+  color: var(--text);
+}
+
+.btn:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 1px;
+}
+
+.btn[data-active='true'] {
+  background: var(--preview-btn-active-bg);
+  border-color: var(--preview-btn-active-border);
+  color: var(--preview-btn-active-color);
+}
+
+.btn svg {
+  width: 15px;
+  height: 15px;
+}
+
+/* ---- Viewport size controls ---- */
+
+.viewportControls {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  padding: 2px;
+  border: 1px solid var(--preview-btn-border);
+  border-radius: var(--radius-sm);
+  background: var(--preview-btn-bg);
+}
+
+.viewportBtn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 28px;
+  height: 26px;
+  padding: 0 5px;
+  border: none;
+  border-radius: 4px;
+  background: transparent;
+  color: var(--text-muted);
+  font-size: 11px;
+  font-weight: 550;
+  font-family: var(--mono);
+  cursor: pointer;
+  transition:
+    background 140ms var(--ease-out),
+    color 140ms var(--ease-out);
+  white-space: nowrap;
+}
+
+.viewportBtn:hover {
+  background: var(--preview-btn-bg-hover);
+  color: var(--text);
+}
+
+.viewportBtn[data-active='true'] {
+  background: var(--preview-btn-active-bg);
+  color: var(--preview-btn-active-color);
+}
+
+.viewportBtn:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: -1px;
+}
+
+/* ---- URL bar ---- */
+
+.urlBar {
+  flex: 1 1 auto;
+  max-width: 360px;
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 3px 10px;
+  border: 1px solid var(--preview-url-border);
+  border-radius: var(--radius-pill);
+  background: var(--preview-url-bg);
+  overflow: hidden;
+}
+
+.urlLockIcon {
+  flex: 0 0 auto;
+  display: inline-flex;
+  color: var(--text-faint);
+}
+
+.urlLockIcon svg {
+  width: 12px;
+  height: 12px;
+}
+
+.urlText {
+  flex: 1 1 auto;
+  min-width: 0;
+  font-size: 12px;
+  font-family: var(--mono);
+  color: var(--preview-url-text);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  user-select: all;
+}
+
+/* ---- Viewport / iframe container ---- */
+
+.viewport {
+  flex: 1 1 auto;
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  min-height: 0;
+  overflow: auto;
+  padding: 0;
+  background: var(--preview-viewport-bg);
+  transition: padding 200ms var(--ease-out);
+}
+
+.viewportPad {
+  padding: 16px;
+}
+
+.iframeWrapper {
+  width: 100%;
+  height: 100%;
+  background: #fff;
+  border-radius: var(--radius-sm);
+  box-shadow: var(--shadow-md);
+  overflow: hidden;
+  transition:
+    width 240ms var(--ease-out),
+    height 240ms var(--ease-out);
+  position: relative;
+}
+
+.iframeWrapper[data-viewport='mobile'] {
+  max-width: 375px;
+}
+
+.iframeWrapper[data-viewport='tablet'] {
+  max-width: 768px;
+}
+
+.iframeWrapper[data-viewport='desktop'] {
+  max-width: none;
+}
+
+.iframe {
+  width: 100%;
+  height: 100%;
+  border: none;
+  display: block;
+  background: #fff;
+}
+
+/* ---- Scale-to-fit mode ---- */
+
+.viewportScale {
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow: hidden;
+  position: relative;
+  background: var(--preview-viewport-bg);
+}
+
+.viewportScaleInner {
+  transform-origin: top left;
+  transition: transform 200ms var(--ease-out);
+}
+
+.viewportScale .iframe {
+  width: 1280px;
+  height: 900px;
+  border: none;
+  display: block;
+  background: #fff;
+  border-radius: var(--radius-sm);
+  box-shadow: var(--shadow-md);
+}
+
+/* ---- Offline / Loading states ---- */
+
+.overlay {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  display: grid;
+  place-items: center;
+  padding: 32px;
+  background: color-mix(in srgb, var(--preview-viewport-bg) 92%, transparent);
+  backdrop-filter: blur(4px);
+}
+
+.overlayCard {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+  max-width: 400px;
+  text-align: center;
+}
+
+.overlayIcon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 48px;
+  height: 48px;
+  border-radius: var(--radius-md);
+  border: 1px solid var(--border);
+  background: var(--bg-panel);
+  color: var(--text-muted);
+}
+
+.overlayIcon[data-variant='offline'] {
+  border-color: color-mix(in srgb, var(--red) 32%, var(--border));
+  background: color-mix(in srgb, var(--red) 8%, var(--bg-panel));
+  color: var(--red);
+}
+
+.overlayIcon[data-variant='detecting'] {
+  border-color: color-mix(in srgb, var(--amber) 32%, var(--border));
+  background: color-mix(in srgb, var(--amber) 8%, var(--bg-panel));
+  color: var(--amber);
+}
+
+.overlayIcon svg {
+  width: 22px;
+  height: 22px;
+}
+
+.overlayTitle {
+  margin: 0;
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--text);
+}
+
+.overlayDescription {
+  margin: 0;
+  font-size: 13px;
+  line-height: 1.5;
+  color: var(--text-muted);
+}
+
+.overlayActions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  justify-content: center;
+}
+
+.overlayBtn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-height: 34px;
+  padding: 0 16px;
+  border: none;
+  border-radius: var(--radius-sm);
+  background: var(--accent);
+  color: var(--accent-contrast, #fff);
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: opacity 140ms var(--ease-out);
+}
+
+.overlayBtn:hover {
+  opacity: 0.92;
+}
+
+.overlayBtn:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+.overlayBtn svg {
+  width: 14px;
+  height: 14px;
+}
+
+.overlayBtnSecondary {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-height: 34px;
+  padding: 0 16px;
+  border: 1px solid var(--border-strong, var(--border));
+  border-radius: var(--radius-sm);
+  background: transparent;
+  color: var(--text);
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition:
+    background 140ms var(--ease-out),
+    border-color 140ms var(--ease-out);
+}
+
+.overlayBtnSecondary:hover {
+  background: var(--bg-fill-tertiary);
+}
+
+.overlayBtnSecondary:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+/* ---- Loading spinner ---- */
+
+.spinner {
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  border: 2.5px solid color-mix(in srgb, var(--amber) 28%, var(--border));
+  border-top-color: var(--amber);
+  animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* ---- Port input ---- */
+
+.portInput {
+  width: 56px;
+  min-width: 0;
+  height: 26px;
+  padding: 0 6px;
+  border: 1px solid var(--preview-btn-border);
+  border-radius: 4px;
+  background: var(--preview-url-bg);
+  color: var(--text);
+  font-size: 12px;
+  font-family: var(--mono);
+  text-align: center;
+  transition:
+    border-color 140ms var(--ease-out),
+    background 140ms var(--ease-out);
+}
+
+.portInput:focus {
+  outline: none;
+  border-color: var(--accent);
+  background: var(--bg-elevated);
+}
+
+.portInput::placeholder {
+  color: var(--text-faint);
+}
+
+/* ---- Responsive ---- */
+
+@media (max-width: 640px) {
+  .toolbar {
+    flex-wrap: wrap;
+    gap: 4px;
+    padding: 4px 6px;
+  }
+
+  .urlBar {
+    order: 10;
+    max-width: none;
+    width: 100%;
+  }
+
+  .viewportPad {
+    padding: 8px;
+  }
+}
+
+/* ---- Reduced motion ---- */
+
+@media (prefers-reduced-motion: reduce) {
+  .statusDot[data-detecting='true'],
+  .spinner {
+    animation: none;
+  }
+
+  .iframeWrapper,
+  .viewportScaleInner {
+    transition: none;
+  }
+}

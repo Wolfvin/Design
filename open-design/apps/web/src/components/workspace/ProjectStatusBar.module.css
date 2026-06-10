@@ -1,0 +1,125 @@
+/* ============================================================
+   ProjectStatusBar — VS Code-style status bar
+   ============================================================ */
+
+.root {
+  display: flex;
+  align-items: center;
+  gap: 0;
+  height: 24px;
+  padding: 0 10px;
+  background: var(--accent-strong);
+  color: rgba(255, 255, 255, 0.92);
+  font-size: 11.5px;
+  font-family: var(--sans);
+  line-height: 1;
+  user-select: none;
+}
+
+/* ---- Individual item ---- */
+
+.item {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 0 8px;
+  height: 100%;
+  white-space: nowrap;
+  cursor: default;
+  transition: background 100ms var(--ease-out);
+}
+
+.itemClickable {
+  cursor: pointer;
+}
+
+.itemClickable:hover {
+  background: rgba(255, 255, 255, 0.12);
+}
+
+.itemClickable:focus-visible {
+  outline: 1px solid rgba(255, 255, 255, 0.5);
+  outline-offset: -1px;
+}
+
+/* ---- Spacer ---- */
+
+.spacer {
+  flex: 1 1 auto;
+}
+
+/* ---- Status indicators ---- */
+
+.dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  flex: 0 0 auto;
+}
+
+.dotOnline {
+  background: #4ade80;
+  box-shadow: 0 0 4px rgba(74, 222, 128, 0.6);
+}
+
+.dotOffline {
+  background: #f87171;
+  box-shadow: 0 0 4px rgba(248, 113, 113, 0.5);
+}
+
+.dotDetecting {
+  background: #fbbf24;
+  box-shadow: 0 0 4px rgba(251, 191, 36, 0.5);
+  animation: status-pulse 1.4s ease-in-out infinite;
+}
+
+@keyframes status-pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.35; }
+}
+
+/* ---- Separator ---- */
+
+.sep {
+  width: 1px;
+  height: 12px;
+  background: rgba(255, 255, 255, 0.2);
+  flex: 0 0 auto;
+}
+
+/* ---- Icon helpers ---- */
+
+.icon {
+  display: inline-flex;
+  flex: 0 0 auto;
+}
+
+/* ---- Git branch ---- */
+
+.branchIcon {
+  display: inline-flex;
+  flex: 0 0 auto;
+}
+
+/* ---- Responsive ---- */
+
+@media (max-width: 640px) {
+  .root {
+    font-size: 10.5px;
+    padding: 0 6px;
+  }
+  .item {
+    padding: 0 5px;
+  }
+}
+
+/* ---- Dark theme ---- */
+/* The status bar uses accent-strong which is already dark-suitable */
+/* No additional dark overrides needed */
+
+/* Reduced motion */
+@media (prefers-reduced-motion: reduce) {
+  .dotDetecting {
+    animation: none;
+  }
+}

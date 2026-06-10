@@ -1,0 +1,459 @@
+/* ============================================================
+   CodeViewer — Syntax-highlighted code viewer with line numbers,
+   diff mode, line highlighting, minimap, and theme sync.
+   ============================================================ */
+
+.root {
+  --cv-bg: var(--code-body-bg);
+  --cv-surface: var(--code-header-bg);
+  --cv-border: var(--border);
+  --cv-text: var(--text);
+  --cv-text-muted: var(--text-muted);
+  --cv-text-soft: var(--text-soft);
+  --cv-accent: var(--accent);
+  --cv-selected: var(--selected);
+  --cv-selected-soft: var(--selected-soft);
+  --cv-green: var(--green);
+  --cv-green-bg: var(--green-bg);
+  --cv-red: var(--red, #9c2a25);
+  --cv-red-bg: var(--red-bg, #fdecea);
+  --cv-radius: var(--radius-sm);
+  --cv-font: var(--mono);
+  --cv-font-size: var(--code-font-size, 13px);
+  --cv-line-height: var(--code-line-height, 1.65);
+  --cv-transition: var(--dur-quick) var(--ease-out);
+
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  min-height: 0;
+  background: var(--cv-bg);
+  color: var(--cv-text);
+  font-family: var(--cv-font);
+  font-size: var(--cv-font-size);
+  line-height: var(--cv-line-height);
+  overflow: hidden;
+}
+
+/* ── Header: breadcrumb + actions ─────────────────────────── */
+
+.header {
+  flex: 0 0 auto;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 12px;
+  background: var(--cv-surface);
+  border-bottom: 1px solid var(--cv-border);
+  min-height: 34px;
+}
+
+.breadcrumb {
+  flex: 1 1 auto;
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  min-width: 0;
+  overflow: hidden;
+  font-size: 12px;
+  color: var(--cv-text-muted);
+}
+
+.breadcrumbSegment {
+  flex: 0 0 auto;
+  white-space: nowrap;
+}
+
+.breadcrumbSep {
+  flex: 0 0 auto;
+  margin: 0 2px;
+  opacity: 0.4;
+}
+
+.breadcrumbLast {
+  color: var(--cv-text);
+  font-weight: 600;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.headerActions {
+  flex: 0 0 auto;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.actionBtn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  padding: 3px 8px;
+  font-family: var(--cv-font);
+  font-size: 11px;
+  color: var(--cv-text-muted);
+  background: none;
+  border: 1px solid var(--cv-border);
+  border-radius: var(--cv-radius);
+  cursor: pointer;
+  transition:
+    color var(--cv-transition),
+    background var(--cv-transition),
+    border-color var(--cv-transition);
+  white-space: nowrap;
+}
+
+.actionBtn:hover {
+  color: var(--cv-text);
+  background: var(--cv-bg);
+  border-color: var(--cv-text-soft);
+}
+
+.actionBtnActive {
+  color: var(--cv-selected);
+  border-color: var(--cv-selected);
+}
+
+.copyBtn {
+  composes: actionBtn;
+}
+
+.copiedLabel {
+  color: var(--cv-green);
+}
+
+/* ── Diff mode toggle ────────────────────────────────────── */
+
+.diffToggle {
+  composes: actionBtn;
+}
+
+/* ── Main content area ───────────────────────────────────── */
+
+.body {
+  flex: 1 1 auto;
+  display: flex;
+  min-height: 0;
+  overflow: hidden;
+  position: relative;
+}
+
+/* ── Single code view (no diff) ──────────────────────────── */
+
+.codeView {
+  flex: 1 1 auto;
+  display: flex;
+  min-height: 0;
+  overflow: auto;
+  scrollbar-width: thin;
+  scrollbar-color: var(--cv-border) transparent;
+}
+
+.codeView::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+.codeView::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.codeView::-webkit-scrollbar-thumb {
+  background: var(--cv-border);
+  border-radius: 3px;
+}
+
+/* ── Line numbers gutter ──────────────────────────────────── */
+
+.lineNumbers {
+  flex: 0 0 auto;
+  padding: 12px 0;
+  text-align: right;
+  color: var(--cv-text-soft);
+  font-family: inherit;
+  font-size: inherit;
+  line-height: inherit;
+  user-select: none;
+  min-width: 48px;
+  border-right: 1px solid var(--cv-border);
+  background: var(--cv-surface);
+  overflow: hidden;
+}
+
+.lineNumber {
+  display: block;
+  padding: 0 10px;
+  height: calc(var(--cv-font-size) * var(--cv-line-height));
+  cursor: pointer;
+  transition: color var(--cv-transition);
+}
+
+.lineNumber:hover {
+  color: var(--cv-text-muted);
+}
+
+.lineNumberHighlighted {
+  color: var(--cv-accent);
+  font-weight: 600;
+}
+
+/* ── Code content ────────────────────────────────────────── */
+
+.codeContent {
+  flex: 1 1 auto;
+  padding: 12px 16px;
+  overflow-x: auto;
+  overflow-y: hidden;
+  min-width: 0;
+}
+
+.codeContent pre {
+  margin: 0;
+  padding: 0;
+  font-family: inherit;
+  font-size: inherit;
+  line-height: inherit;
+  background: none !important;
+  overflow: visible;
+}
+
+.codeContent code {
+  font-family: inherit;
+  font-size: inherit;
+  line-height: inherit;
+  background: none !important;
+}
+
+/* Shiki output styling overrides */
+.codeContent :global(.shiki) {
+  background: none !important;
+  padding: 0 !important;
+  margin: 0 !important;
+}
+
+.codeContent :global(pre) {
+  background: none !important;
+}
+
+/* ── Line highlight (full-width background stripe) ───────── */
+
+.lineHighlight {
+  position: absolute;
+  left: 0;
+  right: 0;
+  height: calc(var(--cv-font-size) * var(--cv-line-height));
+  background: var(--cv-selected-soft);
+  pointer-events: none;
+  opacity: 0.5;
+  z-index: 0;
+}
+
+.lineHighlightAccent {
+  background: color-mix(in srgb, var(--cv-accent) 12%, transparent);
+  opacity: 0.7;
+}
+
+/* ── Diff view: side-by-side ─────────────────────────────── */
+
+.diffSideBySide {
+  flex: 1 1 auto;
+  display: flex;
+  min-height: 0;
+  overflow: hidden;
+}
+
+.diffPane {
+  flex: 1 1 50%;
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  overflow: auto;
+  border-right: 1px solid var(--cv-border);
+}
+
+.diffPane:last-child {
+  border-right: none;
+}
+
+.diffPaneHeader {
+  flex: 0 0 auto;
+  padding: 4px 12px;
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--cv-text-muted);
+  background: var(--cv-surface);
+  border-bottom: 1px solid var(--cv-border);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.diffPaneBody {
+  flex: 1 1 auto;
+  overflow: auto;
+  padding: 12px 16px;
+}
+
+/* ── Diff view: inline ───────────────────────────────────── */
+
+.diffInline {
+  flex: 1 1 auto;
+  display: flex;
+  min-height: 0;
+  overflow: auto;
+}
+
+.diffLineNumber {
+  min-width: 48px;
+  padding: 0 10px;
+  text-align: right;
+  color: var(--cv-text-soft);
+  background: var(--cv-surface);
+  border-right: 1px solid var(--cv-border);
+  user-select: none;
+  overflow: hidden;
+}
+
+.diffLineNumberAdded {
+  color: var(--cv-green);
+}
+
+.diffLineNumberRemoved {
+  color: var(--cv-red);
+}
+
+/* ── Diff line backgrounds ───────────────────────────────── */
+
+.lineAdded {
+  background: var(--cv-green-bg);
+}
+
+.lineRemoved {
+  background: var(--cv-red-bg);
+}
+
+.lineAddedMarker,
+.lineRemovedMarker {
+  flex: 0 0 auto;
+  width: 3px;
+  margin-right: 8px;
+}
+
+.lineAddedMarker {
+  background: var(--cv-green);
+}
+
+.lineRemovedMarker {
+  background: var(--cv-red);
+}
+
+/* ── Minimap ─────────────────────────────────────────────── */
+
+.minimap {
+  flex: 0 0 auto;
+  width: 48px;
+  min-height: 0;
+  overflow: hidden;
+  background: var(--cv-surface);
+  border-left: 1px solid var(--cv-border);
+  cursor: pointer;
+  position: relative;
+}
+
+.minimapCanvas {
+  width: 100%;
+  height: 100%;
+  opacity: 0.6;
+}
+
+.minimapViewport {
+  position: absolute;
+  left: 0;
+  right: 0;
+  border: 1px solid var(--cv-selected);
+  background: var(--cv-selected-soft);
+  pointer-events: none;
+  opacity: 0.4;
+  transition: top var(--cv-transition);
+}
+
+/* ── Edit mode textarea ──────────────────────────────────── */
+
+.editArea {
+  flex: 1 1 auto;
+  width: 100%;
+  min-height: 0;
+  padding: 12px 16px;
+  font-family: var(--cv-font);
+  font-size: var(--cv-font-size);
+  line-height: var(--cv-line-height);
+  color: var(--cv-text);
+  background: var(--cv-bg);
+  border: none;
+  outline: none;
+  resize: none;
+  tab-size: 2;
+}
+
+.editArea:focus {
+  box-shadow: inset 0 0 0 2px var(--cv-selected-soft);
+}
+
+/* ── Loading state ───────────────────────────────────────── */
+
+.loading {
+  display: grid;
+  place-items: center;
+  padding: 32px;
+  color: var(--cv-text-soft);
+  font-size: 13px;
+}
+
+.loadingSpinner {
+  width: 16px;
+  height: 16px;
+  border: 2px solid var(--cv-border);
+  border-top-color: var(--cv-text-muted);
+  border-radius: 50%;
+  animation: cv-spin 0.8s linear infinite;
+  margin-bottom: 8px;
+}
+
+@keyframes cv-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* ── Language badge ──────────────────────────────────────── */
+
+.langBadge {
+  display: inline-flex;
+  align-items: center;
+  padding: 1px 6px;
+  font-size: 10px;
+  font-weight: 600;
+  color: var(--cv-text-muted);
+  background: var(--cv-bg);
+  border: 1px solid var(--cv-border);
+  border-radius: var(--cv-radius);
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+}
+
+/* ── Tab size (read from editorconfig or default 2) ──────── */
+
+.codeView,
+.diffPaneBody,
+.diffInline {
+  tab-size: 2;
+}
+
+/* ── Reduced motion ──────────────────────────────────────── */
+
+@media (prefers-reduced-motion: reduce) {
+  .loadingSpinner {
+    animation: none;
+  }
+}

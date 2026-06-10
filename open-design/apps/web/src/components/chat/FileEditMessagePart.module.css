@@ -1,0 +1,166 @@
+/* ============================================================
+   FileEditMessagePart — chat message integration for file edits
+   ============================================================ */
+
+.root {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 4px 0;
+}
+
+/* -- Summary banner at the top ------------------------------ */
+
+.summaryBanner {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 10px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--bg-subtle);
+  font-family: var(--sans);
+  font-size: 12px;
+  color: var(--text-muted);
+}
+
+.summaryIcon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 20px;
+  height: 20px;
+  border-radius: var(--radius-sm);
+  background: var(--bg-fill-secondary);
+  color: var(--text-muted);
+  font-size: 11px;
+  font-weight: 700;
+  flex-shrink: 0;
+}
+
+.summaryCount {
+  font-weight: 600;
+  color: var(--text);
+}
+
+.summarySpacer {
+  flex: 1 1 auto;
+}
+
+/* -- Cards list --------------------------------------------- */
+
+.cards {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+/* -- View all changes footer -------------------------------- */
+
+.viewAllFooter {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 6px 0;
+}
+
+.viewAllBtn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  min-height: 28px;
+  padding: 0 14px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  background: var(--bg-panel);
+  color: var(--text-muted);
+  font-family: var(--sans);
+  font-size: 12px;
+  font-weight: 500;
+  cursor: pointer;
+  transition:
+    background 140ms var(--ease-out),
+    border-color 140ms var(--ease-out),
+    color 140ms var(--ease-out);
+}
+
+.viewAllBtn:hover {
+  background: var(--bg-fill-secondary);
+  border-color: var(--border-strong);
+  color: var(--text);
+}
+
+.viewAllBtn:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 1px;
+}
+
+/* -- Streaming overlay --------------------------------------- */
+
+.streamingOverlay {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 10px;
+  font-family: var(--sans);
+  font-size: 11px;
+  color: var(--accent);
+}
+
+.streamingPulse {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--accent);
+  animation: streamPulse 1.2s ease-in-out infinite;
+}
+
+@keyframes streamPulse {
+  0%, 100% {
+    opacity: 0.4;
+    transform: scale(0.85);
+  }
+  50% {
+    opacity: 1;
+    transform: scale(1.15);
+  }
+}
+
+/* -- Loading skeleton for original content ------------------- */
+
+.loadingSkeleton {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 8px 12px;
+}
+
+.skeletonLine {
+  height: 10px;
+  border-radius: var(--radius-xs);
+  background: var(--bg-fill-secondary);
+  animation: skeletonShimmer 1.6s ease-in-out infinite;
+}
+
+@keyframes skeletonShimmer {
+  0%, 100% {
+    opacity: 0.5;
+  }
+  50% {
+    opacity: 1;
+  }
+}
+
+/* -- Reduced motion ------------------------------------------ */
+
+@media (prefers-reduced-motion: reduce) {
+  .streamingPulse,
+  .skeletonLine {
+    animation: none;
+  }
+
+  .viewAllBtn {
+    transition: none;
+  }
+}

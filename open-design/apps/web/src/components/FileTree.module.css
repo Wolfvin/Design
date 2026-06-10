@@ -1,0 +1,455 @@
+/* ============================================================
+   FileTree — Collapsible project file tree with search, context
+   menu, keyboard navigation, and drag handle support.
+   ============================================================ */
+
+.root {
+  --ft-bg: var(--bg-panel);
+  --ft-surface: var(--bg-elevated);
+  --ft-hover: var(--bg-fill-tertiary);
+  --ft-active: var(--bg-fill-secondary);
+  --ft-border: var(--border);
+  --ft-text: var(--text);
+  --ft-text-muted: var(--text-muted);
+  --ft-text-soft: var(--text-soft);
+  --ft-accent: var(--accent);
+  --ft-selected: var(--selected);
+  --ft-selected-soft: var(--selected-soft);
+  --ft-green: var(--green);
+  --ft-radius: var(--radius-sm);
+  --ft-font: var(--mono);
+  --ft-font-size: 12.5px;
+  --ft-line-height: 1.5;
+  --ft-row-height: 28px;
+  --ft-indent: 16px;
+  --ft-transition: var(--dur-quick) var(--ease-out);
+
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  min-height: 0;
+  background: var(--ft-bg);
+  color: var(--ft-text);
+  font-family: var(--ft-font);
+  font-size: var(--ft-font-size);
+  line-height: var(--ft-line-height);
+  overflow: hidden;
+}
+
+/* ── Search / filter bar ─────────────────────────────────── */
+
+.searchBar {
+  flex: 0 0 auto;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 10px;
+  border-bottom: 1px solid var(--ft-border);
+  background: var(--ft-surface);
+}
+
+.searchIcon {
+  flex: 0 0 auto;
+  display: inline-flex;
+  color: var(--ft-text-soft);
+  font-size: 13px;
+}
+
+.searchInput {
+  flex: 1 1 auto;
+  min-width: 0;
+  padding: 3px 6px;
+  font-family: inherit;
+  font-size: inherit;
+  line-height: inherit;
+  color: var(--ft-text);
+  background: var(--ft-bg);
+  border: 1px solid var(--ft-border);
+  border-radius: var(--ft-radius);
+  outline: none;
+  transition: border-color var(--ft-transition);
+}
+
+.searchInput:focus {
+  border-color: var(--ft-selected);
+  box-shadow: 0 0 0 2px var(--ft-selected-soft);
+}
+
+.searchInput::placeholder {
+  color: var(--ft-text-soft);
+}
+
+.searchClear {
+  flex: 0 0 auto;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 20px;
+  height: 20px;
+  padding: 0;
+  font-size: 14px;
+  color: var(--ft-text-muted);
+  background: none;
+  border: none;
+  border-radius: var(--ft-radius);
+  cursor: pointer;
+  transition: color var(--ft-transition), background var(--ft-transition);
+}
+
+.searchClear:hover {
+  color: var(--ft-text);
+  background: var(--ft-hover);
+}
+
+/* ── Scrollable tree body ────────────────────────────────── */
+
+.treeBody {
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow-y: auto;
+  overflow-x: hidden;
+  padding: 4px 0;
+  scrollbar-width: thin;
+  scrollbar-color: var(--ft-border) transparent;
+}
+
+.treeBody::-webkit-scrollbar {
+  width: 6px;
+}
+
+.treeBody::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.treeBody::-webkit-scrollbar-thumb {
+  background: var(--ft-border);
+  border-radius: 3px;
+}
+
+/* ── Tree row (folder or file) ───────────────────────────── */
+
+.row {
+  display: flex;
+  align-items: center;
+  height: var(--ft-row-height);
+  padding-right: 8px;
+  cursor: pointer;
+  user-select: none;
+  transition: background var(--ft-transition);
+  position: relative;
+}
+
+.row:hover {
+  background: var(--ft-hover);
+}
+
+.rowActive {
+  background: var(--ft-active);
+}
+
+.rowActive:hover {
+  background: var(--ft-active);
+}
+
+.rowFocused {
+  outline: 2px solid var(--ft-selected);
+  outline-offset: -2px;
+  border-radius: 2px;
+  z-index: 1;
+}
+
+/* ── Drag handle ─────────────────────────────────────────── */
+
+.dragHandle {
+  flex: 0 0 auto;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 14px;
+  height: 100%;
+  color: var(--ft-text-soft);
+  opacity: 0;
+  cursor: grab;
+  font-size: 10px;
+  transition: opacity var(--ft-transition);
+}
+
+.row:hover .dragHandle,
+.rowFocused .dragHandle {
+  opacity: 0.6;
+}
+
+.dragHandle:hover {
+  opacity: 1 !important;
+  color: var(--ft-text-muted);
+}
+
+/* ── Indent / guide lines ────────────────────────────────── */
+
+.indentGuide {
+  flex: 0 0 auto;
+  width: var(--ft-indent);
+  position: relative;
+  height: 100%;
+}
+
+.indentGuideLine {
+  position: absolute;
+  left: 7px;
+  top: 0;
+  bottom: 0;
+  width: 1px;
+  background: var(--ft-border);
+  opacity: 0.5;
+}
+
+/* ── Expand / collapse chevron ───────────────────────────── */
+
+.chevron {
+  flex: 0 0 auto;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 16px;
+  height: 16px;
+  font-size: 10px;
+  color: var(--ft-text-muted);
+  transition: transform var(--ft-transition);
+}
+
+.chevronExpanded {
+  transform: rotate(90deg);
+}
+
+.chevronHidden {
+  visibility: hidden;
+}
+
+/* ── File / folder icon ──────────────────────────────────── */
+
+.icon {
+  flex: 0 0 auto;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 18px;
+  height: 18px;
+  font-size: 14px;
+  margin-right: 4px;
+}
+
+.iconFolder {
+  color: var(--ft-accent);
+}
+
+.iconTs {
+  color: #3178c6;
+}
+
+.iconCss {
+  color: #a855f7;
+}
+
+.iconJson {
+  color: #e09a40;
+}
+
+.iconRust {
+  color: #dea584;
+}
+
+.iconHtml {
+  color: #e34c26;
+}
+
+.iconMd {
+  color: var(--ft-text-muted);
+}
+
+.iconDefault {
+  color: var(--ft-text-soft);
+}
+
+/* ── File name label ─────────────────────────────────────── */
+
+.name {
+  flex: 1 1 auto;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-weight: 500;
+}
+
+.nameFolder {
+  font-weight: 600;
+}
+
+/* ── Recently edited indicator ───────────────────────────── */
+
+.editIndicator {
+  flex: 0 0 auto;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--ft-green);
+  margin-left: 6px;
+  opacity: 0.9;
+}
+
+.editIndicatorHidden {
+  display: none;
+}
+
+/* ── Rename input ────────────────────────────────────────── */
+
+.renameInput {
+  flex: 1 1 auto;
+  min-width: 0;
+  padding: 1px 4px;
+  font-family: inherit;
+  font-size: inherit;
+  line-height: inherit;
+  color: var(--ft-text);
+  background: var(--ft-bg);
+  border: 1px solid var(--ft-selected);
+  border-radius: 3px;
+  outline: none;
+  box-shadow: 0 0 0 2px var(--ft-selected-soft);
+}
+
+/* ── Empty state ─────────────────────────────────────────── */
+
+.empty {
+  display: grid;
+  place-items: center;
+  padding: 32px 16px;
+  color: var(--ft-text-soft);
+  text-align: center;
+  font-size: 12px;
+  line-height: 1.6;
+}
+
+.emptyIcon {
+  font-size: 24px;
+  margin-bottom: 8px;
+  opacity: 0.5;
+}
+
+/* ── Context menu ────────────────────────────────────────── */
+
+.contextMenu {
+  position: fixed;
+  z-index: 9999;
+  min-width: 160px;
+  padding: 4px 0;
+  background: var(--ft-surface);
+  border: 1px solid var(--ft-border);
+  border-radius: var(--ft-radius);
+  box-shadow: var(--shadow-md);
+  font-size: var(--ft-font-size);
+  color: var(--ft-text);
+}
+
+.contextMenuItem {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  padding: 6px 12px;
+  font-family: inherit;
+  font-size: inherit;
+  color: var(--ft-text);
+  background: none;
+  border: none;
+  cursor: pointer;
+  text-align: left;
+  white-space: nowrap;
+  transition: background var(--ft-transition);
+}
+
+.contextMenuItem:hover {
+  background: var(--ft-hover);
+}
+
+.contextMenuItemDanger {
+  color: var(--red, #9c2a25);
+}
+
+.contextMenuItemDanger:hover {
+  background: var(--red-bg, #fdecea);
+}
+
+.contextMenuShortcut {
+  margin-left: auto;
+  color: var(--ft-text-soft);
+  font-size: 11px;
+}
+
+/* ── Folder children (collapse animation) ────────────────── */
+
+.folderChildren {
+  overflow: hidden;
+}
+
+.folderChildrenCollapsed {
+  max-height: 0;
+  opacity: 0;
+  transition:
+    max-height 200ms var(--ease-out),
+    opacity 120ms var(--ease-out);
+}
+
+.folderChildrenExpanded {
+  max-height: 9999px;
+  opacity: 1;
+  transition:
+    max-height 300ms var(--ease-out),
+    opacity 150ms var(--ease-out);
+}
+
+/* ── Loading spinner inside a folder ─────────────────────── */
+
+.folderLoading {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 2px 0 2px 8px;
+  color: var(--ft-text-soft);
+  font-size: 11px;
+}
+
+.folderLoadingSpinner {
+  width: 10px;
+  height: 10px;
+  border: 1.5px solid var(--ft-border);
+  border-top-color: var(--ft-text-muted);
+  border-radius: 50%;
+  animation: ft-spin 0.8s linear infinite;
+}
+
+@keyframes ft-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* ── Dragging state ──────────────────────────────────────── */
+
+.rowDragging {
+  opacity: 0.5;
+  background: var(--ft-selected-soft);
+}
+
+/* ── Reduced motion ──────────────────────────────────────── */
+
+@media (prefers-reduced-motion: reduce) {
+  .folderChildrenCollapsed,
+  .folderChildrenExpanded {
+    transition: none;
+  }
+
+  .folderLoadingSpinner {
+    animation: none;
+  }
+}
