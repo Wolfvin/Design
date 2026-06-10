@@ -123,22 +123,20 @@ export function useDevServerPreview(options: DevServerPreviewOptions): DevServer
   }, [projectId, initialProjectType, initialPort, daemonBaseUrl, projectType]);
 
   // Determine server type from project type
-  const serverType: DevServerType = projectType.startsWith('nextjs')
-    ? 'nextjs'
-    : 'legacy';
+  const isNextjs = projectType.startsWith('nextjs');
 
-  // Use the appropriate sub-provider
+  // Use the appropriate sub-provider for each type
+  const viteState = useVitePreview(projectId, {
+    enabled: !isNextjs,
+  });
+
   const nextjsState = useNextjsPreview({
     projectId,
-    port: projectType.startsWith('nextjs') ? detectedPort : undefined,
+    port: isNextjs ? detectedPort : undefined,
     daemonBaseUrl,
   });
 
-  // For Vite projects, use the existing vite preview
-  // (we compose the state from vite-preview for Vite projects)
-  const isNextjs = projectType.startsWith('nextjs');
-
-  // Build unified state
+  // Build unified state based on project type
   if (isNextjs) {
     return {
       serverType: 'nextjs',
@@ -152,15 +150,14 @@ export function useDevServerPreview(options: DevServerPreviewOptions): DevServer
     };
   }
 
-  // Vite / Tauri projects
-  const port = detectedPort ?? DEFAULT_PORTS[projectType] ?? 5173;
+  // Vite / Tauri projects — delegate to useVitePreview for health checking
   return {
     serverType: 'vite',
-    serverOnline: false, // Vite online detection handled by vite-preview
-    previewUrl: `http://localhost:${port}`,
-    port,
-    loading: false,
-    error: null,
+    serverOnline: viteState.serverOnline,
+    previewUrl: viteState.previewUrl,
+    port: viteState.port,
+    loading: viteState.loading,
+    error: viteState.error,
     projectType,
   };
 }

@@ -25,6 +25,10 @@ import {
   resolveExclusiveSurface,
   shouldRenderCodexImagegenOverride,
 } from './prompts/system.js';
+import {
+  composeAppDeveloperPrompt,
+  composeAppDeveloperPromptAuto,
+} from './prompts/app-developer-system.js';
 import { expandHomePrefix, resolveProjectRelativePath } from './home-expansion.js';
 import { resolveProjectRoot } from './project-root.js';
 import {
@@ -11078,7 +11082,31 @@ export async function startServer({
       }
     }
 
-    const prompt = composeSystemPrompt({
+    // If this is an app-developer project, use the new stack-aware prompt
+    const projectTypeRow = db.prepare('SELECT project_type FROM projects WHERE id = ?').get(projectId) as { project_type: string | null } | undefined;
+    const projectType = projectTypeRow?.project_type ?? null;
+    const isAppDevProject = projectType && (
+      projectType.startsWith('tauri') ||
+      projectType.startsWith('nextjs') ||
+      projectType.startsWith('vite')
+    );
+
+    let prompt: string;
+    if (isAppDevProject) {
+      // App-developer project: use stack-aware prompt that includes file map,
+      // design tokens as CSS, and project-type-specific rules
+      const projectDir = resolveProjectDir(PROJECTS_DIR, projectId, metadata);
+      prompt = await composeAppDeveloperPromptAuto({
+        projectName: project?.name ?? projectId,
+        baseDir: projectDir,
+        tokensCss: designSystemTokensCss ?? '',
+        designMd: designSystemBody ?? '',
+        ...(skillBody ? { skillBody } : {}),
+        ...(memoryBody ? { memory: memoryBody } : {}),
+        ...(userInstructions || projectInstructions ? { customInstructions: [userInstructions, projectInstructions].filter(Boolean).join('\n\n') } : {}),
+      });
+    } else {
+      prompt = composeSystemPrompt({
       agentId,
       includeCodexImagegenOverride: false,
       skillBody,
@@ -11124,6 +11152,7 @@ export async function startServer({
       userInstructions,
       projectInstructions,
     });
+    }
     // The chat handler also needs to know where the active skill lives
     // on disk so it can stage a per-project copy of its side files
     // before spawning the agent. Returning that here avoids a second

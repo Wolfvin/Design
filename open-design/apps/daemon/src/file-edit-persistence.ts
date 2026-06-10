@@ -137,3 +137,61 @@ export function updateProjectVitePort(
     `UPDATE projects SET vite_port = ?, updated_at = ? WHERE id = ?`,
   ).run(vitePort, Date.now(), projectId);
 }
+
+/**
+ * Apply the Next.js mode migration (009) to the database.
+ *
+ * Adds:
+ * - dev_port column (unified dev server port)
+ * - dev_server_type column (vite, nextjs, or custom)
+ * - project_type column (granular project type detection)
+ * - prisma_migrations_log table (tracks Prisma schema changes for Next.js projects)
+ * - Backfills existing Vite projects with dev_server_type and dev_port
+ */
+export function migrateNextjsMode(db: SqliteDb): void {
+  // Add new columns to projects table (safe: check existence first)
+  const projectCols = db.prepare(`PRAGMA table_info(projects)`).all() as DbRow[];
+
+  if (!projectCols.some((c: DbRow) => c.name === 'dev_port')) {
+    db.exec(`ALTER TABLE projects ADD COLUMN dev_port INTEGER`);
+  }
+  if (!projectCols.some((c: DbRow) => c.name === 'dev_server_type')) {
+    db.exec(`ALTER TABLE projects ADD COLUMN dev_server_type TEXT CHECK(dev_server_type IN ('vite', 'nextjs', 'custom')) DEFAULT 'vite'`);
+  }
+  if (!projectCols.some((c: DbRow) => c.name === 'project_type')) {
+    // project_type may already exist from migration 007 (file-edit-history)
+    // Only add if it doesn't exist
+    db.exec(`ALTER TABLE projects ADD COLUMN project_type TEXT DEFAULT NULL`);
+  }
+
+  // Create index on project_type
+  db.exec(`CREATE INDEX IF NOT EXISTS idx_projects_project_type ON projects(project_type)`);
+
+  // Create prisma_migrations_log table
+  db.exec(`
+    CREATE TABLE IF NOT EXISTS prisma_migrations_log (
+      id              INTEGER PRIMARY KEY AUTOINCREMENT,
+      project_id      TEXT    NOT NULL,
+      schema_before   TEXT,
+      schema_after    TEXT,
+      migration_sql   TEXT,
+      status          TEXT    NOT NULL DEFAULT 'pending'
+                      CHECK(status IN ('pending', 'validated', 'applied', 'failed')),
+      error_message   TEXT,
+      duration_ms     INTEGER,
+      created_at      INTEGER NOT NULL,
+      FOREIGN KEY(project_id) REFERENCES projects(id) ON DELETE CASCADE
+    );
+
+    CREATE INDEX IF NOT EXISTS idx_prisma_migrations_log_project
+      ON prisma_migrations_log(project_id, created_at DESC);
+  `);
+
+  // Backfill: Set dev_server_type and dev_port for existing Vite projects
+  db.exec(`
+    UPDATE projects SET
+      dev_server_type = 'vite',
+      dev_port = vite_port
+    WHERE vite_port IS NOT NULL AND dev_port IS NULL;
+  `);
+}

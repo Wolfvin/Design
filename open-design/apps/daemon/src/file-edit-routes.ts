@@ -13,116 +13,10 @@ import {
   updateProjectVitePort,
 } from './file-edit-persistence.js';
 import { isSafeId, projectDir } from './projects.js';
+import { detectProjectType as detectProjectTypeFull } from './prompts/project-type-detector.js';
+import { PrismaSchemaHelper } from './prisma-helper.js';
 
 export interface RegisterFileEditRoutesDeps extends RouteDeps<'db' | 'http' | 'paths' | 'projectFiles'> {}
-
-/**
- * Known project type detection signatures.
- */
-const PROJECT_TYPE_SIGNATURES: Record<string, string[]> = {
-  'nextjs': ['next.config.js', 'next.config.mjs', 'next.config.ts'],
-  'vite-react': ['vite.config.ts', 'vite.config.js', 'vite.config.mts'],
-  'vite-vanilla': ['index.html', 'vite.config.ts', 'vite.config.js'],
-  'react-cra': ['react-app-env.d.ts', 'config-overrides.js'],
-  'astro': ['astro.config.mjs', 'astro.config.ts'],
-  'sveltekit': ['svelte.config.js', 'svelte.config.ts'],
-  'nuxt': ['nuxt.config.ts', 'nuxt.config.js'],
-  'remix': ['remix.config.js', 'remix.config.ts'],
-  'angular': ['angular.json'],
-  'vue-cli': ['vue.config.js', 'vue.config.ts'],
-};
-
-/**
- * Tech stack detection based on lock/config files.
- */
-function detectTechStack(files: string[]): string[] {
-  const stack: string[] = [];
-  if (files.some((f) => f === 'package.json')) stack.push('node');
-  if (files.some((f) => f === 'Cargo.toml')) stack.push('rust');
-  if (files.some((f) => f === 'requirements.txt' || f === 'pyproject.toml')) stack.push('python');
-  if (files.some((f) => f === 'go.mod')) stack.push('go');
-  if (files.some((f) => f === 'tsconfig.json')) stack.push('typescript');
-  if (files.some((f) => f === 'tailwind.config.js' || f === 'tailwind.config.ts')) stack.push('tailwind');
-  if (files.some((f) => f === 'postcss.config.js' || f === 'postcss.config.mjs')) stack.push('postcss');
-  return stack;
-}
-
-/**
- * Auto-detect project type from existing files.
- */
-function detectProjectType(files: string[]): string {
-  for (const [type, signatures] of Object.entries(PROJECT_TYPE_SIGNATURES)) {
-    if (signatures.every((sig) => files.some((f) => f === sig || f.endsWith('/' + sig)))) {
-      return type;
-    }
-  }
-  // Fallback heuristics
-  if (files.some((f) => f === 'package.json')) return 'node';
-  if (files.some((f) => f === 'Cargo.toml')) return 'rust';
-  return 'unknown';
-}
-
-/**
- * Attempt to detect the Vite dev server port from project config.
- */
-async function detectVitePort(projectDir: string): Promise<number | null> {
-  // Check vite.config.* for server.port
-  const viteConfigNames = ['vite.config.ts', 'vite.config.js', 'vite.config.mts'];
-  for (const configName of viteConfigNames) {
-    try {
-      const content = await fs.readFile(path.join(projectDir, configName), 'utf8');
-      const portMatch = content.match(/port\s*:\s*(\d+)/);
-      if (portMatch) return parseInt(portMatch[1], 10);
-    } catch { /* file doesn't exist */ }
-  }
-
-  // Check package.json scripts for --port
-  try {
-    const pkgContent = await fs.readFile(path.join(projectDir, 'package.json'), 'utf8');
-    const pkg = JSON.parse(pkgContent);
-    const scripts = pkg.scripts ?? {};
-    for (const script of Object.values(scripts)) {
-      if (typeof script !== 'string') continue;
-      const portMatch = script.match(/--port\s+(\d+)/);
-      if (portMatch) return parseInt(portMatch[1], 10);
-    }
-  } catch { /* package.json doesn't exist or is malformed */ }
-
-  // Default Vite port
-  return null;
-}
-
-/**
- * Attempt to detect the Next.js dev server port from project config.
- */
-async function detectNextjsPort(projectDirPath: string): Promise<number> {
-  // Check next.config.* for devServer.port
-  const nextConfigNames = ['next.config.ts', 'next.config.js', 'next.config.mts', 'next.config.mjs'];
-  for (const configName of nextConfigNames) {
-    try {
-      const content = await fs.readFile(path.join(projectDirPath, configName), 'utf8');
-      const portMatch = content.match(/devServer\s*:\s*\{[^}]*port\s*:\s*(\d+)/);
-      if (portMatch) return parseInt(portMatch[1], 10);
-    } catch { /* file doesn't exist */ }
-  }
-
-  // Check package.json scripts for --port or -p
-  try {
-    const pkgContent = await fs.readFile(path.join(projectDirPath, 'package.json'), 'utf8');
-    const pkg = JSON.parse(pkgContent);
-    const scripts = pkg.scripts ?? {};
-    for (const script of Object.values(scripts)) {
-      if (typeof script !== 'string') continue;
-      const portMatch = script.match(/--port\s+(\d+)/);
-      if (portMatch) return parseInt(portMatch[1], 10);
-      const pMatch = script.match(/-p\s+(\d+)/);
-      if (pMatch) return parseInt(pMatch[1], 10);
-    }
-  } catch { /* package.json doesn't exist or is malformed */ }
-
-  // Default Next.js port
-  return 3000;
-}
 
 /**
  * Build a file map (relative paths with sizes) for a project directory.
@@ -306,22 +200,27 @@ export function registerFileEditRoutes(app: Express, ctx: RegisterFileEditRoutes
     }
 
     try {
-      const fileMap = await buildFileMap(PROJECTS_DIR, projectId);
-      const filePaths = fileMap.map((f) => f.path);
-      const projectType = detectProjectType(filePaths);
-      const techStack = detectTechStack(filePaths);
+      const projectDirPath = projectDir(PROJECTS_DIR, projectId);
+      const detection = await detectProjectTypeFull(projectDirPath);
+      const projectType = detection.type;
+      const techStack = detection.techStack;
 
       // Persist detected type/stack
       try {
         updateProjectType(db as any, projectId, projectType);
-        if (techStack.length > 0) {
-          updateProjectTechStack(db as any, projectId, techStack.join(','));
+        if (techStack) {
+          updateProjectTechStack(db as any, projectId, techStack);
         }
       } catch (err) {
         console.warn(`[file-edit-routes] failed to persist project type: ${err}`);
       }
 
-      res.json({ projectType, techStack });
+      res.json({
+        projectType,
+        techStack,
+        devPort: detection.devPort,
+        devServerType: detection.devServerType,
+      });
     } catch (err: any) {
       console.error(`[file-edit-routes] detect-type failed: ${err.message}`);
       return sendApiError(res, 500, 'INTERNAL_ERROR', 'Failed to detect project type');
@@ -339,7 +238,8 @@ export function registerFileEditRoutes(app: Express, ctx: RegisterFileEditRoutes
     const projectDirPath = projectDir(PROJECTS_DIR, projectId);
 
     try {
-      const vitePort = await detectVitePort(projectDirPath);
+      const detection = await detectProjectTypeFull(projectDirPath);
+      const vitePort = detection.devPort ?? detection.vitePort ?? null;
 
       if (vitePort !== null) {
         try {
@@ -369,22 +269,10 @@ export function registerFileEditRoutes(app: Express, ctx: RegisterFileEditRoutes
     const projectDirPath = projectDir(PROJECTS_DIR, projectId);
 
     try {
-      // First, detect project type to determine which port detection to use
-      const fileMap = await buildFileMap(PROJECTS_DIR, projectId);
-      const filePaths = fileMap.map((f) => f.path);
-      const projectType = detectProjectType(filePaths);
-
-      let devPort: number | null = null;
-      let devServerType: 'vite' | 'nextjs' | 'custom' = 'vite';
-
-      if (projectType === 'nextjs') {
-        // Next.js port detection
-        devServerType = 'nextjs';
-        devPort = await detectNextjsPort(projectDirPath);
-      } else {
-        // Vite / Tauri port detection
-        devPort = await detectVitePort(projectDirPath);
-      }
+      const detection = await detectProjectTypeFull(projectDirPath);
+      const projectType = detection.type;
+      const devServerType = detection.devServerType ?? 'vite';
+      const devPort = detection.devPort ?? null;
 
       // Persist detected port
       if (devPort !== null) {
@@ -411,22 +299,14 @@ export function registerFileEditRoutes(app: Express, ctx: RegisterFileEditRoutes
     }
 
     try {
-      const { execFile } = await import('node:child_process');
-      const { promisify } = await import('node:util');
-      const execAsync = promisify(execFile);
-
       const projectDirPath = projectDir(PROJECTS_DIR, projectId);
-      const start = Date.now();
-
-      const { stdout, stderr } = await execAsync('npx', ['prisma', 'generate'], {
-        cwd: projectDirPath,
-        timeout: 30000,
-      });
+      const helper = new PrismaSchemaHelper(projectDirPath);
+      const result = await helper.generateClient();
 
       res.json({
-        success: true,
-        output: stdout || stderr,
-        durationMs: Date.now() - start,
+        success: result.success,
+        output: result.output,
+        durationMs: result.durationMs,
       });
     } catch (err: any) {
       res.json({
@@ -453,33 +333,15 @@ export function registerFileEditRoutes(app: Express, ctx: RegisterFileEditRoutes
     }
 
     try {
-      const { execFile } = await import('node:child_process');
-      const { promisify } = await import('node:util');
-      const { writeFile, unlink } = await import('node:fs/promises');
-      const os = await import('node:os');
-      const pathMod = await import('node:path');
-      const execAsync = promisify(execFile);
-
       const projectDirPath = projectDir(PROJECTS_DIR, projectId);
-      const tmpPath = pathMod.join(os.tmpdir(), `prisma-validate-${Date.now()}.prisma`);
+      const helper = new PrismaSchemaHelper(projectDirPath);
+      const result = await helper.validateSchema(schemaContent);
 
-      try {
-        await writeFile(tmpPath, schemaContent, 'utf-8');
-        const { stdout, stderr } = await execAsync(
-          'npx', ['prisma', 'validate', `--schema=${tmpPath}`],
-          { cwd: projectDirPath, timeout: 15000 },
-        );
-
-        res.json({ valid: true, errors: [], warnings: [] });
-      } catch (err: any) {
-        res.json({
-          valid: false,
-          errors: [{ message: err.stderr || err.message || 'Validation failed' }],
-          warnings: [],
-        });
-      } finally {
-        await unlink(tmpPath).catch(() => {});
-      }
+      res.json({
+        valid: result.valid,
+        errors: result.errors,
+        warnings: result.warnings,
+      });
     } catch (err: any) {
       console.error(`[file-edit-routes] prisma validate failed: ${err.message}`);
       return sendApiError(res, 500, 'INTERNAL_ERROR', 'Failed to validate Prisma schema');
@@ -495,23 +357,15 @@ export function registerFileEditRoutes(app: Express, ctx: RegisterFileEditRoutes
     }
 
     try {
-      const { execFile } = await import('node:child_process');
-      const { promisify } = await import('node:util');
-      const execAsync = promisify(execFile);
-
       const projectDirPath = projectDir(PROJECTS_DIR, projectId);
-      const start = Date.now();
-
-      const { stdout, stderr } = await execAsync(
-        'npx', ['prisma', 'db', 'push', '--accept-data-loss'],
-        { cwd: projectDirPath, timeout: 60000 },
-      );
+      const helper = new PrismaSchemaHelper(projectDirPath);
+      const result = await helper.pushToDatabase();
 
       res.json({
-        success: true,
-        output: stdout || stderr,
-        warnings: [],
-        durationMs: Date.now() - start,
+        success: result.success,
+        output: result.output,
+        warnings: result.warnings,
+        durationMs: result.durationMs,
       });
     } catch (err: any) {
       res.json({

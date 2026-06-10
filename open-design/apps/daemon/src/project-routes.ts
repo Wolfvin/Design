@@ -10,7 +10,7 @@ import { createProjectArtifactFile } from './artifact-create.js';
 import { ArtifactPublicationBlockedError } from './artifact-publication-guard.js';
 import { ArtifactRegressionError } from './artifact-stub-guard.js';
 import { listDesignSystems } from './design-systems.js';
-import { handleSyncTokensRoute } from './design-token-sync.js';
+import { handleSyncTokensRoute, syncDesignTokensToNextjsProject, syncDesignTokensToProject } from './design-token-sync.js';
 import {
   FIRST_PARTY_ATOMS,
   buildConnectorProbe,
@@ -1445,7 +1445,58 @@ export function registerProjectRoutes(app: Express, ctx: RegisterProjectRoutesDe
   // Sync design tokens (tokens.css + tailwind-theme.css) from the project's
   // active design system into its source tree. The new app-dev model writes
   // these files to src/styles/ so React components can import them directly.
-  app.post('/api/projects/:id/sync-tokens', handleSyncTokensRoute(ctx));
+  app.post('/api/projects/:id/sync-tokens', async (req, res) => {
+    const projectId = req.params.id;
+    if (!isSafeId(projectId)) {
+      ctx.http.sendApiError(res, 400, 'BAD_REQUEST', 'Invalid project id');
+      return;
+    }
+
+    try {
+      // Detect project type to choose the right sync function
+      const project = getProject(db, projectId);
+      const projectTypeRow = db.prepare('SELECT project_type FROM projects WHERE id = ?').get(projectId) as { project_type: string | null } | undefined;
+      const projectType = projectTypeRow?.project_type ?? null;
+      const isNextjs = projectType && projectType.startsWith('nextjs');
+
+      // Use Next.js-specific token sync for Next.js projects
+      // (includes globals.css injection)
+      if (isNextjs) {
+        const result = await syncDesignTokensToNextjsProject(projectId, PROJECTS_DIR, {
+          db,
+          designSystemsDir: DESIGN_SYSTEMS_DIR,
+          userDesignSystemsDir: ctx.paths.USER_DESIGN_SYSTEMS_DIR,
+        });
+        res.json({
+          ok: true,
+          tokensPath: result.tokensPath,
+          tailwindPath: result.tailwindPath,
+          tokensHash: result.tokensHash,
+          wasUpdated: result.wasUpdated,
+          backupCreated: result.backupCreated,
+          globalsUpdated: result.globalsUpdated,
+        });
+      } else {
+        const result = await syncDesignTokensToProject(projectId, PROJECTS_DIR, {
+          db,
+          designSystemsDir: DESIGN_SYSTEMS_DIR,
+          userDesignSystemsDir: ctx.paths.USER_DESIGN_SYSTEMS_DIR,
+        });
+        res.json({
+          ok: true,
+          tokensPath: result.tokensPath,
+          tailwindPath: result.tailwindPath,
+          tokensHash: result.tokensHash,
+          wasUpdated: result.wasUpdated,
+          backupCreated: result.backupCreated,
+        });
+      }
+    } catch (err: unknown) {
+      const message =
+        err instanceof Error ? err.message : String(err);
+      ctx.http.sendApiError(res, 500, 'TOKEN_SYNC_ERROR', message);
+    }
+  });
 
   // SSE stream of file-changed events for a project. Drives preview live-reload.
   // Receipt of a `file-changed` event triggers a file-list refresh, which
