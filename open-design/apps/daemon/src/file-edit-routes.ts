@@ -10,6 +10,7 @@ import {
   validatePrismaSchema,
   runPrismaGenerate,
   runPrismaDbPush,
+  runPrismaMigrateDev,
 } from './prisma-helper.js';
 import {
   insertFileEditHistory,
@@ -206,6 +207,22 @@ export function registerFileEditRoutes(app: Express, ctx: RegisterFileEditRoutes
         }
       }
 
+      // If any edit was a Prisma schema file, run prisma generate
+      if (!pipelineOptions.dryRun) {
+        for (const edit of edits) {
+          if (isPrismaSchemaFile(edit.filePath)) {
+            try {
+              const genResult = await runPrismaGenerate(projectBaseDir);
+              if (!genResult.success) {
+                console.warn(`[file-edit-routes] prisma generate failed: ${genResult.error}`);
+              }
+            } catch (err) {
+              console.warn(`[file-edit-routes] prisma generate error: ${err}`);
+            }
+          }
+        }
+      }
+
       res.json({ results });
     } catch (err: any) {
       console.error(`[file-edit-routes] write failed: ${err.message}`);
@@ -329,7 +346,6 @@ export function registerFileEditRoutes(app: Express, ctx: RegisterFileEditRoutes
       return sendApiError(res, 500, 'INTERNAL_ERROR', 'Failed to detect Vite port');
     }
   });
-}
 
   // ─── Next.js Mode Routes ───────────────────────────────────────────
 
@@ -493,6 +509,100 @@ export function registerFileEditRoutes(app: Express, ctx: RegisterFileEditRoutes
     } catch (err: any) {
       console.error(`[file-edit-routes] sync-tokens/nextjs failed: ${err.message}`);
       return sendApiError(res, 500, 'TOKEN_SYNC_ERROR', err.message);
+    }
+  });
+
+  // ─── Prisma API Routes (Next.js only) ──────────────────────────────
+
+  // POST /api/projects/:id/prisma/validate
+  // Validate Prisma schema syntax before applying changes.
+  // Should be called before writing schema edits to disk.
+  app.post('/api/projects/:id/prisma/validate', async (req, res) => {
+    const projectId = req.params.id;
+    if (!isSafeId(projectId)) {
+      return sendApiError(res, 400, 'BAD_REQUEST', 'invalid project id');
+    }
+
+    const body = req.body || {};
+    const schemaContent = body.schemaContent;
+    if (typeof schemaContent !== 'string' || !schemaContent.trim()) {
+      return sendApiError(res, 400, 'BAD_REQUEST', 'schemaContent is required');
+    }
+
+    try {
+      const project = (db as any).prepare?.(`SELECT metadata_json FROM projects WHERE id = ?`).get(projectId);
+      let metadata: any = undefined;
+      if (project?.metadata_json) {
+        try { metadata = JSON.parse(project.metadata_json); } catch { /* ignore */ }
+      }
+      const projectBaseDir = resolveDir(PROJECTS_DIR, projectId, metadata);
+
+      const result = await validatePrismaSchema(projectBaseDir, schemaContent);
+      res.json(result);
+    } catch (err: any) {
+      console.error(`[file-edit-routes] prisma/validate failed: ${err.message}`);
+      return sendApiError(res, 500, 'PRISMA_ERROR', err.message);
+    }
+  });
+
+  // POST /api/projects/:id/prisma/generate
+  // Run `npx prisma generate` after schema edits to update Prisma Client types.
+  // Should be called after writing schema changes to disk.
+  app.post('/api/projects/:id/prisma/generate', async (req, res) => {
+    const projectId = req.params.id;
+    if (!isSafeId(projectId)) {
+      return sendApiError(res, 400, 'BAD_REQUEST', 'invalid project id');
+    }
+
+    try {
+      const project = (db as any).prepare?.(`SELECT metadata_json FROM projects WHERE id = ?`).get(projectId);
+      let metadata: any = undefined;
+      if (project?.metadata_json) {
+        try { metadata = JSON.parse(project.metadata_json); } catch { /* ignore */ }
+      }
+      const projectBaseDir = resolveDir(PROJECTS_DIR, projectId, metadata);
+
+      const result = await runPrismaGenerate(projectBaseDir);
+      res.json(result);
+    } catch (err: any) {
+      console.error(`[file-edit-routes] prisma/generate failed: ${err.message}`);
+      return sendApiError(res, 500, 'PRISMA_ERROR', err.message);
+    }
+  });
+
+  // POST /api/projects/:id/prisma/migrate
+  // Apply Prisma schema changes to the database.
+  // Supports two modes: "push" (dev mode, no migration files) and
+  // "dev" (creates migration files and applies them).
+  app.post('/api/projects/:id/prisma/migrate', async (req, res) => {
+    const projectId = req.params.id;
+    if (!isSafeId(projectId)) {
+      return sendApiError(res, 400, 'BAD_REQUEST', 'invalid project id');
+    }
+
+    const body = req.body || {};
+    const mode = body.mode === 'dev' ? 'dev' : 'push';
+    const migrationName = typeof body.migrationName === 'string' ? body.migrationName : 'od_auto';
+
+    try {
+      const project = (db as any).prepare?.(`SELECT metadata_json FROM projects WHERE id = ?`).get(projectId);
+      let metadata: any = undefined;
+      if (project?.metadata_json) {
+        try { metadata = JSON.parse(project.metadata_json); } catch { /* ignore */ }
+      }
+      const projectBaseDir = resolveDir(PROJECTS_DIR, projectId, metadata);
+
+      let result;
+      if (mode === 'dev') {
+        result = await runPrismaMigrateDev(projectBaseDir, migrationName);
+      } else {
+        result = await runPrismaDbPush(projectBaseDir);
+      }
+
+      res.json(result);
+    } catch (err: any) {
+      console.error(`[file-edit-routes] prisma/migrate failed: ${err.message}`);
+      return sendApiError(res, 500, 'PRISMA_ERROR', err.message);
     }
   });
 }

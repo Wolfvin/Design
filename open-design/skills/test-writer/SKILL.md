@@ -10,6 +10,7 @@ od:
   category: app-development
   taskKind: test-writing
   outputFormat: file-edit
+  stackCompatibility: both
   design_system:
     requires: false
   craft:

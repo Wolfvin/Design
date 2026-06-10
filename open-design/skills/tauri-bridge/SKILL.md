@@ -11,6 +11,7 @@ od:
   category: app-development
   taskKind: ipc-bridge
   outputFormat: file-edit
+  stackCompatibility: tauri
   design_system:
     requires: false
   craft:

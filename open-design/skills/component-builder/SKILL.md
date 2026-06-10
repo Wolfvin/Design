@@ -11,6 +11,7 @@ od:
   category: app-development
   taskKind: component-create
   outputFormat: file-edit
+  stackCompatibility: both
   design_system:
     requires: true
   craft:

@@ -10,6 +10,7 @@ od:
   category: app-development
   taskKind: code-edit
   outputFormat: file-edit
+  stackCompatibility: both
   design_system:
     requires: true
   craft:
