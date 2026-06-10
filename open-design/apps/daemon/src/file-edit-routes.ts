@@ -93,6 +93,38 @@ async function detectVitePort(projectDir: string): Promise<number | null> {
 }
 
 /**
+ * Attempt to detect the Next.js dev server port from project config.
+ */
+async function detectNextjsPort(projectDirPath: string): Promise<number> {
+  // Check next.config.* for devServer.port
+  const nextConfigNames = ['next.config.ts', 'next.config.js', 'next.config.mts', 'next.config.mjs'];
+  for (const configName of nextConfigNames) {
+    try {
+      const content = await fs.readFile(path.join(projectDirPath, configName), 'utf8');
+      const portMatch = content.match(/devServer\s*:\s*\{[^}]*port\s*:\s*(\d+)/);
+      if (portMatch) return parseInt(portMatch[1], 10);
+    } catch { /* file doesn't exist */ }
+  }
+
+  // Check package.json scripts for --port or -p
+  try {
+    const pkgContent = await fs.readFile(path.join(projectDirPath, 'package.json'), 'utf8');
+    const pkg = JSON.parse(pkgContent);
+    const scripts = pkg.scripts ?? {};
+    for (const script of Object.values(scripts)) {
+      if (typeof script !== 'string') continue;
+      const portMatch = script.match(/--port\s+(\d+)/);
+      if (portMatch) return parseInt(portMatch[1], 10);
+      const pMatch = script.match(/-p\s+(\d+)/);
+      if (pMatch) return parseInt(pMatch[1], 10);
+    }
+  } catch { /* package.json doesn't exist or is malformed */ }
+
+  // Default Next.js port
+  return 3000;
+}
+
+/**
  * Build a file map (relative paths with sizes) for a project directory.
  */
 async function buildFileMap(
@@ -322,5 +354,189 @@ export function registerFileEditRoutes(app: Express, ctx: RegisterFileEditRoutes
       console.error(`[file-edit-routes] detect-vite-port failed: ${err.message}`);
       return sendApiError(res, 500, 'INTERNAL_ERROR', 'Failed to detect Vite port');
     }
+  });
+
+  // ── Next.js-specific routes ─────────────────────────────────────────
+
+  // POST /api/projects/:id/detect-dev-port
+  // Unified dev port detection (Vite + Next.js).
+  app.post('/api/projects/:id/detect-dev-port', async (req, res) => {
+    const projectId = req.params.id;
+    if (!isSafeId(projectId)) {
+      return sendApiError(res, 400, 'BAD_REQUEST', 'invalid project id');
+    }
+
+    const projectDirPath = projectDir(PROJECTS_DIR, projectId);
+
+    try {
+      // First, detect project type to determine which port detection to use
+      const fileMap = await buildFileMap(PROJECTS_DIR, projectId);
+      const filePaths = fileMap.map((f) => f.path);
+      const projectType = detectProjectType(filePaths);
+
+      let devPort: number | null = null;
+      let devServerType: 'vite' | 'nextjs' | 'custom' = 'vite';
+
+      if (projectType === 'nextjs') {
+        // Next.js port detection
+        devServerType = 'nextjs';
+        devPort = await detectNextjsPort(projectDirPath);
+      } else {
+        // Vite / Tauri port detection
+        devPort = await detectVitePort(projectDirPath);
+      }
+
+      // Persist detected port
+      if (devPort !== null) {
+        try {
+          updateProjectVitePort(db as any, projectId, devPort);
+        } catch (err) {
+          console.warn(`[file-edit-routes] failed to persist dev port: ${err}`);
+        }
+      }
+
+      res.json({ devPort, devServerType, projectType });
+    } catch (err: any) {
+      console.error(`[file-edit-routes] detect-dev-port failed: ${err.message}`);
+      return sendApiError(res, 500, 'INTERNAL_ERROR', 'Failed to detect dev port');
+    }
+  });
+
+  // POST /api/projects/:id/prisma/generate
+  // Run `npx prisma generate` after schema edit (Next.js only).
+  app.post('/api/projects/:id/prisma/generate', async (req, res) => {
+    const projectId = req.params.id;
+    if (!isSafeId(projectId)) {
+      return sendApiError(res, 400, 'BAD_REQUEST', 'invalid project id');
+    }
+
+    try {
+      const { execFile } = await import('node:child_process');
+      const { promisify } = await import('node:util');
+      const execAsync = promisify(execFile);
+
+      const projectDirPath = projectDir(PROJECTS_DIR, projectId);
+      const start = Date.now();
+
+      const { stdout, stderr } = await execAsync('npx', ['prisma', 'generate'], {
+        cwd: projectDirPath,
+        timeout: 30000,
+      });
+
+      res.json({
+        success: true,
+        output: stdout || stderr,
+        durationMs: Date.now() - start,
+      });
+    } catch (err: any) {
+      res.json({
+        success: false,
+        output: err.stderr || err.message,
+        durationMs: 0,
+      });
+    }
+  });
+
+  // POST /api/projects/:id/prisma/validate
+  // Validate Prisma schema syntax (Next.js only).
+  app.post('/api/projects/:id/prisma/validate', async (req, res) => {
+    const projectId = req.params.id;
+    if (!isSafeId(projectId)) {
+      return sendApiError(res, 400, 'BAD_REQUEST', 'invalid project id');
+    }
+
+    const body = req.body || {};
+    const schemaContent = body.schemaContent;
+
+    if (typeof schemaContent !== 'string') {
+      return sendApiError(res, 400, 'BAD_REQUEST', 'schemaContent string is required');
+    }
+
+    try {
+      const { execFile } = await import('node:child_process');
+      const { promisify } = await import('node:util');
+      const { writeFile, unlink } = await import('node:fs/promises');
+      const os = await import('node:os');
+      const pathMod = await import('node:path');
+      const execAsync = promisify(execFile);
+
+      const projectDirPath = projectDir(PROJECTS_DIR, projectId);
+      const tmpPath = pathMod.join(os.tmpdir(), `prisma-validate-${Date.now()}.prisma`);
+
+      try {
+        await writeFile(tmpPath, schemaContent, 'utf-8');
+        const { stdout, stderr } = await execAsync(
+          'npx', ['prisma', 'validate', `--schema=${tmpPath}`],
+          { cwd: projectDirPath, timeout: 15000 },
+        );
+
+        res.json({ valid: true, errors: [], warnings: [] });
+      } catch (err: any) {
+        res.json({
+          valid: false,
+          errors: [{ message: err.stderr || err.message || 'Validation failed' }],
+          warnings: [],
+        });
+      } finally {
+        await unlink(tmpPath).catch(() => {});
+      }
+    } catch (err: any) {
+      console.error(`[file-edit-routes] prisma validate failed: ${err.message}`);
+      return sendApiError(res, 500, 'INTERNAL_ERROR', 'Failed to validate Prisma schema');
+    }
+  });
+
+  // POST /api/projects/:id/prisma/migrate
+  // Run `npx prisma db push` (Next.js only, requires user confirmation).
+  app.post('/api/projects/:id/prisma/migrate', async (req, res) => {
+    const projectId = req.params.id;
+    if (!isSafeId(projectId)) {
+      return sendApiError(res, 400, 'BAD_REQUEST', 'invalid project id');
+    }
+
+    try {
+      const { execFile } = await import('node:child_process');
+      const { promisify } = await import('node:util');
+      const execAsync = promisify(execFile);
+
+      const projectDirPath = projectDir(PROJECTS_DIR, projectId);
+      const start = Date.now();
+
+      const { stdout, stderr } = await execAsync(
+        'npx', ['prisma', 'db', 'push', '--accept-data-loss'],
+        { cwd: projectDirPath, timeout: 60000 },
+      );
+
+      res.json({
+        success: true,
+        output: stdout || stderr,
+        warnings: [],
+        durationMs: Date.now() - start,
+      });
+    } catch (err: any) {
+      res.json({
+        success: false,
+        output: err.stderr || err.message,
+        warnings: [],
+        durationMs: 0,
+      });
+    }
+  });
+
+  // POST /api/projects/:id/nextjs/restart
+  // Signal that Next.js dev server needs restart (after middleware/config changes).
+  app.post('/api/projects/:id/nextjs/restart', async (req, res) => {
+    const projectId = req.params.id;
+    if (!isSafeId(projectId)) {
+      return sendApiError(res, 400, 'BAD_REQUEST', 'invalid project id');
+    }
+
+    // We don't actually restart the server — we just acknowledge the request
+    // and return a flag that the frontend can use to show a restart notification.
+    // The user manually restarts their dev server.
+    res.json({
+      restartNeeded: true,
+      message: 'Next.js dev server restart may be required after middleware or config changes. Please restart your dev server manually.',
+    });
   });
 }

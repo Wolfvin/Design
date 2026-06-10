@@ -198,6 +198,118 @@ export async function syncDesignTokensToProject(
   };
 }
 
+
+// ─── Next.js globals.css injection ────────────────────────────────────
+
+/**
+ * Next.js-specific design token sync.
+ *
+ * In addition to writing tokens.css and tailwind-theme.css to
+ * src/styles/, this function also injects an @import for tokens.css
+ * into the project's globals.css (or app/globals.css) so that
+ * design tokens are available throughout the Next.js app without
+ * manual imports.
+ */
+export async function syncDesignTokensToNextjsProject(
+  projectId: string,
+  projectsRoot: string,
+  options: {
+    db: Database.Database;
+    designSystemsDir: string;
+    userDesignSystemsDir: string;
+  },
+): Promise<TokenSyncResult & { globalsUpdated: boolean }> {
+  // 1. Run standard token sync first
+  const result = await syncDesignTokensToProject(projectId, projectsRoot, options);
+
+  // 2. If no update happened, skip globals injection
+  if (!result.wasUpdated) {
+    return { ...result, globalsUpdated: false };
+  }
+
+  // 3. Resolve project directory
+  const project = getProject(options.db, projectId);
+  if (!project) return { ...result, globalsUpdated: false };
+  const metadata = project.metadata ?? undefined;
+  const projectDir = resolveProjectDir(projectsRoot, projectId, metadata);
+
+  // 4. Find globals.css
+  const globalsPath = await findGlobalsCss(projectDir);
+  if (!globalsPath) {
+    return { ...result, globalsUpdated: false };
+  }
+
+  // 5. Inject @import for tokens.css into globals.css
+  let globalsContent = await readFile(globalsPath, 'utf8').catch(() => '');
+  if (!globalsContent) {
+    return { ...result, globalsUpdated: false };
+  }
+
+  // Remove existing OD token import if present
+  globalsContent = globalsContent.replace(
+    /\/\* OD TOKEN_SCHEMA - start \*\/[\s\S]*?\/\* OD TOKEN_SCHEMA - end \*\//g,
+    '',
+  );
+
+  // Build the token import block
+  // Determine relative path from globals.css to tokens.css
+  const globalsDir = path.dirname(globalsPath);
+  const tokensAbs = path.join(projectDir, TOKENS_REL);
+  const relTokensPath = path.relative(globalsDir, tokensAbs).replace(/\\/g, '/');
+  const tokenBlock = `/* OD TOKEN_SCHEMA - start */\n@import '${relTokensPath}';\n/* OD TOKEN_SCHEMA - end */`;
+
+  // Add after @tailwind directives if present
+  if (globalsContent.includes('@tailwind')) {
+    globalsContent = globalsContent.replace(
+      /(@tailwind\s+utilities;)/,
+      `$1\n\n${tokenBlock}`,
+    );
+  } else if (globalsContent.includes('@import')) {
+    // Add after the last @import
+    const lastImportIdx = globalsContent.lastIndexOf('@import');
+    const endOfImport = globalsContent.indexOf(';', lastImportIdx);
+    if (endOfImport !== -1) {
+      globalsContent =
+        globalsContent.slice(0, endOfImport + 1) +
+        '\n\n' + tokenBlock +
+        globalsContent.slice(endOfImport + 1);
+    } else {
+      globalsContent = `${tokenBlock}\n\n${globalsContent}`;
+    }
+  } else {
+    // Prepend
+    globalsContent = `${tokenBlock}\n\n${globalsContent}`;
+  }
+
+  await writeFile(globalsPath, globalsContent, 'utf8');
+
+  return { ...result, globalsUpdated: true };
+}
+
+/**
+ * Find the globals.css file in a Next.js project.
+ * Checks common locations: app/globals.css, src/app/globals.css, styles/globals.css
+ */
+async function findGlobalsCss(projectDir: string): Promise<string | null> {
+  const candidates = [
+    path.join(projectDir, 'app', 'globals.css'),
+    path.join(projectDir, 'src', 'app', 'globals.css'),
+    path.join(projectDir, 'styles', 'globals.css'),
+    path.join(projectDir, 'src', 'styles', 'globals.css'),
+  ];
+
+  for (const candidate of candidates) {
+    try {
+      const s = await stat(candidate);
+      if (s.isFile()) return candidate;
+    } catch {
+      // File doesn't exist, try next
+    }
+  }
+
+  return null;
+}
+
 // ─── Watcher ───────────────────────────────────────────────────────────
 
 /**

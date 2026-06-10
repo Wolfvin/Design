@@ -21,7 +21,9 @@
 export type AppDeveloperProjectKind =
   | 'tauri-react'       // Tauri + React + TypeScript
   | 'tauri-vue'         // Tauri + Vue + TypeScript
-  | 'nextjs'            // Next.js (React SSR)
+  | 'nextjs-standalone' // Next.js App Router (React SSR, output: standalone)
+  | 'nextjs-pages'      // Next.js Pages Router (React SSR)
+  | 'nextjs'            // Next.js (generic, before sub-type detection)
   | 'vite-react'        // Vite + React
   | 'vite-vue'          // Vite + Vue
   | 'astro'             // Astro static site
@@ -87,6 +89,10 @@ export interface ProjectTypeDetectionResult {
   techStack: TechStackInfo;
   /** Vite dev server port, if applicable */
   vitePort?: number;
+  /** Unified dev server port (Vite: 5173, Next.js: 3000) */
+  devPort?: number;
+  /** Dev server type for preview mechanism selection */
+  devServerType?: 'vite' | 'nextjs' | 'custom';
   /** How confident the detection is */
   confidence: 'high' | 'medium' | 'low';
 }
@@ -166,4 +172,23 @@ export interface FileEditRecord {
   lineCount?: number;
   /** SHA-256 hash of the file content after edit */
   contentHash?: string;
+}
+
+// ---------------------------------------------------------------------------
+// Stack compatibility
+// ---------------------------------------------------------------------------
+
+/**
+ * Stack compatibility info for skills.
+ *
+ * Skills can declare which project types they are compatible with.
+ * The UI filters skills based on this information.
+ */
+export interface StackCompatibilityInfo {
+  /** Which project types this skill works with. Empty = all types. */
+  stackCompat?: AppDeveloperProjectKind[];
+  /** Whether this skill is only for Next.js projects. */
+  nextjsOnly?: boolean;
+  /** Whether this skill is only for Tauri projects. */
+  tauriOnly?: boolean;
 }
