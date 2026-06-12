@@ -1,0 +1,117 @@
+/**
+ * `od design status` — Show current design system state
+ *
+ * Displays:
+ * - Current DS source and hash
+ * - Strategy in use
+ * - Token/component counts
+ * - Extensions (overrides and adds)
+ * - Rollback availability
+ * - Last update time
+ */
+
+import { Command } from 'commander';
+import { resolve, join } from 'node:path';
+import { log } from '../utils/logger.js';
+import { fileExists, dirExists, readJsonFile } from '../utils/fs-utils.js';
+import { hashDesignDirectory } from '../core/hash.js';
+
+export function statusCommand(): Command {
+  const cmd = new Command('status');
+
+  cmd
+    .description('Show current design system state')
+    .option('--project <path>', 'Target project path', process.cwd())
+    .option('--json', 'Output as JSON', false)
+    .action(async (options) => {
+      const projectPath = resolve(options.project);
+      const designDir = join(projectPath, 'design');
+
+      if (!(await dirExists(designDir))) {
+        if (options.json) {
+          console.log(JSON.stringify({ initialized: false }, null, 2));
+        } else {
+          log.warn('No design/ directory found. Run "od design init" to get started.');
+        }
+        return;
+      }
+
+      const manifestPath = join(designDir, 'manifest.json');
+      if (!(await fileExists(manifestPath))) {
+        if (options.json) {
+          console.log(JSON.stringify({ initialized: true, hasManifest: false }, null, 2));
+        } else {
+          log.warn('design/ exists but no manifest.json found. Run "od design init" to fix.');
+        }
+        return;
+      }
+
+      const manifest = await readJsonFile<any>(manifestPath);
+      const contractPath = join(designDir, 'contract.json');
+      const contract = await fileExists(contractPath) ? await readJsonFile<any>(contractPath) : null;
+
+      const currentHash = await hashDesignDirectory(designDir);
+
+      const status = {
+        initialized: true,
+        source: manifest.source?.designSystem || 'unknown',
+        repoHash: manifest.source?.repoHash || 'unknown',
+        currentHash,
+        strategy: manifest.cssStrategy || 'unknown',
+        stack: manifest.stack || 'unknown',
+        generatedAt: manifest.source?.generatedAt || 'unknown',
+        tokens: contract ? Object.values(contract.tokens).flat().length : 0,
+        components: contract?.components?.length || 0,
+        extensions: (manifest.extensions || []).length,
+        overrides: (manifest.extensions || []).filter((e: any) => e.type === 'override').length,
+        additions: (manifest.extensions || []).filter((e: any) => e.type === 'add').length,
+        rollbackAvailable: !!manifest.rollback?.lastStableHash,
+        rollbackHash: manifest.rollback?.lastStableHash || null,
+        rollbackHistoryCount: manifest.rollback?.history?.length || 0,
+      };
+
+      if (options.json) {
+        console.log(JSON.stringify(status, null, 2));
+        return;
+      }
+
+      log.heading('Design System Status');
+      console.log('');
+      console.log(`  Source:         \x1b[1m${status.source}\x1b[0m`);
+      console.log(`  Stack:          ${status.stack}`);
+      console.log(`  Strategy:       ${status.strategy}`);
+      console.log(`  Repo Hash:      ${status.repoHash}`);
+      console.log(`  Current Hash:   ${status.currentHash}`);
+      console.log(`  Generated:      ${status.generatedAt}`);
+      console.log('');
+      console.log(`  \x1b[1mContents\x1b[0m`);
+      console.log(`  Tokens:         ${status.tokens}`);
+      console.log(`  Components:     ${status.components}`);
+      console.log('');
+
+      if (status.extensions > 0) {
+        console.log(`  \x1b[1mExtensions\x1b[0m`);
+        console.log(`  Overrides:      ${status.overrides}`);
+        console.log(`  Additions:      ${status.additions}`);
+
+        // List extensions
+        for (const ext of manifest.extensions || []) {
+          const icon = ext.type === 'override' ? '\x1b[33m✎\x1b[0m' : '\x1b[32m+\x1b[0m';
+          console.log(`    ${icon} ${ext.file} (${ext.type}, by ${ext.addedBy || 'unknown'})`);
+        }
+        console.log('');
+      }
+
+      console.log(`  \x1b[1mRollback\x1b[0m`);
+      if (status.rollbackAvailable) {
+        console.log(`  Available:      \x1b[32mYes\x1b[0m`);
+        console.log(`  Last Stable:    ${status.rollbackHash}`);
+        console.log(`  History:        ${status.rollbackHistoryCount} snapshot(s)`);
+      } else {
+        console.log(`  Available:      \x1b[33mNo\x1b[0m (run "od design update" to create a rollback point)`);
+      }
+      console.log('');
+    });
+
+  return cmd;
+}

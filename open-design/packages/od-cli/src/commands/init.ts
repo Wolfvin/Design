@@ -9,6 +9,7 @@ import { fileExists, dirExists, readJsonFile, readTextFile, writeIfChanged, dete
 import { extractTokens, writeTokenFiles } from '../core/token-extractor.js';
 import { extractComponents, writeComponentFiles } from '../core/component-forge.js';
 import { generateManifest, generateContract, generateExecutionPlan, generateIndexCss, generateTailwindCss } from '../core/generators.js';
+import { generateCssModulesFiles, generateJsTokensFiles } from '../core/strategies.js';
 
 export function initCommand(): Command {
   const cmd = new Command('init');
@@ -17,7 +18,7 @@ export function initCommand(): Command {
     .description('Initialize design/ from a source design system')
     .requiredOption('--from <name>', 'Source design system name (e.g., apple, brutalism, supabase)')
     .option('--project <path>', 'Target project path', process.cwd())
-    .option('--strategy <type>', 'CSS strategy: custom-properties | tailwind-theme | js-tokens', '')
+    .option('--strategy <type>', 'CSS strategy: custom-properties | tailwind-theme | css-modules | js-tokens', '')
     .option('--force', 'Overwrite existing design/ directory', false)
     .action(async (options) => {
       const projectPath = resolve(options.project);
@@ -102,6 +103,7 @@ export function initCommand(): Command {
         const strategyMap: Record<string, string> = {
           'custom-properties': 'custom-properties',
           'tailwind-theme': 'tailwind-theme',
+          'css-modules': 'css-modules',
           'js-tokens': 'js-tokens',
         };
         const override = strategyMap[options.strategy];
@@ -179,12 +181,25 @@ export function initCommand(): Command {
         log.success('tailwind.css generated');
       }
 
+      if (stack.cssStrategy === 'css-modules') {
+        const moduleFiles = await generateCssModulesFiles(designDir, dsName, tokenExtraction, componentExtraction, manifest);
+        log.success(`CSS Modules: ${moduleFiles.length} files generated`);
+      }
+
+      if (stack.cssStrategy === 'js-tokens') {
+        const jsFiles = await generateJsTokensFiles(designDir, dsName, tokenExtraction);
+        log.success(`JS Tokens: ${jsFiles.length} files generated`);
+      }
+
       // ── Step 9: Update project CSS ─────────────────────────────
       log.step(8, 8, 'Updating project imports...');
 
       if (stack.cssEntry) {
         const cssEntryPath = join(projectPath, stack.cssEntry);
-        const importLine = `@import "../design/${stack.cssStrategy === 'tailwind-theme' ? 'tailwind.css' : 'index.css'}";`;
+        const entryFile = stack.cssStrategy === 'tailwind-theme' ? 'tailwind.css'
+          : stack.cssStrategy === 'css-modules' ? 'modules.css'
+          : 'index.css';
+        const importLine = `@import "../design/${entryFile}";`;
 
         try {
           const existing = await readTextFile(cssEntryPath);
