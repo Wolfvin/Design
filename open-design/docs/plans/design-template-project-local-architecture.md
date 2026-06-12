@@ -1,7 +1,7 @@
 # Design System: Project-Local Architecture
 
 **Date**: 2026-06-13 (v2 — revised with consumer feedback)
-**Status**: Phase 0-3 COMPLETE — Runtime working. Phase 4-5 specified.
+**Status**: Phase 0-5 COMPLETE — All phases have runtime.
 **Author**: Wolfvin + Open Design Agent
 **Consumer Review**: Agent self-assessment as primary consumer (7/10 → revised)
 
@@ -1088,26 +1088,36 @@ Steps 1-6 are idempotent → they'll just skip. Step 7+ will execute fresh.
 
 ---
 
-## 8. Multi-Vibe Composition (P2 — Deferred)
+## 8. Multi-Vibe Composition (P2 — COMPLETE)
 
-> **Consumer feedback**: Cool but premature. Solve single DS first.
-> Composition adds complexity without solving the primary problem.
-> Move to P2.
+> **Updated**: Now implemented as `od design compose` command.
+> Composition works via layer-based extraction with last-wins-per-layer conflict resolution.
+> Cross-layer is orthogonal (no conflict).
 
-Composition schema preserved for future reference:
+Composition schema in manifest.json:
 
 ```jsonc
-// In manifest.json (future)
+// In manifest.json
 {
   "composition": [
-    { "source": "apple", "layers": ["tokens", "layout"] },
-    { "source": "brutalism", "layers": ["components"] },
-    { "source": "creative-motion", "layers": ["motion"] }
+    { "source": "apple", "layers": ["tokens", "layout"], "hash": "38af9eb", "repoHash": "e3b0c44" },
+    { "source": "brutalism", "layers": ["components"], "hash": "6319d7a", "repoHash": "e3b0c44" },
+    { "source": "creative", "layers": ["motion"], "hash": "22c9784", "repoHash": "e3b0c44" }
   ]
 }
 ```
 
-Conflict resolution: last-wins-per-layer. Cross-layer is orthogonal (no conflict).
+Usage:
+```bash
+od design compose --sources apple:tokens,layout brutalism:components creative:motion --force
+```
+
+CSS files get per-layer source attribution:
+```css
+/* Token Category: Colors | Source: design-systems/apple */
+/* Component: buttons | Source: design-systems/brutalism */
+/* Token Category: Motion Transitions | Source: design-systems/creative */
+```
 
 ---
 
@@ -1263,11 +1273,11 @@ Rollback is always available.
 - Switching DS re-renders preview without writing files
 - Accept triggers full generation + integration
 
-### Phase 4: Multi-Vibe Composition (P2) — SPECIFIED
+### Phase 4: Multi-Vibe Composition (P2) — COMPLETE
 
 **Goal**: Compose design/ from multiple DS sources.
 
-**Status**: Composition schema, layer-based extraction, conflict resolution, and composition update flow documented in design-sync/SKILL.md.
+**Status**: Full runtime — `od design compose` CLI command, composition schema in manifest.json, layer-based extraction, conflict resolution (last-wins-per-layer), per-layer source attribution in CSS headers, web UI Multi-Vibe Composer tab.
 
 | Step | Task | Deliverable |
 |------|------|-------------|
@@ -1282,11 +1292,11 @@ Rollback is always available.
 - contract.json reflects merged conventions
 - index.css generated from all layers
 
-### Phase 5: CLI Interface (P3) — SPECIFIED
+### Phase 5: CLI Interface (P3) — COMPLETE
 
 **Goal**: CLI commands for design/ management without agent.
 
-**Status**: All 7 commands specified in design-sync/SKILL.md — init, update, add component, switch, diff, sources, rollback. CLI vs agent parity defined.
+**Status**: All 9 commands implemented and tested — init, update, add component, switch, diff, sources, rollback, status, compose.
 
 | Step | Task | Deliverable |
 |------|------|-------------|
