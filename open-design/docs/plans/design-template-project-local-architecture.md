@@ -1,7 +1,7 @@
 # Design System: Project-Local Architecture
 
 **Date**: 2026-06-13 (v2 — revised with consumer feedback)
-**Status**: Phase 0-2 COMPLETE — Skills created and enhanced. Phase 3-5 specified.
+**Status**: Phase 0-3 COMPLETE — Runtime working. Phase 4-5 specified.
 **Author**: Wolfvin + Open Design Agent
 **Consumer Review**: Agent self-assessment as primary consumer (7/10 → revised)
 
@@ -1245,11 +1245,11 @@ Rollback is always available.
 - CSS Modules projects get hybrid global+scoped approach
 - Strategy stored in manifest.json, reflected in contract.json
 
-### Phase 3: Render → Accept Flow (P2) — SPECIFIED
+### Phase 3: Render → Accept Flow (P2) — COMPLETE
 
 **Goal**: Frontend renders design system preview before applying to project.
 
-**Status**: Full flow documented in design-sync/SKILL.md — preview rendering contract, switching behavior, accept trigger, execution flow.
+**Status**: Full web app built with Next.js 16 — DS picker, token preview (colors/spacing/typography/shadows/motion/layout), component iframe, and Apply dialog that triggers od-cli. All 150 DS packages load and render correctly.
 
 | Step | Task | Deliverable |
 |------|------|-------------|
