@@ -12,6 +12,10 @@ od:
   category: video-generation
   upstream: "https://github.com/fal-ai-community/skills"
   stackCompatibility: both
+skill-tree:
+  type: leaf
+  parent: twig-ai-video
+
 ---
 
 # fal-kling-o3

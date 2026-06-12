@@ -12,6 +12,10 @@ od:
   category: video-generation
   upstream: "https://github.com/op7418/Youtube-clipper-skill"
   stackCompatibility: both
+skill-tree:
+  type: leaf
+  parent: twig-video-tools
+
 ---
 
 # youtube-clipper

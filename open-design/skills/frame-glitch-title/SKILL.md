@@ -35,6 +35,10 @@ od:
   example_prompt_i18n:
     zh-CN: "用「故障艺术标题帧」模板把我的内容做成一段「数字故障 / 像散偏移 / 数据腐败标题, 适合视频转场 / cyberpunk hero」。保持模板的视觉签名，使用真实内容和数据，避免 lorem ipsum 和占位图片。"
   stackCompatibility: both
+skill-tree:
+  type: leaf
+  parent: twig-frames
+
 ---
 
 【模板: 故障艺术标题帧 (Glitch Title)】

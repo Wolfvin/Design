@@ -43,6 +43,10 @@ od:
       lorem ipsum 和占位图片。
   outputFormat: artifact
   stackCompatibility: both
+skill-tree:
+  type: leaf
+  parent: twig-slides
+
 ---
 
 

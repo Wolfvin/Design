@@ -35,6 +35,10 @@ od:
     direction closely.'
   outputFormat: file-edit
   stackCompatibility: both
+skill-tree:
+  type: leaf
+  parent: twig-component
+
 ---
 
 

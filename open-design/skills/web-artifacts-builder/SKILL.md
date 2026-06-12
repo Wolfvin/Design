@@ -15,6 +15,10 @@ od:
   upstream: https://github.com/anthropics/skills/tree/main/skills/web-artifacts-builder
   outputFormat: file-edit
   stackCompatibility: both
+skill-tree:
+  type: leaf
+  parent: twig-component
+
 ---
 
 

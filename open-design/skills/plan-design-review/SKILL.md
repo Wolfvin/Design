@@ -12,6 +12,10 @@ od:
   category: creative-direction
   upstream: "https://github.com/garrytan/gstack"
   stackCompatibility: both
+skill-tree:
+  type: leaf
+  parent: twig-creative-direction
+
 ---
 
 # plan-design-review

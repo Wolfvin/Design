@@ -12,6 +12,10 @@ od:
   category: marketing-creative
   upstream: "https://github.com/ComposioHQ/awesome-claude-skills/tree/master/competitive-ads-extractor"
   stackCompatibility: both
+skill-tree:
+  type: leaf
+  parent: twig-poster
+
 ---
 
 # competitive-ads-extractor

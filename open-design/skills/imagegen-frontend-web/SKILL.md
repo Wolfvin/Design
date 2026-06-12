@@ -26,6 +26,10 @@ od:
   example_prompt: |
     Generate separate premium website reference images for each landing-page section, keeping one coherent palette and varied composition.
   stackCompatibility: both
+skill-tree:
+  type: leaf
+  parent: twig-imagegen
+
 ---
 
 

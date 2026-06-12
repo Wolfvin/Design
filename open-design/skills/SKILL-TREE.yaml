@@ -1,0 +1,555 @@
+# ═══════════════════════════════════════════════════════════════
+# SKILL-TREE — Navigasi lengkap skill dalam satu bacaan
+# ═══════════════════════════════════════════════════════════════
+#
+# Cara pakai (AI):
+#   1. Baca file ini → pilih branch yang paling relevan
+#   2. Cari twig yang sesuai → lihat daun-daunnya
+#   3. Langsung baca SKILL.md skill yang dibutuhkan
+#   4. Tidak perlu baca semua — stop kapanpun sudah confident
+#
+# Konvensi:
+#   - Setiap skill existing punya frontmatter skill-tree: {type: leaf, parent: twig-xxx}
+#   - Skill yang cocok di lebih dari 1 twig punya also-matches
+#   - Tidak ada folder navigasi — pohon ini sepenuhnya logis, bukan fisik
+#
+# ═══════════════════════════════════════════════════════════════
+
+motion:
+  description: "Animasi, GSAP, motion design, interaksi, 3D, shader"
+  twigs:
+
+    motion-principles:
+      description: "Kapan & bagaimana animasi — taste, polish, prinsip gerak"
+      leaves:
+        - name: taste-skill
+          note: "Visual taste & judgment"
+        - name: impeccable-design-polish
+          note: "Polish & finishing detail"
+        - name: emilkowalski-motion
+          note: "Motion design prinsip by Emil Kowalski"
+        - name: algorithmic-art
+          note: "Generative & algorithmic animation"
+        - name: d3-visualization
+          note: "D3.js charts & interactive data visualization"
+
+    gsap:
+      description: "GSAP library — dari core sampai framework integration"
+      leaves:
+        - name: gsap-core
+          note: "Core API: to(), from(), fromTo(), easing, stagger"
+        - name: gsap-timeline
+          note: "Timeline sequencing & orchestration"
+        - name: gsap-scrolltrigger
+          note: "Scroll-linked animation"
+        - name: gsap-plugins
+          note: "Flip, Draggable, MorphSVG, dll"
+        - name: gsap-react
+          note: "GSAP in React with useGSAP"
+        - name: gsap-utils
+          note: "clamp, mapRange, random, distribute"
+        - name: gsap-performance
+          note: "Performa & optimasi animasi"
+        - name: gsap-frameworks
+          note: "Vue, Svelte, Angular integration"
+
+    css-animation:
+      description: "Animasi framework-based, canvas, & remotion"
+      leaves:
+        - name: flutter-animating-apps
+          note: "Animasi di Flutter"
+        - name: remotion
+          note: "React-based video & animation"
+          also-matches: [twig-video-tools]
+        - name: canvas-design
+          note: "Canvas-based visual & animasi"
+
+    3d-motion:
+      description: "WebGL, shader, Three.js, 3D interaksi"
+      leaves:
+        - name: shader-dev
+          note: "GLSL & shader programming"
+        - name: threejs
+          note: "Three.js 3D scenes & interaction"
+        - name: fal-3d
+          note: "3D generation via fal.ai"
+        - name: web-shader-extractor
+          note: "Extract shaders from websites"
+          also-matches: [twig-component]
+
+# ───────────────────────────────────────────────────────────────
+
+visual:
+  description: "UI design, branding, creative direction, design system"
+  twigs:
+
+    creative-direction:
+      description: "Konsep, vibe, review, brainstorming, creative strategy"
+      leaves:
+        - name: creative-director
+          note: "AI creative director — 20+ metodologi"
+        - name: creative-motion
+          note: "Unified creative + animation — vibe, visual, choreography"
+          also-matches: [twig-motion-principles]
+        - name: design-consultation
+          note: "Konsultasi design & feedback"
+        - name: design-brief
+          note: "Brief & requirement gathering"
+        - name: brainstorming
+          note: "Ideation & brainstorming"
+        - name: brutalist-skill
+          note: "Brutalist design aesthetic"
+        - name: design-review
+          note: "Design review & critique"
+        - name: enhance-prompt
+          note: "Prompt enhancement untuk design"
+        - name: minimalist-skill
+          note: "Minimalist design aesthetic"
+        - name: redesign-skill
+          note: "Redesign & iteration"
+        - name: soft-skill
+          note: "Soft/organik design aesthetic"
+        - name: style-refactor
+          note: "Style refactoring & cleanup"
+        - name: gpt-tasteskill
+          note: "Taste judgment (GPT variant)"
+        - name: taste-skill-v1
+          note: "Taste judgment v1"
+        - name: reference-design-contract
+          note: "Design reference & contract"
+        - name: plan-design-review
+          note: "Design review planning"
+        - name: domain-name-brainstormer
+          note: "Domain name ideation"
+        - name: research-decision-room
+          note: "Research-based design decisions"
+
+    brand-identity:
+      description: "Brand system, warna, tema, guidelines"
+      leaves:
+        - name: brandkit
+          note: "Brand kit creation"
+        - name: brand-guidelines
+          note: "Brand guidelines generator"
+        - name: color-expert
+          note: "Color theory & palette"
+        - name: theme-factory
+          note: "Theme & design token generation"
+
+    ui-design:
+      description: "Frontend UI, platform design, mockup, screenshot"
+      leaves:
+        - name: frontend-design
+          note: "Frontend design & layout"
+        - name: frontend-dev
+          note: "Frontend development"
+        - name: ui-skills
+          note: "General UI skill set"
+        - name: ui-ux-pro-max
+          note: "Advanced UI/UX"
+        - name: shadcn-ui
+          note: "shadcn/ui components"
+          also-matches: [twig-component]
+        - name: apple-hig
+          note: "Apple Human Interface Guidelines"
+        - name: platform-design
+          note: "Cross-platform design"
+        - name: swiftui-design
+          note: "SwiftUI design patterns"
+        - name: web-design-guidelines
+          note: "Web design best practices"
+        - name: mockup-device-3d
+          note: "3D device mockup"
+        - name: screenshots-marketing
+          note: "App store screenshots"
+        - name: hatch-pet
+          note: "Pet character & illustration"
+        - name: hand-drawn-diagrams
+          note: "Hand-drawn style diagrams"
+
+    design-system:
+      description: "Design system & component library"
+      leaves:
+        - name: design-sync
+          note: "MASTER: Generate/update project-local design/ from repo DS"
+          also-matches: [twig-ui-design]
+        - name: token-extractor
+          note: "Split tokens.css into categorized CSS files"
+          also-matches: [twig-brand-identity]
+        - name: component-forge
+          note: "Extract component CSS from DS + generate contract registry"
+          also-matches: [twig-ui-design]
+        - name: figma-create-design-system-rules
+          note: "Figma design system rules"
+        - name: figma-generate-library
+          note: "Figma library generation"
+        - name: wpds
+          note: "WPDS design system"
+        - name: the-designer
+          note: "AI design system — DNA visual management"
+        - name: visual-design-foundations
+          note: "Visual design principles & foundations"
+        - name: fecttral-cyberpunk-ui
+          note: "Cyberpunk/sci-fi UI design system (FectTral)"
+          also-matches: [twig-ui-design]
+        - name: design-library-curator
+          note: "Curate design elements from websites"
+        - name: design-library-generator
+          note: "Generate design library entries"
+        - name: design-library-reviewer
+          note: "Review design library quality"
+        - name: design-library-selector
+          note: "Select designs from library"
+        - name: design-library-tagger
+          note: "Tag & categorize design library entries"
+
+# ───────────────────────────────────────────────────────────────
+
+image:
+  description: "AI image generation, edit, upscale, workflow"
+  twigs:
+
+    fal:
+      description: "fal.ai — generate, edit, vision, restore, upscale, train"
+      leaves:
+        - name: fal-generate
+          note: "Generate images via fal.ai (Flux, SDXL, dll)"
+        - name: fal-image-edit
+          note: "Edit images via fal.ai"
+        - name: fal-vision
+          note: "Image analysis & vision via fal.ai"
+        - name: fal-restore
+          note: "Image restoration via fal.ai"
+        - name: fal-upscale
+          note: "Image upscaling via fal.ai"
+        - name: fal-train
+          note: "Train custom models via fal.ai"
+        - name: fal-tryon
+          note: "Virtual try-on via fal.ai"
+        - name: fal-realtime
+          note: "Realtime generation via fal.ai"
+
+    venice-image:
+      description: "Venice AI — image generate & edit"
+      leaves:
+        - name: venice-image-generate
+          note: "Generate images via Venice AI"
+        - name: venice-image-edit
+          note: "Edit images via Venice AI"
+
+    imagegen:
+      description: "Image generation — general, web, mobile, specialized"
+      leaves:
+        - name: imagegen
+          note: "General image generation"
+        - name: imagegen-frontend-web
+          note: "Image gen untuk web frontend"
+        - name: imagegen-frontend-mobile
+          note: "Image gen untuk mobile frontend"
+        - name: imagen
+          note: "Google Imagen"
+        - name: replicate
+          note: "Replicate model hub"
+
+    image-workflow:
+      description: "Image workflow — ecommerce, enhance, media management"
+      leaves:
+        - name: ecommerce-image-workflow
+          note: "Ecommerce image pipeline"
+        - name: image-enhancer
+          note: "Image enhancement & quality"
+        - name: pixelbin-media
+          note: "Pixelbin media management"
+
+# ───────────────────────────────────────────────────────────────
+
+docs:
+  description: "Dokumen, PDF, PPTX, slides, artikel, resume"
+  twigs:
+
+    word-docs:
+      description: "Word document creation & editing"
+      leaves:
+        - name: docx
+          note: "Create/edit Word documents"
+        - name: minimax-docx
+          note: "Word docs via MiniMax"
+        - name: doc
+          note: "General document creation"
+        - name: doc-kami-parchment
+          note: "Kami parchment document style"
+
+    pdf:
+      description: "PDF creation & manipulation"
+      leaves:
+        - name: pdf
+          note: "Create/edit PDF"
+        - name: minimax-pdf
+          note: "PDF via MiniMax"
+
+    slides:
+      description: "Presentasi, PPTX, deck, keynote"
+      leaves:
+        - name: pptx
+          note: "PowerPoint creation"
+        - name: pptx-generator
+          note: "PPTX generator"
+        - name: pptx-html-fidelity-audit
+          note: "HTML→PPTX fidelity audit"
+        - name: slides
+          note: "General slide creation"
+        - name: frontend-slides
+          note: "Frontend-based slides"
+        - name: nanobanana-ppt
+          note: "Nanobanana presentation"
+        - name: ppt-keynote
+          note: "Keynote-style presentation"
+        - name: deck-guizang-editorial
+          note: "Guizang editorial deck"
+        - name: deck-open-slide-canvas
+          note: "Open slide canvas deck"
+        - name: deck-swiss-international
+          note: "Swiss International style deck"
+        - name: html-ppt-retro-quarterly-review
+          note: "Retro quarterly review deck"
+        - name: digits-fintech-swiss-template
+          note: "Fintech Swiss template deck"
+        - name: swiss-creative-mode-template
+          note: "Swiss creative mode deck"
+
+    web-docs:
+      description: "Artikel, magazine, resume, report, editorial"
+      leaves:
+        - name: data-report
+          note: "Data report & visualization"
+        - name: article-magazine
+          note: "Article & magazine layout"
+        - name: resume-modern
+          note: "Modern resume/CV"
+        - name: design-md
+          note: "Design documentation in Markdown"
+        - name: after-hours-editorial-template
+          note: "After-hours editorial template"
+        - name: editorial-burgundy-principles-template
+          note: "Burgundy editorial template"
+        - name: field-notes-editorial-template
+          note: "Field notes editorial template"
+        - name: release-notes-one-pager
+          note: "Release notes one-pager"
+
+# ───────────────────────────────────────────────────────────────
+
+social:
+  description: "Social media cards, poster, GIF, frame, marketing"
+  twigs:
+
+    cards:
+      description: "Social media card — Twitter, XHS, Reddit, Spotify"
+      leaves:
+        - name: card-twitter
+          note: "Twitter/X share card"
+        - name: card-xiaohongshu
+          note: "Xiaohongshu (RED) card"
+        - name: social-x-post-card
+          note: "X platform post card"
+        - name: social-reddit-card
+          note: "Reddit post card"
+        - name: social-spotify-card
+          note: "Spotify-style card"
+
+    frames:
+      description: "Frame & VFX — glitch, liquid, cinema, chart, cursor"
+      leaves:
+        - name: frame-glitch-title
+          note: "Glitch title frame"
+        - name: frame-liquid-bg-hero
+          note: "Liquid background hero frame"
+        - name: frame-light-leak-cinema
+          note: "Light leak cinema frame"
+        - name: frame-logo-outro
+          note: "Logo outro frame"
+        - name: frame-macos-notification
+          note: "macOS notification frame"
+        - name: frame-data-chart-nyt
+          note: "NYT-style data chart frame"
+        - name: frame-flowchart-sticky
+          note: "Flowchart sticky frame"
+        - name: vfx-text-cursor
+          note: "Text cursor VFX"
+
+    poster:
+      description: "Poster, ad creative, copywriting, marketing"
+      leaves:
+        - name: poster-hero
+          note: "Hero poster design"
+        - name: ad-creative
+          note: "Ad creative design"
+        - name: copywriting
+          note: "Copywriting for design"
+        - name: marketing-psychology
+          note: "Marketing psychology principles"
+        - name: competitive-ads-extractor
+          note: "Competitive ads analysis"
+        - name: paywall-upgrade-cro
+          note: "Paywall & CRO optimization"
+
+    gif-sticker:
+      description: "GIF & sticker creation"
+      leaves:
+        - name: gif-sticker-maker
+          note: "GIF sticker maker"
+        - name: slack-gif-creator
+          note: "Slack custom GIF creator"
+
+# ───────────────────────────────────────────────────────────────
+
+dev:
+  description: "Next.js, Figma, komponen, backend, tooling"
+  twigs:
+
+    nextjs:
+      description: "Next.js App Router — page, API, middleware, auth"
+      leaves:
+        - name: nextjs-page-builder
+          note: "Page & layout builder"
+        - name: nextjs-api-route
+          note: "API route creation"
+        - name: nextjs-middleware
+          note: "Middleware & edge functions"
+        - name: nextjs-prisma
+          note: "Prisma + Next.js integration"
+        - name: nextauth-setup
+          note: "NextAuth.js setup"
+        - name: faq-page
+          note: "FAQ page builder"
+        - name: login-flow
+          note: "Login & auth flow"
+
+    figma:
+      description: "Figma — use, create, generate, implement, connect"
+      leaves:
+        - name: figma-use
+          note: "Figma usage & navigation"
+        - name: figma-create-new-file
+          note: "Create new Figma file"
+        - name: figma-generate-design
+          note: "Generate design in Figma"
+        - name: figma-implement-design
+          note: "Implement Figma design to code"
+        - name: figma-code-connect-components
+          note: "Code connect for Figma components"
+
+    component:
+      description: "Component builder, UI library, state, artifact"
+      leaves:
+        - name: component-builder
+          note: "Component builder"
+        - name: shadcn-ui
+          note: "shadcn/ui components"
+          also-matches: [twig-ui-design]
+        - name: state-management
+          note: "State management patterns"
+        - name: tauri-bridge
+          note: "Tauri bridge & native"
+        - name: app-developer
+          note: "Full app development"
+        - name: artifacts-builder
+          note: "Build artifacts & output"
+        - name: image-to-code-skill
+          note: "Image to code conversion"
+        - name: output-skill
+          note: "Output & export management"
+        - name: stitch-loop
+          note: "Stitch loop pattern"
+        - name: stitch-skill
+          note: "Stitch pattern skill"
+        - name: web-artifacts-builder
+          note: "Web artifacts builder"
+        - name: screenshot
+          note: "Screenshot capture & processing"
+        - name: full-page-screenshot
+          note: "Full page screenshot"
+        - name: frontend-skill
+          note: "General frontend skill"
+
+    backend:
+      description: "API, database, testing, browser automation"
+      leaves:
+        - name: api-integration
+          note: "API integration patterns"
+        - name: prisma-schema
+          note: "Prisma schema design"
+        - name: test-writer
+          note: "Test writing & coverage"
+        - name: agent-browser
+          note: "Browser automation agent"
+        - name: export-download-debugging
+          note: "Export & download debugging"
+        - name: pr-feedback-quality-gate
+          note: "PR feedback & quality gate"
+        - name: page-creator
+          note: "Page creation utility"
+
+# ───────────────────────────────────────────────────────────────
+
+video:
+  description: "Video AI, audio, lip sync, video tools"
+  twigs:
+
+    ai-video:
+      description: "AI video generation — Sora, Kling, Venice, Hyperframes"
+      leaves:
+        - name: sora
+          note: "OpenAI Sora video generation"
+        - name: fal-kling-o3
+          note: "Kling video via fal.ai"
+        - name: fal-video-edit
+          note: "Video editing via fal.ai"
+        - name: venice-video
+          note: "Venice AI video generation"
+        - name: video-hyperframes
+          note: "Hyperframes video templates"
+        - name: 8-bit-orbit-video-template
+          note: "8-bit orbit video template"
+        - name: swiss-user-research-video-template
+          note: "Swiss user research video"
+        - name: weread-year-in-review-video-template
+          note: "WeRead year in review video"
+        - name: storyboard-manager
+          note: "Manage video storyboard & scenes"
+
+    audio:
+      description: "Audio — speech, music, voice"
+      leaves:
+        - name: speech
+          note: "Text-to-speech & voice"
+        - name: venice-audio-music
+          note: "Music generation via Venice AI"
+        - name: venice-audio-speech
+          note: "Speech generation via Venice AI"
+        - name: ai-music-album
+          note: "AI music album creation"
+
+    video-tools:
+      description: "Video download, clip, remotion"
+      leaves:
+        - name: video-downloader
+          note: "Video download tool"
+        - name: youtube-clipper
+          note: "YouTube clip extraction"
+        - name: remotion
+          note: "React-based video creation"
+          also-matches: [twig-css-animation]
+
+    lip-sync:
+      description: "Lip sync video"
+      leaves:
+        - name: fal-lip-sync
+          note: "Lip sync via fal.ai"
+
+    charts:
+      description: "Chart, diagram, dashboard, data visualization"
+      leaves:
+        - name: charts
+          note: "Professional chart & diagram creation"
+          also-matches: [twig-motion-principles]

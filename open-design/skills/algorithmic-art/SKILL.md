@@ -14,6 +14,10 @@ od:
   category: image-generation
   upstream: "https://github.com/anthropics/skills/tree/main/skills/algorithmic-art"
   stackCompatibility: both
+skill-tree:
+  type: leaf
+  parent: twig-motion-principles
+
 ---
 
 # algorithmic-art

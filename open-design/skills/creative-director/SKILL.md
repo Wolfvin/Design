@@ -13,6 +13,10 @@ od:
   category: creative-direction
   upstream: "https://github.com/smixs/creative-director-skill"
   stackCompatibility: both
+skill-tree:
+  type: leaf
+  parent: twig-creative-direction
+
 ---
 
 # creative-director

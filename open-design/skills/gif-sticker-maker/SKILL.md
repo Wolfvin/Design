@@ -13,6 +13,10 @@ od:
   category: image-generation
   upstream: "https://github.com/MiniMax-AI/skills"
   stackCompatibility: both
+skill-tree:
+  type: leaf
+  parent: twig-gif-sticker
+
 ---
 
 # gif-sticker-maker

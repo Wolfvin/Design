@@ -12,6 +12,10 @@ od:
   category: image-generation
   upstream: "https://github.com/anthropics/skills/tree/main/skills/slack-gif-creator"
   stackCompatibility: both
+skill-tree:
+  type: leaf
+  parent: twig-gif-sticker
+
 ---
 
 # slack-gif-creator

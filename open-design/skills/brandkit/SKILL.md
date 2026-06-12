@@ -25,6 +25,10 @@ od:
   example_prompt: |
     Create a premium brand-kit overview image for this product: logo direction, palette, typography, applications, and a coherent visual world.
   stackCompatibility: both
+skill-tree:
+  type: leaf
+  parent: twig-brand-identity
+
 ---
 
 

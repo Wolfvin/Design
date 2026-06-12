@@ -43,6 +43,10 @@ od:
   capabilities_required:
     - file_write
   stackCompatibility: both
+skill-tree:
+  type: leaf
+  parent: twig-creative-direction
+
 ---
 
 # Research Decision Room Skill

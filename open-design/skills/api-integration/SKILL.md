@@ -16,6 +16,10 @@ od:
   craft:
     requires:
       - api-conventions
+skill-tree:
+  type: leaf
+  parent: twig-backend
+
 ---
 
 <!-- MIGRATED: new skill for App Developer migration -->

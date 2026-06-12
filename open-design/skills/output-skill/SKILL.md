@@ -21,6 +21,10 @@ od:
   example_prompt: |
     Produce the complete implementation for the requested artifact with no placeholder comments, no omitted sections, and clean split instructions only if output length requires it.
   stackCompatibility: both
+skill-tree:
+  type: leaf
+  parent: twig-component
+
 ---
 
 

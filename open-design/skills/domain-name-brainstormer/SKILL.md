@@ -13,6 +13,10 @@ od:
   category: marketing-creative
   upstream: "https://github.com/ComposioHQ/awesome-claude-skills/tree/master/domain-name-brainstormer"
   stackCompatibility: both
+skill-tree:
+  type: leaf
+  parent: twig-creative-direction
+
 ---
 
 # domain-name-brainstormer

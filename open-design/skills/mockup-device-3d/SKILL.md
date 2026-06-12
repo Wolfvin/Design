@@ -34,6 +34,10 @@ od:
   example_prompt_i18n:
     zh-CN: "用「iPhone × MacBook 立体展架」模板把我的内容做成一份「iPhone + MacBook 仿 GLTF 静态展架, 屏幕内嵌真实 HTML 内容, 玻璃镜头折射, 360° 转盘构图」。保持模板的视觉签名，使用真实内容和数据，避免 lorem ipsum 和占位图片。"
   stackCompatibility: both
+skill-tree:
+  type: leaf
+  parent: twig-ui-design
+
 ---
 
 【模板: 设备 3D 展架 (Device 3D Showcase / HTML-in-Canvas)】

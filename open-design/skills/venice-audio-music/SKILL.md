@@ -13,6 +13,10 @@ od:
   category: audio-music
   upstream: "https://github.com/veniceai/skills"
   stackCompatibility: both
+skill-tree:
+  type: leaf
+  parent: twig-audio
+
 ---
 
 # venice-audio-music

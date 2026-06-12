@@ -14,6 +14,10 @@ od:
   category: image-generation
   upstream: "https://github.com/fal-ai-community/skills"
   stackCompatibility: both
+skill-tree:
+  type: leaf
+  parent: twig-fal
+
 ---
 
 # fal-vision

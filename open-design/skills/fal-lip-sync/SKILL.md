@@ -13,6 +13,10 @@ od:
   category: video-generation
   upstream: "https://github.com/fal-ai-community/skills"
   stackCompatibility: both
+skill-tree:
+  type: leaf
+  parent: twig-lip-sync
+
 ---
 
 # fal-lip-sync

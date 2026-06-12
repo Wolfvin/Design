@@ -14,6 +14,10 @@ od:
   category: image-generation
   upstream: "https://github.com/openai/skills"
   stackCompatibility: both
+skill-tree:
+  type: leaf
+  parent: twig-imagegen
+
 ---
 
 # imagegen

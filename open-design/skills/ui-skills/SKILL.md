@@ -12,6 +12,10 @@ od:
   category: design-systems
   upstream: "https://github.com/ibelick/ui-skills"
   stackCompatibility: both
+skill-tree:
+  type: leaf
+  parent: twig-ui-design
+
 ---
 
 # ui-skills

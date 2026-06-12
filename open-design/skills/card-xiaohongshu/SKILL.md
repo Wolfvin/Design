@@ -32,6 +32,10 @@ od:
   example_prompt_i18n:
     zh-CN: "用「小红书图文卡片」模板把我的内容做成一份「小红书风格知识卡片, 多张联排可滑动浏览」。保持模板的视觉签名，使用真实内容和数据，避免 lorem ipsum 和占位图片。"
   stackCompatibility: both
+skill-tree:
+  type: leaf
+  parent: twig-cards
+
 ---
 
 【模板: 小红书图文卡片】

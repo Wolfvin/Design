@@ -28,6 +28,10 @@ od:
   example_prompt: |
     Create a premium landing page that follows design-taste-frontend: infer the design read, set the dials, avoid AI-slop patterns, and output a polished responsive HTML artifact.
   stackCompatibility: both
+skill-tree:
+  type: leaf
+  parent: twig-motion-principles
+
 ---
 
 

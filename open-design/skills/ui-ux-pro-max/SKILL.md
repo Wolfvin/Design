@@ -12,6 +12,10 @@ od:
   category: design-systems
   upstream: "https://github.com/nextlevelbuilder/ui-ux-pro-max-skill"
   stackCompatibility: both
+skill-tree:
+  type: leaf
+  parent: twig-ui-design
+
 ---
 
 # ui-ux-pro-max

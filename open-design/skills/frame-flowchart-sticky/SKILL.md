@@ -33,6 +33,10 @@ od:
   example_prompt_i18n:
     zh-CN: "用「便利贴流程图帧」模板把我的内容做成一段「SVG 曲线连接 + 便利贴节点 + 光标交互, 像白板 brainstorm」。保持模板的视觉签名，使用真实内容和数据，避免 lorem ipsum 和占位图片。"
   stackCompatibility: both
+skill-tree:
+  type: leaf
+  parent: twig-frames
+
 ---
 
 【模板: 便利贴流程图帧 (Sticky Flowchart)】

@@ -24,6 +24,9 @@ od:
   category: diagrams
   upstream: "https://github.com/jiannanya/snow-d3/"
   stackCompatibility: both
+skill-tree:
+  type: leaf
+  parent: twig-motion-principles
 ---
 
 # d3-visualization

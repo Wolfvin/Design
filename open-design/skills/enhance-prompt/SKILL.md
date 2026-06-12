@@ -12,6 +12,10 @@ od:
   category: design-systems
   upstream: "https://github.com/google-labs-code/skills"
   stackCompatibility: both
+skill-tree:
+  type: leaf
+  parent: twig-creative-direction
+
 ---
 
 # enhance-prompt

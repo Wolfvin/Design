@@ -26,6 +26,10 @@ od:
   example_prompt: |
     Generate premium mobile app concept frames for this product brief, with readable app-native hierarchy and a consistent visual system across screens.
   stackCompatibility: both
+skill-tree:
+  type: leaf
+  parent: twig-imagegen
+
 ---
 
 

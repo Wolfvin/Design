@@ -15,6 +15,10 @@ od:
   upstream: https://github.com/openai/skills
   outputFormat: artifact
   stackCompatibility: both
+skill-tree:
+  type: leaf
+  parent: twig-slides
+
 ---
 
 

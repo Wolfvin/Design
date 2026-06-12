@@ -13,6 +13,10 @@ od:
   category: design-systems
   upstream: "https://github.com/raintree-technology/apple-hig-skills"
   stackCompatibility: both
+skill-tree:
+  type: leaf
+  parent: twig-ui-design
+
 ---
 
 # apple-hig

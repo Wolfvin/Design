@@ -15,6 +15,10 @@ od:
   category: image-generation
   upstream: "https://github.com/anthropics/skills/tree/main/skills/canvas-design"
   stackCompatibility: both
+skill-tree:
+  type: leaf
+  parent: twig-css-animation
+
 ---
 
 # canvas-design

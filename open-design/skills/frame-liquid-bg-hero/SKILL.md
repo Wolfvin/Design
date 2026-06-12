@@ -33,6 +33,10 @@ od:
   example_prompt_i18n:
     zh-CN: "用「流体背景 Hero 帧」模板把我的内容做成一段「WebGL 风流体置换背景 + 顶部叠加金句, 适合视频片头 / landing hero / 海报」。保持模板的视觉签名，使用真实内容和数据，避免 lorem ipsum 和占位图片。"
   stackCompatibility: both
+skill-tree:
+  type: leaf
+  parent: twig-frames
+
 ---
 
 【模板: 流体背景 Hero】

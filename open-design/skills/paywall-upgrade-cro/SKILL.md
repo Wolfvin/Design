@@ -13,6 +13,10 @@ od:
   category: marketing-creative
   upstream: "https://github.com/coreyhaines31/marketingskills"
   stackCompatibility: both
+skill-tree:
+  type: leaf
+  parent: twig-poster
+
 ---
 
 # paywall-upgrade-cro

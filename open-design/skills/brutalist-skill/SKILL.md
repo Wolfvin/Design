@@ -25,6 +25,10 @@ od:
   example_prompt: |
     Create an industrial-brutalist interface with rigid grids, tactical telemetry motifs, strong typography, and mechanical precision.
   stackCompatibility: both
+skill-tree:
+  type: leaf
+  parent: twig-creative-direction
+
 ---
 
 

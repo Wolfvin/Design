@@ -15,6 +15,10 @@ od:
   mode: utility
   category: web-artifacts
   stackCompatibility: both
+skill-tree:
+  type: leaf
+  parent: twig-backend
+
 ---
 
 # Export Download Debugging

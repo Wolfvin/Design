@@ -15,6 +15,10 @@ od:
   upstream: https://github.com/ComposioHQ/awesome-claude-skills/tree/master/artifacts-builder
   outputFormat: file-edit
   stackCompatibility: both
+skill-tree:
+  type: leaf
+  parent: twig-component
+
 ---
 
 

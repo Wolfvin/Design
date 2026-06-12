@@ -12,6 +12,10 @@ od:
   category: screenshots
   upstream: "https://github.com/Shpigford/screenshots"
   stackCompatibility: both
+skill-tree:
+  type: leaf
+  parent: twig-ui-design
+
 ---
 
 # screenshots-marketing

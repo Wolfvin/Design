@@ -13,6 +13,10 @@ od:
   category: image-generation
   upstream: "https://github.com/sanjay3290/imagen"
   stackCompatibility: both
+skill-tree:
+  type: leaf
+  parent: twig-imagegen
+
 ---
 
 # imagen

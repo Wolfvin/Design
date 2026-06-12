@@ -14,6 +14,10 @@ od:
   category: animation-motion
   upstream: "https://github.com/greensock/gsap-skills"
   stackCompatibility: both
+skill-tree:
+  type: leaf
+  parent: twig-gsap
+
 ---
 
 # gsap.utils

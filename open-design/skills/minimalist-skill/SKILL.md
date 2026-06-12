@@ -26,6 +26,10 @@ od:
   example_prompt: |
     Design a minimalist editorial product interface with warm monochrome color, crisp typography, flat structure, and no decorative excess.
   stackCompatibility: both
+skill-tree:
+  type: leaf
+  parent: twig-creative-direction
+
 ---
 
 

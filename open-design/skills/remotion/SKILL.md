@@ -13,6 +13,11 @@ od:
   category: video-generation
   upstream: "https://github.com/remotion-dev/remotion"
   stackCompatibility: both
+skill-tree:
+  type: leaf
+  parent: twig-css-animation
+    - twig-video-tools
+
 ---
 
 # remotion

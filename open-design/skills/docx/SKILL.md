@@ -13,6 +13,10 @@ od:
   category: documents
   upstream: "https://github.com/anthropics/skills/tree/main/skills/docx"
   stackCompatibility: both
+skill-tree:
+  type: leaf
+  parent: twig-word-docs
+
 ---
 
 # docx

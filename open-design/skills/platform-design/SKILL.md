@@ -13,6 +13,10 @@ od:
   category: design-systems
   upstream: "https://github.com/ehmo/platform-design-skills"
   stackCompatibility: both
+skill-tree:
+  type: leaf
+  parent: twig-ui-design
+
 ---
 
 # platform-design

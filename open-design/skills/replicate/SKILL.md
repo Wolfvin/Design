@@ -12,6 +12,10 @@ od:
   category: image-generation
   upstream: "https://github.com/replicate/skills"
   stackCompatibility: both
+skill-tree:
+  type: leaf
+  parent: twig-imagegen
+
 ---
 
 # replicate

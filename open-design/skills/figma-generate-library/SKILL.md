@@ -12,6 +12,10 @@ od:
   category: figma
   upstream: "https://github.com/figma/skills"
   stackCompatibility: both
+skill-tree:
+  type: leaf
+  parent: twig-design-system
+
 ---
 
 # figma-generate-library

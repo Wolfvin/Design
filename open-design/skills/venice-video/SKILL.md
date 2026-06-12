@@ -11,6 +11,10 @@ od:
   category: video-generation
   upstream: "https://github.com/veniceai/skills"
   stackCompatibility: both
+skill-tree:
+  type: leaf
+  parent: twig-ai-video
+
 ---
 
 # venice-video

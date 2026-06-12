@@ -33,6 +33,10 @@ od:
   example_prompt_i18n:
     zh-CN: "用「NYT 风数据图表帧」模板把我的内容做成一段「NYT-newsroom 排版 + 错峰揭示动画 + 编辑级图表 (折线/柱/范围带)」。保持模板的视觉签名，使用真实内容和数据，避免 lorem ipsum 和占位图片。"
   stackCompatibility: both
+skill-tree:
+  type: leaf
+  parent: twig-frames
+
 ---
 
 【模板: NYT 风数据图表帧】

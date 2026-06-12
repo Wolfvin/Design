@@ -12,6 +12,10 @@ od:
   category: screenshots
   upstream: "https://github.com/openai/skills"
   stackCompatibility: both
+skill-tree:
+  type: leaf
+  parent: twig-component
+
 ---
 
 # screenshot

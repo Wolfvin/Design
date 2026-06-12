@@ -34,6 +34,10 @@ od:
   example_prompt_i18n:
     zh-CN: "用「X (Twitter) 帖子卡」模板把我的内容做成一份「拟真 X 推文卡片 + 互动数据 (likes/reposts/views), 适配视频叠加或图卡分享」。保持模板的视觉签名，使用真实内容和数据，避免 lorem ipsum 和占位图片。"
   stackCompatibility: both
+skill-tree:
+  type: leaf
+  parent: twig-cards
+
 ---
 
 【模板: X (Twitter) 帖子卡】

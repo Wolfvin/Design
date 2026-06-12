@@ -32,6 +32,10 @@ od:
   example_prompt_i18n:
     zh-CN: "用「极简简历」模板把我的内容做成一份「现代极简简历, A4 单页, 适合打印或导出 PDF」。保持模板的视觉签名，使用真实内容和数据，避免 lorem ipsum 和占位图片。"
   stackCompatibility: both
+skill-tree:
+  type: leaf
+  parent: twig-web-docs
+
 ---
 
 【模板: 现代极简简历】

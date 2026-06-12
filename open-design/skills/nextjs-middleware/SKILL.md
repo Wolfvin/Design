@@ -18,6 +18,10 @@ od:
     requires:
       - file-conventions
       - middleware-patterns
+skill-tree:
+  type: leaf
+  parent: twig-nextjs
+
 ---
 
 # Next.js Middleware Editor

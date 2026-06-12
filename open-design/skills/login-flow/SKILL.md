@@ -14,6 +14,10 @@ triggers:
   - 手机号登录
   - 验证码登录
   - 密码登录
+skill-tree:
+  type: leaf
+  parent: twig-nextjs
+
 ---
 
 <!-- MIGRATED: output changed from <artifact> to <file-edit> -->

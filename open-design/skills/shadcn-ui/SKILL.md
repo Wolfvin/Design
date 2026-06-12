@@ -13,6 +13,11 @@ od:
   outputFormat: file-edit
   upstream: "https://github.com/google-labs-code/skills"
   stackCompatibility: both
+skill-tree:
+  type: leaf
+  parent: twig-ui-design
+    - twig-component
+
 ---
 
 <!-- MIGRATED: output changed from <artifact> to <file-edit> -->

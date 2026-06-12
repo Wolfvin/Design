@@ -13,6 +13,10 @@ od:
   category: 3d-shaders
   upstream: "https://github.com/MiniMax-AI/skills"
   stackCompatibility: both
+skill-tree:
+  type: leaf
+  parent: twig-3d-motion
+
 ---
 
 # shader-dev

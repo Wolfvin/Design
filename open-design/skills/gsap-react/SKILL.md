@@ -19,6 +19,10 @@ od:
   upstream: https://github.com/greensock/gsap-skills
   outputFormat: file-edit
   stackCompatibility: both
+skill-tree:
+  type: leaf
+  parent: twig-gsap
+
 ---
 
 

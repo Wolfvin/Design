@@ -12,6 +12,10 @@ od:
   category: design-systems
   upstream: "https://github.com/WordPress/skills"
   stackCompatibility: both
+skill-tree:
+  type: leaf
+  parent: twig-design-system
+
 ---
 
 # wpds

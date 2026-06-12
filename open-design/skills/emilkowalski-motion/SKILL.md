@@ -31,6 +31,10 @@ od:
     the core layout.'
   outputFormat: file-edit
   stackCompatibility: both
+skill-tree:
+  type: leaf
+  parent: twig-motion-principles
+
 ---
 
 

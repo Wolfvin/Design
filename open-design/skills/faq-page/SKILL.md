@@ -37,6 +37,10 @@ od:
     - state-coverage
   outputFormat: file-edit
   stackCompatibility: both
+skill-tree:
+  type: leaf
+  parent: twig-nextjs
+
 ---
 
 

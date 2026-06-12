@@ -37,6 +37,10 @@ od:
   upstream: https://github.com/anthropics/skills/tree/main/skills/frontend-design
   outputFormat: file-edit
   stackCompatibility: both
+skill-tree:
+  type: leaf
+  parent: twig-ui-design
+
 ---
 
 

@@ -14,6 +14,10 @@ od:
   outputFormat: file-edit
   upstream: "https://github.com/MiniMax-AI/skills"
   stackCompatibility: both
+skill-tree:
+  type: leaf
+  parent: twig-ui-design
+
 ---
 
 <!-- MIGRATED: output changed from <artifact> to <file-edit> -->

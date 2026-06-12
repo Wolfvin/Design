@@ -11,6 +11,10 @@ od:
   category: image-generation
   upstream: "https://github.com/veniceai/skills"
   stackCompatibility: both
+skill-tree:
+  type: leaf
+  parent: twig-venice-image
+
 ---
 
 # venice-image-edit

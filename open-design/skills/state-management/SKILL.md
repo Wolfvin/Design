@@ -16,6 +16,10 @@ od:
   craft:
     requires:
       - store-conventions
+skill-tree:
+  type: leaf
+  parent: twig-component
+
 ---
 
 <!-- MIGRATED: new skill for App Developer migration -->

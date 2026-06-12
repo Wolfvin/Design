@@ -18,6 +18,10 @@ od:
     requires:
       - file-conventions
       - database-design
+skill-tree:
+  type: leaf
+  parent: twig-backend
+
 ---
 
 # Prisma Schema Editor

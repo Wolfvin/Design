@@ -16,6 +16,10 @@ od:
   deprecated: true
   deprecatedReason: Flutter/Dart is not compatible with Tauri + React web stack
   stackCompatibility: both
+skill-tree:
+  type: leaf
+  parent: twig-css-animation
+
 ---
 
 

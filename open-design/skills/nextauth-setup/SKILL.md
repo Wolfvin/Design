@@ -18,6 +18,10 @@ od:
     requires:
       - file-conventions
       - authentication
+skill-tree:
+  type: leaf
+  parent: twig-nextjs
+
 ---
 
 # NextAuth Setup

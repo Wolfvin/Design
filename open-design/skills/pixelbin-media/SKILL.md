@@ -13,6 +13,10 @@ od:
   category: image-generation
   upstream: "https://github.com/pixelbin-dev/skills"
   stackCompatibility: both
+skill-tree:
+  type: leaf
+  parent: twig-image-workflow
+
 ---
 
 # pixelbin-media

@@ -33,6 +33,10 @@ od:
     highlight image, and one lifestyle scene. Preserve the exact product
     identity, color, material, logo placement, structure, and proportions.
   stackCompatibility: both
+skill-tree:
+  type: leaf
+  parent: twig-image-workflow
+
 ---
 
 # Ecommerce Image Workflow

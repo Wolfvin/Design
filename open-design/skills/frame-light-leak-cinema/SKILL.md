@@ -33,6 +33,10 @@ od:
   example_prompt_i18n:
     zh-CN: "用「胶片漏光电影帧」模板把我的内容做成一段「胶片漏光 + 颗粒噪点 + 16:9 letterbox + 衬线大字, 电影感开场 / 章节卡」。保持模板的视觉签名，使用真实内容和数据，避免 lorem ipsum 和占位图片。"
   stackCompatibility: both
+skill-tree:
+  type: leaf
+  parent: twig-frames
+
 ---
 
 【模板: 胶片漏光电影帧】

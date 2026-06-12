@@ -32,6 +32,10 @@ od:
   example_prompt: |
     Use impeccable-design-polish on the current HTML artifact: audit visual hierarchy, remove AI tells, tighten copy, add restrained motion, and harden responsive/accessibility issues.
   stackCompatibility: both
+skill-tree:
+  type: leaf
+  parent: twig-motion-principles
+
 ---
 
 # Impeccable Design Polish

@@ -31,6 +31,10 @@ od:
   example_prompt_i18n:
     zh-CN: "用「营销海报」模板把我的内容做成一份「竖版海报 / 朋友圈分享图, 强视觉冲击」。保持模板的视觉签名，使用真实内容和数据，避免 lorem ipsum 和占位图片。"
   stackCompatibility: both
+skill-tree:
+  type: leaf
+  parent: twig-poster
+
 ---
 
 【模板: 营销海报】

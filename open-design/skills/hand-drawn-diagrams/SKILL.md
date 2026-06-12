@@ -12,6 +12,10 @@ od:
   category: diagrams
   upstream: "https://github.com/muthuishere/hand-drawn-diagrams"
   stackCompatibility: both
+skill-tree:
+  type: leaf
+  parent: twig-ui-design
+
 ---
 
 # hand-drawn-diagrams

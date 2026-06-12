@@ -12,6 +12,10 @@ od:
   category: video-generation
   upstream: "https://github.com/ComposioHQ/awesome-claude-skills/tree/master/video-downloader"
   stackCompatibility: both
+skill-tree:
+  type: leaf
+  parent: twig-video-tools
+
 ---
 
 # video-downloader

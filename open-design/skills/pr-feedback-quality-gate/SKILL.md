@@ -12,6 +12,10 @@ triggers:
 od:
   mode: utility
   stackCompatibility: both
+skill-tree:
+  type: leaf
+  parent: twig-backend
+
 ---
 
 # PR Feedback Quality Gate

@@ -43,6 +43,10 @@ od:
   - file_write
   outputFormat: artifact
   stackCompatibility: both
+skill-tree:
+  type: leaf
+  parent: twig-slides
+
 ---
 
 

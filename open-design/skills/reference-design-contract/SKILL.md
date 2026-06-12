@@ -50,6 +50,10 @@ od:
   example_prompt_i18n:
     zh-CN: "为一个开发者笔记应用创建「参考转设计合约」。方向要有编辑感、安静、触感强、认真，但不要照抄任何具体产品。输出 DESIGN.md 和实现交接说明。"
   stackCompatibility: both
+skill-tree:
+  type: leaf
+  parent: twig-creative-direction
+
 ---
 
 # Reference Design Contract

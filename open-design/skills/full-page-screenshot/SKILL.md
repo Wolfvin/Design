@@ -12,6 +12,10 @@ od:
   category: screenshots
   upstream: "https://github.com/LewisLiu007/full-page-screenshot"
   stackCompatibility: both
+skill-tree:
+  type: leaf
+  parent: twig-component
+
 ---
 
 # full-page-screenshot

@@ -34,6 +34,10 @@ od:
   example_prompt_i18n:
     zh-CN: "用「Reddit 帖子卡」模板把我的内容做成一份「拟真 Reddit 帖子卡 + 上下投票 + 评论数, 适合视频叠加 / 故事分享」。保持模板的视觉签名，使用真实内容和数据，避免 lorem ipsum 和占位图片。"
   stackCompatibility: both
+skill-tree:
+  type: leaf
+  parent: twig-cards
+
 ---
 
 【模板: Reddit 帖子卡】

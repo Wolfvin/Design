@@ -13,6 +13,10 @@ od:
   category: design-systems
   upstream: "https://github.com/anthropics/skills/tree/main/skills/theme-factory"
   stackCompatibility: both
+skill-tree:
+  type: leaf
+  parent: twig-brand-identity
+
 ---
 
 # theme-factory

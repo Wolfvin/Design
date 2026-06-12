@@ -34,6 +34,10 @@ od:
   example_prompt_i18n:
     zh-CN: "用「杂志文章」模板把我的内容做成一份「Huashu / huashu-md-html-inspired magazine article layout for turning Markdown or notes into a polished long-form HTML essay」。保持模板的视觉签名，使用真实内容和数据，避免 lorem ipsum 和占位图片。"
   stackCompatibility: both
+skill-tree:
+  type: leaf
+  parent: twig-web-docs
+
 ---
 
 【模板: 杂志文章】

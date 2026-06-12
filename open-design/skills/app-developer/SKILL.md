@@ -17,6 +17,10 @@ od:
     requires:
       - file-conventions
       - editing-rules
+skill-tree:
+  type: leaf
+  parent: twig-component
+
 ---
 
 # App Developer Skill

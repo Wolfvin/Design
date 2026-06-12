@@ -11,6 +11,10 @@ od:
   category: figma
   upstream: "https://github.com/figma/skills"
   stackCompatibility: both
+skill-tree:
+  type: leaf
+  parent: twig-figma
+
 ---
 
 # figma-create-new-file

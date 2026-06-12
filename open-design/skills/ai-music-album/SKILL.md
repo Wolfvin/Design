@@ -13,6 +13,10 @@ od:
   category: audio-music
   upstream: "https://github.com/bitwize-music-studio/claude-ai-music-skills"
   stackCompatibility: both
+skill-tree:
+  type: leaf
+  parent: twig-audio
+
 ---
 
 # ai-music-album

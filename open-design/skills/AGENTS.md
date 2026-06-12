@@ -52,3 +52,53 @@ without vendoring every upstream workflow.
   workflow with its original scripts and references, copy the upstream
   folder into your active agent's skills directory (Claude Code, Codex,
   Cursor, etc.) — the body of each stub explains how.
+
+## Skill Tree navigation
+
+All skills are organized in a **logical tree** (not physical folders).
+The tree is defined in a single index file: `SKILL-TREE.yaml`.
+
+### Structure
+
+```
+Branch (7) → Twig (~28) → Leaf (170 skills)
+```
+
+| Level | Purpose | Example |
+|-------|---------|---------|
+| Branch | Domain category | `motion`, `visual`, `image`, `docs`, `social`, `dev`, `video` |
+| Twig | Sub-domain cluster | `gsap`, `fal`, `cards`, `nextjs` |
+| Leaf | Actual skill | `gsap-core`, `fal-generate`, `card-twitter` |
+
+### How AI navigates
+
+1. Read `SKILL-TREE.yaml` → identify relevant branch
+2. Find the right twig within that branch
+3. Read the leaf skill's `SKILL.md` directly
+4. **Stop at any level** — no need to traverse deeper if context is sufficient
+
+### Frontmatter convention
+
+Every skill `SKILL.md` includes a `skill-tree:` block in frontmatter:
+
+```yaml
+skill-tree:
+  type: leaf
+  parent: twig-gsap
+```
+
+For skills that belong to multiple twigs:
+
+```yaml
+skill-tree:
+  type: leaf
+  parent: twig-ui-design
+    - twig-component
+```
+
+### Adding a new skill
+
+1. Create the skill folder and `SKILL.md` as usual
+2. Add `skill-tree:` block to frontmatter with `type: leaf` and `parent: twig-xxx`
+3. Update `SKILL-TREE.yaml` — add the skill to the appropriate branch → twig → leaves
+4. If the skill doesn't fit existing twigs, add a new twig entry in both `SKILL-TREE.yaml` and the frontmatter

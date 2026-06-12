@@ -18,6 +18,10 @@ od:
     requires:
       - file-conventions
       - prisma-patterns
+skill-tree:
+  type: leaf
+  parent: twig-nextjs
+
 ---
 
 <!-- MIGRATED: new Next.js skill for App Developer migration (Phase 5) -->

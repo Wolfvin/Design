@@ -19,6 +19,10 @@ od:
   deprecatedReason: SwiftUI is Apple-native, not compatible with Tauri + React web
     stack
   stackCompatibility: both
+skill-tree:
+  type: leaf
+  parent: twig-ui-design
+
 ---
 
 

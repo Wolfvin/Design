@@ -49,6 +49,10 @@ od:
       Lemon / Mint / Safety Orange)」。保持模板的视觉签名，使用真实内容和数据，避免 lorem ipsum 和占位图片。
   outputFormat: artifact
   stackCompatibility: both
+skill-tree:
+  type: leaf
+  parent: twig-slides
+
 ---
 
 

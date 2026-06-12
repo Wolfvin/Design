@@ -17,6 +17,10 @@ od:
   craft:
     requires:
       - design-tokens
+skill-tree:
+  type: leaf
+  parent: twig-creative-direction
+
 ---
 
 <!-- MIGRATED: new skill for App Developer migration -->

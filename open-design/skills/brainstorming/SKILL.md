@@ -13,6 +13,10 @@ od:
   category: creative-direction
   upstream: "https://github.com/obra/superpowers"
   stackCompatibility: both
+skill-tree:
+  type: leaf
+  parent: twig-creative-direction
+
 ---
 
 # brainstorming
