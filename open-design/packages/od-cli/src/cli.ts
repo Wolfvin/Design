@@ -8,6 +8,7 @@
  *   od design update
  *   od design sources
  *   od design switch --from brutalism
+ *   od design compose --sources apple:tokens,layout brutalism:components creative:motion
  *   od design rollback
  *   od design diff
  *   od design status
@@ -23,13 +24,14 @@ import { rollbackCommand } from './commands/rollback.js';
 import { diffCommand } from './commands/diff.js';
 import { addComponentCommand } from './commands/add-component.js';
 import { statusCommand } from './commands/status.js';
+import { composeCommand } from './commands/compose.js';
 
 const program = new Command();
 
 program
   .name('od')
   .description('Open Design CLI — generate and manage project-local design systems')
-  .version('0.2.0');
+  .version('0.3.0');
 
 const designCmd = program.command('design').description('Design system management');
 
@@ -41,5 +43,6 @@ designCmd.addCommand(rollbackCommand());
 designCmd.addCommand(diffCommand());
 designCmd.addCommand(addComponentCommand());
 designCmd.addCommand(statusCommand());
+designCmd.addCommand(composeCommand());
 
 program.parse();

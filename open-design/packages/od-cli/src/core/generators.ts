@@ -11,6 +11,13 @@ import type { CssStrategy, StackDetectionResult } from '../utils/fs-utils.js';
 
 // ─── Manifest Generator ────────────────────────────────────
 
+export interface CompositionEntry {
+  source: string;
+  layers: string[];
+  hash: string;
+  repoHash: string;
+}
+
 export interface DesignManifest {
   schemaVersion: string;
   version: number;
@@ -28,6 +35,7 @@ export interface DesignManifest {
     addedBy?: string;
     addedAt?: string;
   }>;
+  composition?: CompositionEntry[];
   stack: string;
   cssStrategy: string;
   import: {
