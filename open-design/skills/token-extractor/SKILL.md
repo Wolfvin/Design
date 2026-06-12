@@ -1,11 +1,8 @@
 ---
 name: token-extractor
-type: leaf
-parent: twig-design-systems
-also-matches: [twig-brand-identity]
 skill-tree:
   type: leaf
-  parent: twig-design-systems
+  parent: twig-design-system
   also-matches: [twig-brand-identity]
 ---
 

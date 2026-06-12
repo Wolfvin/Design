@@ -16,6 +16,7 @@ od:
 skill-tree:
   type: leaf
   parent: twig-ui-design
+  also-matches:
     - twig-component
 
 ---

@@ -1,11 +1,8 @@
 ---
 name: design-sync
-type: leaf
-parent: twig-design-systems
-also-matches: [twig-ui-design]
 skill-tree:
   type: leaf
-  parent: twig-design-systems
+  parent: twig-design-system
   also-matches: [twig-ui-design]
 ---
 

@@ -604,7 +604,7 @@ component-forge/         ← Convert DS components to individual CSS (P0)
 ---
 name: design-sync
 type: leaf
-parent: twig-design-systems
+parent: twig-design-system
 ---
 
 # Design Sync
@@ -735,7 +735,7 @@ If a step has `"idempotent": true`, it's safe to re-run.
 ---
 name: token-extractor
 type: leaf
-parent: twig-design-systems
+parent: twig-design-system
 ---
 
 # Token Extractor
@@ -813,7 +813,7 @@ If `cssStrategy = "tailwind-theme"` in manifest:
 ---
 name: component-forge
 type: leaf
-parent: twig-design-systems
+parent: twig-design-system
 ---
 
 # Component Forge

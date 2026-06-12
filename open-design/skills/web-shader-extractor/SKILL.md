@@ -7,6 +7,8 @@ description: |
 skill-tree:
   type: leaf
   parent: twig-3d-motion
+  also-matches:
+    - twig-component
 
 ---
 

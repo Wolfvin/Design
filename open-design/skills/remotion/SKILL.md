@@ -16,6 +16,7 @@ od:
 skill-tree:
   type: leaf
   parent: twig-css-animation
+  also-matches:
     - twig-video-tools
 
 ---

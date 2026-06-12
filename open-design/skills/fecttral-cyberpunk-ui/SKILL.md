@@ -11,6 +11,8 @@ allowed-tools: Read Write
 skill-tree:
   type: leaf
   parent: twig-design-system
+  also-matches:
+    - twig-ui-design
 
 ---
 

@@ -29,6 +29,8 @@ license: Proprietary. LICENSE.txt has complete terms
 skill-tree:
   type: leaf
   parent: twig-charts
+  also-matches:
+    - twig-motion-principles
 
 ---
 
