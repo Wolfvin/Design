@@ -34,6 +34,7 @@ export * from './api/version.js';
 export * from './examples.js';
 export * from './design-systems/components-manifest.js';
 export * from './design-systems/derived-token-outputs.js';
+export * from './design-systems/css-validators.js';
 export * from './design-systems/token-schema.js';
 export * from './sse/common.js';
 export * from './sse/chat.js';

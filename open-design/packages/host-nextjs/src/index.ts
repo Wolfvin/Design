@@ -20,6 +20,7 @@ import { isNextjsEnvironment } from './detection.js';
 
 export { createNextjsHostBridge } from './bridge.js';
 export { isNextjsEnvironment, detectNextjsPlatform, detectNextjsLocale } from './detection.js';
+export { OPEN_DESIGN_HOST_VERSION } from '@open-design/host';
 export {
   buildOdInjectionHeaders,
   generateMiddlewareSnippet,

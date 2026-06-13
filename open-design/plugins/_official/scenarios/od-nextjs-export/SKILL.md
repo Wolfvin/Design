@@ -1,3 +1,12 @@
+---
+name: od-nextjs-export
+description: Export an accepted Open Design artifact to a Next.js App Router project.
+od:
+  scenario: nextjs-export
+  mode: prototype
+  stackCompatibility: nextjs
+---
+
 # Export To Next.js
 
 Use this plugin when the user wants to hand an accepted Open Design artifact to a Next.js App Router project.

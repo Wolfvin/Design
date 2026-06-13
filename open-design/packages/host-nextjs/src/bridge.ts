@@ -10,13 +10,18 @@
  * making it discoverable by the OD web app via `getOpenDesignHost()`.
  */
 
-import { OPEN_DESIGN_HOST_GLOBAL } from '@open-design/host';
+import {
+  OPEN_DESIGN_HOST_VERSION,
+  type OpenDesignHostActionResult,
+  type OpenDesignHostBrowserClearDataOptions,
+  type OpenDesignHostCaptureResult,
+  type OpenDesignHostUpdaterStatusSnapshot,
+} from '@open-design/host';
 
-import { isNextjsEnvironment, detectNextjsPlatform, detectNextjsLocale } from './detection.js';
+import { detectNextjsPlatform, detectNextjsLocale } from './detection.js';
 import type {
   NextjsBrowserClearDataOptions,
   NextjsPdfPrintOptions,
-  NextjsCaptureResult,
 } from './types.js';
 
 /** Configuration for creating the Next.js host bridge. */
@@ -25,6 +30,46 @@ export interface NextjsHostBridgeConfig {
   daemonBaseUrl: string;
   /** The OD project ID. */
   projectId: string;
+}
+
+/**
+ * Normalise clear-data options so that both the generic host contract
+ * (`OpenDesignHostBrowserClearDataOptions` with `cookies` / `storage`)
+ * and the Next.js-specific contract (`NextjsBrowserClearDataOptions` with
+ * `cache` / `serviceWorkers` / `localStorage`) are accepted.
+ */
+function normalizeClearDataOptions(
+  options?: OpenDesignHostBrowserClearDataOptions | NextjsBrowserClearDataOptions,
+) {
+  const generic = options as OpenDesignHostBrowserClearDataOptions | undefined;
+  const nextjs = options as NextjsBrowserClearDataOptions | undefined;
+
+  return {
+    cache: nextjs?.cache ?? generic?.storage ?? false,
+    serviceWorkers: nextjs?.serviceWorkers ?? false,
+    localStorage: nextjs?.localStorage ?? generic?.storage ?? false,
+    cookies: generic?.cookies ?? false,
+  };
+}
+
+/** Build a minimal, but valid, updater status snapshot for the web bridge. */
+function buildUpdaterStatusSnapshot(): OpenDesignHostUpdaterStatusSnapshot {
+  return {
+    arch: 'web',
+    capabilities: {
+      canApplyInPlace: false,
+      canDownload: false,
+      canOpenInstaller: false,
+      requiresManualInstall: true,
+    },
+    channel: 'stable',
+    currentVersion: '0.0.0',
+    enabled: false,
+    mode: 'js-incremental',
+    platform: 'web',
+    state: 'unsupported',
+    supported: false,
+  };
 }
 
 /**
@@ -44,88 +89,139 @@ export function createNextjsHostBridge(config: NextjsHostBridgeConfig) {
       platform,
     },
 
+    version: OPEN_DESIGN_HOST_VERSION,
+
     shell: {
-      openExternal: (url: string) => {
-        window.open(url, '_blank', 'noopener,noreferrer');
+      openExternal: async (url: string): Promise<OpenDesignHostActionResult> => {
+        try {
+          window.open(url, '_blank', 'noopener,noreferrer');
+          return { ok: true };
+        } catch (error) {
+          return {
+            ok: false,
+            reason: error instanceof Error ? error.message : String(error),
+          };
+        }
       },
-      openPath: async (projectId: string) => {
-        // Open in user's editor via daemon API
-        await fetch(`${config.daemonBaseUrl}/api/projects/${projectId}/open-in-editor`, {
-          method: 'POST',
-        });
+      openPath: async (projectId: string): Promise<OpenDesignHostActionResult> => {
+        try {
+          // Open in user's editor via daemon API
+          await fetch(`${config.daemonBaseUrl}/api/projects/${projectId}/open-in-editor`, {
+            method: 'POST',
+          });
+          return { ok: true };
+        } catch (error) {
+          return {
+            ok: false,
+            reason: error instanceof Error ? error.message : String(error),
+          };
+        }
       },
     },
 
     browser: {
-      clearData: async (options?: NextjsBrowserClearDataOptions) => {
-        if (options?.cache) {
-          // Clear Cache Storage API entries for the preview origin
-          if ('caches' in window) {
-            const keys = await caches.keys();
-            await Promise.all(
-              keys
-                .filter((key) => key.startsWith('od-preview'))
-                .map((key) => caches.delete(key)),
-            );
-          }
-        }
+      clearData: async (
+        options?: OpenDesignHostBrowserClearDataOptions | NextjsBrowserClearDataOptions,
+      ): Promise<OpenDesignHostActionResult> => {
+        try {
+          const normalized = normalizeClearDataOptions(options);
 
-        if (options?.serviceWorkers) {
-          // Unregister service workers for the preview origin
-          if ('serviceWorker' in navigator) {
-            const registrations = await navigator.serviceWorker.getRegistrations();
-            await Promise.all(registrations.map((reg) => reg.unregister()));
-          }
-        }
-
-        if (options?.localStorage) {
-          // Clear OD-related localStorage keys
-          const keysToRemove: string[] = [];
-          for (let i = 0; i < localStorage.length; i++) {
-            const key = localStorage.key(i);
-            if (key?.startsWith('open-design:')) {
-              keysToRemove.push(key);
+          if (normalized.cache) {
+            // Clear Cache Storage API entries for the preview origin
+            if ('caches' in window) {
+              const keys = await caches.keys();
+              await Promise.all(
+                keys
+                  .filter((key) => key.startsWith('od-preview'))
+                  .map((key) => caches.delete(key)),
+              );
             }
           }
-          keysToRemove.forEach((key) => localStorage.removeItem(key));
+
+          if (normalized.serviceWorkers) {
+            // Unregister service workers for the preview origin
+            if ('serviceWorker' in navigator) {
+              const registrations = await navigator.serviceWorker.getRegistrations();
+              await Promise.all(registrations.map((reg) => reg.unregister()));
+            }
+          }
+
+          if (normalized.localStorage) {
+            // Clear OD-related localStorage keys
+            const keysToRemove: string[] = [];
+            for (let i = 0; i < localStorage.length; i++) {
+              const key = localStorage.key(i);
+              if (key?.startsWith('open-design:')) {
+                keysToRemove.push(key);
+              }
+            }
+            keysToRemove.forEach((key) => localStorage.removeItem(key));
+          }
+
+          if (normalized.cookies) {
+            // Clear OD-related cookies
+            document.cookie.split(';').forEach((cookie) => {
+              const name = cookie.split('=')[0]?.trim();
+              if (name?.startsWith('od-') || name?.startsWith('open-design-')) {
+                document.cookie = `${name}=;expires=Thu, 01 Jan 1970 00:00:00 GMT;path=/`;
+              }
+            });
+          }
+
+          return { ok: true };
+        } catch (error) {
+          return {
+            ok: false,
+            reason: error instanceof Error ? error.message : String(error),
+          };
         }
       },
     },
 
     capture: {
-      page: async (options?: NextjsPdfPrintOptions): Promise<NextjsCaptureResult> => {
-        // Screenshot via daemon API (Puppeteer/Playwright on server side)
-        const res = await fetch(`${config.daemonBaseUrl}/api/capture`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            url: options?.url,
-            format: options?.format ?? 'png',
-            width: options?.width,
-            height: options?.height,
-          }),
-        });
+      page: async (options?: NextjsPdfPrintOptions): Promise<OpenDesignHostCaptureResult> => {
+        try {
+          // Screenshot via daemon API (Puppeteer/Playwright on server side)
+          const res = await fetch(`${config.daemonBaseUrl}/api/capture`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              url: options?.url,
+              format: options?.format ?? 'png',
+              width: options?.width,
+              height: options?.height,
+            }),
+          });
 
-        if (!res.ok) {
-          throw new Error(`Capture failed: ${res.status} ${res.statusText}`);
-        }
+          if (!res.ok) {
+            return {
+              ok: false,
+              reason: `Capture failed: ${res.status} ${res.statusText}`,
+            };
+          }
 
-        const blob = await res.blob();
-        const base64 = await new Promise<string>((resolve) => {
-          const reader = new FileReader();
-          reader.onloadend = () => {
-            const dataUrl = reader.result as string;
-            resolve(dataUrl.split(',')[1]);
+          const blob = await res.blob();
+          const dataUrl = await new Promise<string>((resolve) => {
+            const reader = new FileReader();
+            reader.onloadend = () => resolve(reader.result as string);
+            reader.readAsDataURL(blob);
+          });
+
+          const w = options?.width ?? 1280;
+          const h = options?.height ?? 720;
+
+          return {
+            dataUrl,
+            h,
+            ok: true,
+            w,
           };
-          reader.readAsDataURL(blob);
-        });
-
-        return {
-          base64,
-          mimeType: blob.type || 'image/png',
-          width: options?.width ?? 1280,
-          height: options?.height ?? 720,
-        };
+        } catch (error) {
+          return {
+            ok: false,
+            reason: error instanceof Error ? error.message : String(error),
+          };
+        }
       },
     },
 
@@ -148,29 +244,54 @@ export function createNextjsHostBridge(config: NextjsHostBridgeConfig) {
     },
 
     pdf: {
-      print: async (html: string, nonce?: string, options?: NextjsPdfPrintOptions) => {
-        const res = await fetch(`${config.daemonBaseUrl}/api/projects/${config.projectId}/export/pdf`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ html, nonce, ...options }),
-        });
-        return res.blob();
+      print: async (
+        html: string,
+        nonce?: string,
+        options?: NextjsPdfPrintOptions,
+      ): Promise<OpenDesignHostActionResult> => {
+        try {
+          const res = await fetch(
+            `${config.daemonBaseUrl}/api/projects/${config.projectId}/export/pdf`,
+            {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ html, nonce, ...options }),
+            },
+          );
+
+          if (!res.ok) {
+            return {
+              ok: false,
+              reason: `PDF print failed: ${res.status} ${res.statusText}`,
+            };
+          }
+
+          // Consume the response body so the connection is properly closed
+          await res.blob();
+
+          return { ok: true };
+        } catch (error) {
+          return {
+            ok: false,
+            reason: error instanceof Error ? error.message : String(error),
+          };
+        }
       },
     },
 
     pet: {
-      setVisible: async () => {
+      setVisible: () => {
         // No pet in browser mode
       },
     },
 
     updater: {
-      check: async () => ({ available: false, version: null }),
-      download: async () => {},
-      install: async () => {},
-      quit: async () => {},
-      status: async () => ({ status: 'up-to-date' as const }),
-      subscribe: () => {},
+      check: async () => buildUpdaterStatusSnapshot(),
+      download: async () => buildUpdaterStatusSnapshot(),
+      install: async () => buildUpdaterStatusSnapshot(),
+      quit: async () => ({ ok: true as const }),
+      status: async () => buildUpdaterStatusSnapshot(),
+      subscribe: () => () => {},
     },
   };
 

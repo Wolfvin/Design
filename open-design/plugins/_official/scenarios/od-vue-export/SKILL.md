@@ -1,3 +1,12 @@
+---
+name: od-vue-export
+description: Export an accepted Open Design artifact to a Vue 3 project.
+od:
+  scenario: vue-export
+  mode: prototype
+  stackCompatibility: both
+---
+
 # Export To Vue
 
 Use this plugin when the user wants to hand an accepted Open Design artifact to a Vue 3 project.

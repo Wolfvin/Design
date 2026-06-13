@@ -1,3 +1,11 @@
+---
+name: od-design-refine
+description: Improve an existing Open Design artifact rather than create a new one. Use when the user asks to refine, iterate, or polish an existing design.
+od:
+  scenario: design-refine
+  mode: prototype
+---
+
 # Design Refine
 
 Use this plugin when the user wants to improve an existing Open Design artifact rather than create a new one.

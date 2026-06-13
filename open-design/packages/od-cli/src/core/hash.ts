@@ -7,10 +7,10 @@ import { readFile, readdir, stat } from 'node:fs/promises';
 import { join, relative } from 'node:path';
 
 /**
- * Compute SHA-256 hash of a string, return first 7 hex chars
+ * Compute SHA-256 hash of a string, return full 64-char hex digest
  */
 export function hashContent(content: string): string {
-  return createHash('sha256').update(content).digest('hex').slice(0, 7);
+  return createHash('sha256').update(content, 'utf8').digest('hex');
 }
 
 /**
@@ -60,7 +60,7 @@ export async function hashDesignDirectory(designDir: string): Promise<string> {
   try {
     await walk(designDir);
   } catch {
-    return '0000000'; // Directory doesn't exist
+    return '0'.repeat(64); // Directory doesn't exist
   }
 
   filePaths.sort();
